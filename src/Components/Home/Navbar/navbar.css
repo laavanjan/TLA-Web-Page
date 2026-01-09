@@ -1,0 +1,24 @@
+.appBar {
+    background: white !important;
+}
+
+.nav-Items {
+    color: #022345 !important;
+    font-size: 20px !important;
+    font-family: 'Heading' !important;
+    margin: 0 10px !important;
+    padding: 3px 0 !important;
+
+
+}
+.uni-name{
+    font-family: 'Heading' !important;
+    color: #022345 !important;
+    font-size: 20px !important;
+    margin: 0 10px !important;
+    padding: 3px 0 !important;
+}
+.nav-Items.active {
+    border-bottom: 3px solid #022345;
+    transition: 0.5s !important;
+}

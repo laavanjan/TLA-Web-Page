@@ -1,0 +1,45 @@
+.bar-chart-container-mmvc {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    height: 370px;
+    width: 400px;
+}
+
+.mmvc-heading{
+    font-family: "Heading" !important;
+    font-size: 30px;
+    margin: 0;
+    margin-bottom: 2vh;
+}
+
+.mmvc-question{
+    font-family: "Para" !important;
+    font-size: 30px;
+    margin: 0;
+    margin-bottom: 2vh;
+}
+
+.mmvc-response{
+    font-family: "Para" !important;
+    font-size: 30px;
+    margin: 0;
+    margin-bottom: 2vh;
+}
+
+.mmvc-tobe{
+    font-family: "Para" !important;
+    font-size: 30px;
+    margin: 0;
+    margin-bottom: 2vh;
+}
+
+@media all and (max-width: 450px) {
+    .bar-chart-container-mmvc {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+        height: 400px;
+        width: 300px;
+    }
+}

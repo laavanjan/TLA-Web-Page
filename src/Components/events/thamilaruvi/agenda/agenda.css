@@ -1,0 +1,248 @@
+.agenda-card {
+    width: 325px;
+    height: 546px;
+    left: 372px;
+    top: 837px;
+
+    background: #e3e7eb;
+    box-shadow: 0px 4px 5px 1px rgba(0, 0, 0, 0.16);
+    border-radius: 15px;
+}
+
+.agenda-card2 {
+    width: 325px;
+    height: 546px;
+    left: 723px;
+    top: 837px;
+
+    background: #e3e7eb;
+    box-shadow: 0px 4px 5px 1px rgba(0, 0, 0, 0.16);
+    border-radius: 15px;
+}
+
+.agenda-title {
+    width: 264px;
+    height: 27px;
+    left: 403px;
+    top: 995px;
+
+    font-family: "Heading" !important;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px !important;
+    line-height: 18px;
+    text-align: center;
+
+    color: #002245 !important;
+}
+
+.agenda-card-title {
+    /* font-family: 'bavantech13'; */
+    font-style: normal;
+    font-weight: 400;
+    line-height: 17px;
+    color: #022345 !important;
+    font-size: 20px !important;
+    font-family: "Heading" !important;
+    /* identical to box height, or 85% */
+
+    text-align: center;
+}
+
+.agenda-title2 {
+    font-family: "Heading" !important;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 17px !important;
+    /* identical to box height, or 85% */
+
+    text-align: center;
+    padding: 20px;
+
+    color: #002245 !important;
+}
+
+.agenda-text-title {
+    width: 191px;
+    height: 56px;
+    left: 439px;
+    top: 1060px;
+    font-family: "Heading" !important;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 32px !important;
+    line-height: 28px;
+    /* or 88% */
+
+    text-align: center;
+
+    color: #002245 !important;
+}
+.agenda-card22 {
+    box-sizing: border-box;
+    width: 235px;
+    left: 769px;
+    background: #ffffff;
+    border: 1px solid #002245;
+    border-radius: 15px;
+}
+
+.event-detail {
+    width: 247px;
+    height: 84px;
+    left: 411px;
+    right: 211px;
+    top: 1135px;
+    font-family: "Heading" !important;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 20px !important;
+    line-height: 28px;
+    /* or 140% */
+
+    text-align: center;
+    color: #002245 !important;
+}
+
+.agenda-list {
+    font-family: "Para" !important;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px !important;
+    line-height: 17px;
+    /* or 106% */
+    text-align: center;
+    color: #002245 !important;
+}
+
+.agenda-img {
+    width: 400px;
+}
+
+.event-container-1 {
+    font-family: "Heading" !important;
+    color: #012244;
+    background-color: #e2e7ea;
+    width: 350px;
+    height: 85vh;
+    border-radius: 2rem;
+    background-image: url(../../../../images/Agenda/SiCir\ 5.png),
+        url(../../../../images/Agenda/SiCir\ 6.png);
+        background-size: 70% auto;
+    background-position: top, bottom;
+    background-repeat: no-repeat;
+    margin: 2%;
+    display: grid;
+    place-items: center;
+    text-align: center;
+}
+
+.invite-heading{
+    margin: 0;
+    font-size: 46px;
+    font-family: "Heading" !important;
+    color: #012244;
+}
+
+.event-container-2 {
+    font-family: "Heading" !important;
+    color: #012244;
+    background-color: #e2e7ea;
+    width: 350px;
+    height: 85vh;
+    border-radius: 2rem;
+    background-image: url(../../../../images/Agenda/SiCir\ 5.png),
+        url(../../../../images/Agenda/SiCir\ 6.png);
+    background-size: 70% auto;
+    background-position: top, bottom;
+    background-repeat: no-repeat;
+    margin: 2%;
+    position: relative;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.agenda-heading{
+    font-family: "Heading" !important;
+    margin:0;
+    font-size: 30px;
+    margin-bottom: 2vh;
+}
+
+.thamilaruvi-events {
+    width: 75%;
+    height: fit-content;
+    background-color: white;
+    border: 2px solid black;
+    border-radius: 2rem;
+    position: absolute;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding: 4vh 0;
+}
+
+.event-list-text{
+    font-size: 22px;
+    margin: 0 !important;
+    text-align: center;
+}
+
+.events ul {
+    font-family: "Para" !important;
+    list-style-type: none;
+    font-size: 18px;
+    padding: 0;
+}
+
+.event-container-2 h1 {
+    font-size: 25px;
+    font-weight: normal;
+    padding: 100px 75px 0px 75px;
+}
+
+.event-container-1 h1 {
+    font-size: 40px;
+    font-weight: normal;
+    padding: 0px 50px;
+}
+
+.invite-detail{
+    font-size: 20px;
+    margin: 0;
+    text-align: center;
+    font-family: "Heading" !important;
+}
+
+.invite-sub-detail{
+    font-size: 24px;
+    margin: 0;
+    text-align: center;
+    margin-bottom: 3vh;
+}
+
+.thamilaruvi-para1 {
+    font-size: 20px;
+    margin-top: 20vh;
+    margin-bottom: 2vh;
+    text-align: center;
+}
+
+.para2 {
+    font-size: 22px;
+    padding-top: 0;
+    padding-bottom: 22vh;
+    text-align: center;
+}
+
+.events h2 {
+    font-weight: normal;
+    padding: 0;
+}
+
+.invitation-img{
+    margin-top: 4vh;
+}

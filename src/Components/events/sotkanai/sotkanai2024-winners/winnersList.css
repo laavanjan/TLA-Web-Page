@@ -1,0 +1,63 @@
+.medals-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.medal {
+    margin: 0 20px;
+}
+
+.medal-img {
+    width: 130px; 
+}
+
+.gold-place{
+    width: 130px; 
+}
+
+.silver-place .medal-img, .bronze-place .medal-img {
+    width: 150px; 
+    height: 150px; 
+}
+
+.trophy-section {
+    margin-top: 25px;
+}
+
+.trophy-img {
+    width: 200px;
+    height: 220px;
+}
+
+.medal p, .trophy-section p {
+    margin-top: 5px; 
+    font-size: 25px; 
+    text-align: center; 
+}
+
+@media only screen and (max-width: 600px) {
+    .medal-img {
+        width: 80px; /* Smaller medals on mobile */
+        height: 80px;
+    }
+    
+    .gold-place .medal-img {
+        width: 120px; /* Smaller gold medal for mobile */
+        height: 120px;
+    }
+
+    .silver-place .medal-img, .bronze-place .medal-img {
+        width: 100px; /* Adjusted silver and bronze size for mobile */
+        height: 100px;
+    }
+
+    .trophy-img {
+        width: 150px; /* Adjusted trophy size */
+        height: 160px;
+    }
+
+    .medal p, .trophy-section p {
+        font-size: 18px; /* Slightly smaller text for mobile */
+    }
+}

@@ -1,0 +1,16 @@
+.timeline-container-div {
+    background-color: #F6F6F8;
+    font-family: 'Heading';
+}
+
+.vertical-timeline-element-title {
+    font-size: 2rem;
+}
+
+.vertical-timeline-element-subtitle {
+    font-size: 1.5rem;
+}
+
+.vertical-timeline-element-work .vertical-timeline-element-content.bounce-in {
+    border-radius: 10px;
+}

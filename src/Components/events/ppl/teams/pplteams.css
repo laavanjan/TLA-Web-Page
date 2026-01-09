@@ -1,0 +1,26 @@
+.ppl-team-container-div {
+    padding-bottom: 2rem;
+}
+
+.ppl-team-grid-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ppl-team-images {
+    min-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.ppl-team-heading {
+    color: #022345 !important;
+    font-size: 50px;
+    font-family: 'Heading' !important;
+    letter-spacing: normal;
+    text-align: center;
+    line-height: 1.5;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}

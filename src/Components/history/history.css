@@ -1,0 +1,70 @@
+.history {
+    width: 75%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5%;
+    display: block;
+}
+h1 {
+    color: #002245;
+    font-family: "Heading" !important;
+    position: relative;
+    text-align: center;
+    margin: 3%;
+}
+
+p {
+    text-align: left;
+}
+
+.history-para{
+    font-family: "Para" !important;
+    line-height: 30px;
+    font-size: small;
+    text-align: left;
+    font-size: 20px;
+    color: #002245;
+    margin: 40px 0;
+}
+
+.container {
+    font-family: "Para" !important;
+    line-height: 30px;
+    font-size: small;
+    text-align: center;
+    font-size: 20px;
+    color: #002245;
+    width: 100%;
+}
+
+.img {
+    width: 100%;
+}
+
+.sub-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin: 40px 0;
+}
+
+.container_img {
+    flex: 50%;
+}
+
+.container_text {
+    flex: 50%;
+}
+
+.book-image {
+    width: 300px;
+    margin: 0 20px;
+    height: 400px;
+}
+
+@media screen and (max-width: 576px) {
+    .sub-container {
+        display: block;
+    }
+}

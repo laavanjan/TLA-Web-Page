@@ -1,0 +1,131 @@
+.contact-heading {
+    color: #022345 !important;
+    font-size: 80px !important;
+    font-family: "Heading" !important;
+    letter-spacing: normal;
+    width: 100%;
+    text-align: center;
+}
+
+.contact-container {
+    margin: auto;
+    width: 80%;
+}
+
+.contact-row {
+    color: #022345;
+    font-size: 28px !important;
+    font-family: "Para" !important;
+    margin-top: 2vh;
+}
+
+.contact-input {
+    width: 100%;
+    border: none;
+    border-radius: 5px;
+    font-size: 20px;
+    padding: 10px 12px;
+}
+
+.valid-input {
+    display: none;
+    font-size: 12px;
+}
+.inValid-input {
+    display: block;
+    font-size: 12px;
+    color: red;
+}
+.message-input {
+    height: 20vh !important;
+}
+
+.contact-send-button {
+    width: 150px;
+    height: 40px;
+    background-color: #022345;
+    color: white;
+    font-size: 28px !important;
+    font-family: "Para" !important;
+    margin-top: 6px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+.response-message {
+    color: green;
+    font-size: 20px;
+    font-family: "Para" !important;
+    text-align: center;
+}
+
+.contact-container-div {
+    min-height: 100vh;
+}
+
+.contact-icon-div {
+    display: flex;
+    align-items: center;
+    border: 2px solid rgb(226, 225, 225);
+    border-radius: 5px;
+    background-color: #ffffff;
+}
+
+.contact-select {
+    width: 100%;
+    height: 5vh;
+    border: none;
+    border-radius: 5px;
+    color: #022345;
+    font-size: 28px !important;
+    font-family: "Para" !important;
+}
+
+.contact-icon {
+    margin: 0px;
+    font-size: 25px;
+    color: #022345;
+    width: 35px;
+}
+
+textarea:focus,
+input:focus {
+    outline: none;
+}
+
+.col-left {
+    width: 50vw;
+}
+
+.col-right {
+    margin-top: 3vh;
+    padding: 2vw;
+}
+
+.nav-text {
+    font-size: 28px !important;
+    font-family: "Para" !important;
+    margin-top: 4vh;
+    color: #022345;
+    padding-left: 2px;
+    cursor: pointer;
+}
+
+@media only screen and (max-width: 900px) {
+    /* .contact-container {
+        border-radius: 10px;
+        background: #f3f3f3;
+        width: 90%;
+        padding: 10px;
+    } */
+    .col-right {
+        margin-bottom: 3vh;
+        margin-left: 0;
+    }
+    .col-left {
+        width: 75vw;
+    }
+}

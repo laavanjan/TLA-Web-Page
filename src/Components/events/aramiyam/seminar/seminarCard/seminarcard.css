@@ -1,0 +1,213 @@
+:root {
+  --text-color: #002245;
+}
+
+.seminarCard {
+  height: fit-content;
+  width: 80vw;
+  border-radius: 20px;
+  background: #e3e7eb;
+  box-shadow: 0px 4px 4px 0px rgba(0, 34, 69, 0.25);
+  margin-top: 1rem;
+  /* margin-left: auto; */
+  /* margin-right: auto; */
+  background-image: url("../../../../../images/Events/aramiyam/seminarcardBG.png");
+  background-position: right center;
+  background-repeat: no-repeat;
+  background-size: 25% 570px;
+  padding: 20px;
+}
+
+.frame {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: column;
+  flex-shrink: calc(100% - 20px);
+  margin-top: 5vw;
+}
+
+/* Responsive styles for screens smaller than 768px (typical mobile devices) */
+@media (max-width: 768px) {
+  .frame {
+    /* align-items: center; */
+  }
+  .seminarCard {
+    background-image: url("../../../../../images/Events/aramiyam/seminarBGTop.png");
+    background-position: top center;
+    background-size: auto 20%; /* Adjust background image to fit within card */
+    padding: 15px; /* Reduce padding for smaller screens */
+    align-items: center;
+  }
+
+  .seminarCardimg {
+    margin-left: 0; /* Reset the margin for mobile */
+    margin-top: 1rem; /* Add spacing between the text and image on small screens */
+  }
+
+  .seminarCard .seminar-content {
+    flex-direction: row;
+    align-items: center;
+    width: 100% !important;
+  }
+
+  .profile-content {
+    width: fit-content !important;
+  }
+
+  .time-content-container {
+    width: 100%;
+    height: fit-content;
+  }
+  .time-content-container {
+    flex-direction: row !important;
+    height: fit-content;
+    height: 100px !important;
+  }
+
+  .time-heading,
+  .time-text,
+  .seminar-description {
+    font-size: 1.2rem !important;
+  }
+  .profile-text {
+    font-size: 1rem !important;
+  }
+  .seminar-heading {
+    font-size: 2rem !important;
+  }
+}
+
+.time-content-container {
+  align-self: flex-start;
+  width: 500px !important;
+  display: flex;
+  flex-direction: row !important;
+  align-items: center;
+  justify-content: center;
+}
+.seminar-card-content {
+  z-index: 0;
+  align-self: flex-start;
+  border: #000000;
+}
+
+.profile-frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.profile-img {
+  width: 200px;
+  height: 200px;
+  margin-top: 2rem;
+  border-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
+}
+
+.profile-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.profile-heading {
+  width: fit-content;
+  align-self: center;
+  /* margin-top: 2rem; */
+  /* margin-right: 0.5rem; */
+  font-size: 1.8rem;
+  font-family: "Para";
+  color: var(--text-color);
+  text-align: center;
+}
+
+.profile-text {
+  align-self: flex-start;
+  /* margin-top: 2rem; */
+  font-size: 1rem;
+  color: #002345e3;
+  text-align: center;
+}
+
+.seminar-content {
+  display: flex;
+  flex-direction: column !important;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin: "50px" !important;
+}
+
+.time-content {
+  display: flex;
+  flex-direction: column !important;
+  justify-content: flex-start;
+  align-items: center;
+  height: 30px !important;
+}
+
+.time-heading {
+  align-self: center;
+  margin-top: 2rem;
+  margin-right: 0.5rem;
+  font-size: 1.8rem;
+  font-family: "Para";
+  color: var(--text-color);
+  text-align: center;
+}
+
+.time-text {
+  align-self: center;
+  margin-top: 0.5rem;
+  font-size: 1.5rem;
+  font-family: "Para";
+  color: #002345e3;
+  text-align: center;
+}
+
+.seminar-heading {
+  align-self: center;
+  margin-right: 0.5rem;
+  font-size: 3rem;
+  font-family: "Heading";
+  color: var(--text-color);
+  text-align: center;
+}
+
+.seminar-title {
+  align-self: flex-start;
+  margin-top: 2rem;
+  margin-left: 0%;
+  font-size: 2rem;
+  font-weight: 400;
+  font-family: "Para";
+  color: var(--text-color);
+  text-align: center;
+}
+
+.seminar-description {
+  width: 500px;
+  align-self: flex-start;
+  margin-top: 2rem;
+  margin-left: 10px;
+  font-size: 1.5rem;
+  font-family: "Para";
+  color: var(--text-color);
+  text-align: left;
+}
+
+
+.video-link{
+  background-color: var(--text-color);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-family: "Para";
+  font-size: 1.5rem;
+}
+
+.video-link:hover{
+  color:white;
+}

@@ -1,0 +1,71 @@
+.popup-container {
+  position: absolute;
+  top: 7%;
+  left: 60%;
+  transform: translate(-50%, -50%);
+  width: 50%; 
+  height: 10%; 
+  border-radius: 20px;
+}
+
+.popup-card {
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.7); 
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: 'Heading';
+  color: #022345;
+  font-size: 1.9vw;
+  text-align: center;
+  background-image: url(../../../../images/Introduction/intro_back.png),url(../../../../images/Introduction/intro_back.png);
+  background-size: auto, auto; 
+  background-position: left, right; 
+  background-repeat: no-repeat, no-repeat; 
+  border-radius: 20px;
+}
+
+.popup-card-content {
+  border: 1px solid #ccc; 
+  padding: 1px; 
+  border-color:#022345;
+  background-color: white;
+  border-radius:20px ;
+}
+
+.popup-line{
+  height: 12px;
+}
+
+.popup-button {
+  position: absolute;
+  top: 50%;
+  left: 20%;
+  transform: translate(-50%, -50%);
+  padding: 15px;
+  background-color: rgba(255, 255, 255, 0.7);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #022345;
+  font-family: 'Heading';
+  font-size: 2vw;
+}
+
+
+@media screen and (max-width: 768px) {
+  .popup-container{
+    left: 50%;
+    width: 80%;
+    z-index: 2;
+  }
+  .popup-card {
+    font-size: 2vw; 
+    padding: 15px; 
+  }
+  
+  .popup-button {
+    left: 20%;
+    font-size: 2vw; 
+    padding: 10px; 
+  }
+}

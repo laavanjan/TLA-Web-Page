@@ -1,0 +1,79 @@
+.winners-conatainer{
+    min-height: 35vh;
+}
+
+.sotkanai-landing-containerx {
+    display: flex;
+    justify-content: center; /* Center align the container horizontally */
+    border-radius: 25px; /* Border radius of 10px */
+    padding: 20px; /* Padding */
+    background-color: #DFE5E8; /* Background color */
+    background-image: url(../../../../../images/Introduction/intro_back.png), url(../../../../../images/Introduction/intro_back_flip.png);
+    background-position: right, left;
+    background-size: 20%;
+    background-repeat: no-repeat;
+
+  }
+  .head-landing-heading1x {
+    color: #022345 !important;
+    font-size: 40px !important;
+    font-family: 'Heading' !important;
+    letter-spacing: normal;
+    text-align: center;
+    line-height: 1.5;
+    padding-top: 2rem;
+    margin-bottom: 10px;
+}
+.head-landing-heading2x{
+    color: #022345 !important;
+    font-size: 35px !important;
+    font-family: 'Heading' !important;
+    letter-spacing: normal;
+    text-align: center;
+    line-height: 1;
+    padding-top: 2rem;
+    margin-bottom: 25px;
+
+}
+
+.head-landing-containerx {
+    border-radius: 10px; /* Border radius of 10px */
+    border-color: #022345;
+    padding: 20px; /* Padding */
+    background-color: #ffffff; /* Background color */
+    width: 60%;
+    margin: 10px auto; /* Center align using auto margin */
+    display: flex;
+    flex-direction: column; /* Set flex direction to column */
+    align-items: center; /* Center align items horizontally */
+    justify-content: center; /* Center align items vertically */
+    outline: 2px solid black; /* Add a black outline around the background images */
+
+}
+
+@media only screen and (max-width: 600px) {
+    .head-landing-containerx {
+        width: auto; /* Reset width for mobile screens */
+        margin: 0; /* Reset margin */
+        border-radius: 0; /* Reset border radius */
+        padding: 0; /* Reset padding */
+        background-color: transparent; /* Reset background color */
+        display: block; /* Reset display */
+        flex-direction: row; /* Reset flex direction */
+        align-items: flex-start; /* Reset align items */
+        justify-content: flex-start; /* Reset justify content */
+    }
+}
+
+
+.head-landing-body1x{
+    color: #022345 !important;
+    font-size: 25px !important;
+    font-family: 'Heading' !important;
+    letter-spacing: normal;
+    line-height: 1.5;
+    padding-top: 5px;
+    text-align: center;
+}
+
+  

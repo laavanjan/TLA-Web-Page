@@ -1,0 +1,17 @@
+.underline {
+    border-top: 2px solid #717274;
+    margin-bottom: 3vh;
+}
+
+.seeMore {
+    background-color: #002245;
+    color: #ffffff;
+    padding: 6px 20px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+
+.seeMore:hover {
+    box-shadow: 2px 2px 2px gray;
+}

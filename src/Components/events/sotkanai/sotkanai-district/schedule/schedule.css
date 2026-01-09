@@ -1,0 +1,196 @@
+.schedule-container{
+ height: 46vh;
+}
+
+.head-landing-container{
+    background-image: linear-gradient(to left, rgba(255, 0, 0, 0), rgba(227, 230, 235), rgba(227, 230, 235), rgba(255, 0, 0, 0));
+    padding-bottom: 40px;
+}
+
+.head-landing-heading1 {
+    color: #022345 !important;
+    font-size: 30px !important;
+    font-family: 'Heading' !important;
+    letter-spacing: normal;
+    text-align: center;
+    line-height: 1.5;
+    padding-top: 2rem;
+    /* background-color: #E3E7EB !important; */
+}
+.head-landing-body {
+    color: #022345 !important;
+    font-size: 20px !important;
+    font-family: 'Heading' !important;
+    letter-spacing: normal;
+    text-align: center;
+    line-height: 1.5;
+    padding-top: 2rem;
+    /* background-color: #E3E7EB !important; */
+}
+.head-landing-body1 {
+    color: #022345 !important;
+    font-size: 20px !important;
+    font-family: 'Heading' !important;
+    letter-spacing: normal;
+    text-align: center;
+    line-height: 1.5;
+    padding-top: 1rem;
+    display: flex;
+    justify-content:space-evenly;
+}
+.head-landing-icon{
+    line-height: 1.5;
+    padding-top: 2rem;
+    display: flex;
+    justify-content:space-evenly;
+}
+.head-landing-description {
+    color: #022345 !important;
+    font-size: 20px !important;
+    font-family: 'Heading' !important;
+    letter-spacing: normal;
+    line-height: 1.5;
+    padding-top: 2rem;
+    display: flex;
+    justify-content:space-evenly;
+}
+.head-landing-des1 {
+    color: #022345 !important;
+    font-size: 20px !important;
+    width: 30%;
+    font-family: 'Heading' !important;
+    letter-spacing: normal;
+    line-height: 1.5;
+    padding-top: 2rem;
+}
+@media only screen and (max-width: 600px) {
+    .head-landing-body1 {
+        /* margin-left:20%; */
+        display: flex;
+        justify-content:center;
+        flex-direction:column;
+        align-items: center;
+    }
+    .head-landing-des1 {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+    .head-landing-des2 {
+        margin-left: 30px;
+        width: 185px;
+        text-align: left;
+    }
+  }
+
+.head-landing-register {
+    color: #022345 !important;
+    font-size: 20px !important;
+    font-family: 'Heading' !important;
+    letter-spacing: normal;
+    text-align: center;
+    line-height: 1.5;
+    padding-top: 2rem;
+}
+
+.sotkanai-district-landing-container-div {
+    /* height: 100vh; */
+    /* background-image: url(../../../../../images/Introduction/intro_back.png),url(../../../../../images/Introduction/intro_back_flip.png); */
+    /* background-position: right,left;
+    background-size: 20%;
+    background-repeat: no-repeat;  */
+}
+.sotkanai-district-landing-container {
+    
+}
+.sotkanai-district-landing-heading1 {
+    color: #022345 !important;
+    font-size: 30px !important;
+    font-family: 'Heading' !important;
+    letter-spacing: normal;
+    text-align: center;
+    line-height: 1.5;
+    padding-top: 2rem;
+    margin-bottom: 80px;
+}
+.sotkanai-district-icon {
+    height: 50vh;
+    width: auto;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+  }
+  
+  @media only screen and (max-width: 768px) {
+    .sotkanai-district-icon {
+      height: auto;
+      width: 70%;
+    }
+  }
+
+.sotknai-landing-heading-letter {
+    font-size: 70px;
+    line-height: 1;
+}
+
+.intro-decription {
+    color: #717274 !important;
+    font-size: 30px !important;
+    font-family: 'Para' !important;
+    letter-spacing: normal;
+    text-align: center;
+}
+
+
+/* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {
+    .intro-decription {
+        font-size: 30px !important;
+    }
+}
+
+/* Small devices (portrait tablets and large phones, 600px and up) */
+@media only screen and (min-width: 600px) {
+    .intro-decription {
+        font-size: 30px !important;
+        
+    }
+}
+
+/* Medium devices (landscape tablets, 768px and up) */
+@media only screen and (min-width: 768px) { 
+    .intro-decription {
+        font-size: 30px !important;   
+    }
+}
+
+/* Large devices (laptops/desktops, 992px and up) */
+@media only screen and (min-width: 992px) {
+    .intro-decription {
+        font-size: 30px !important;   
+    } 
+}
+@media only screen and (min-width: 1100px) {
+    .intro-decription {
+        font-size: 30px !important;       
+    }
+}
+
+/* Extra large devices (large laptops and desktops, 1200px and up) */
+@media only screen and (min-width: 1296px) {
+    .intro-description {
+        font-size: 30px !important;      
+    }
+}
+
+.vertical-align{
+    display: flex;
+    justify-content: center;
+    align-items: start;
+    height: 100vh;
+}
+
+.sotkanai-landing-container {
+    max-width: 75%; /* Adjust the maximum width as needed */
+    margin: auto; /* Center align the container */
+}

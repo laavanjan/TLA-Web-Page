@@ -1,0 +1,79 @@
+.button-school-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .button-school {
+    background-color: #f0f0f0; /* Grey color */
+    border: none;
+    border-radius: 20px; /* Slight oval shape */
+    padding: 10px 20px; /* Adjust padding as needed */
+    margin: 5px; /* Adjust margin as needed */
+    text-align: center; /* Center align text */
+    cursor: pointer;
+  }
+  
+  .button-school-container .button-school {
+    flex: 1 0 auto; /* Maximum 3 button-schools in a row */
+  }
+  
+  @media (max-width: 768px) {
+    .button-school-container .button-school {
+      flex-basis: 100%; /* For smaller screens, make each button-school take full width */
+    }
+  }
+  .show-more-button {
+    margin-top: 10px; /* Adjust margin as needed */
+  }
+  .set-width {
+    width: 70%;
+    padding: 10px;
+    margin: auto;
+  }
+  
+  @media only screen and (max-width: 768px) {
+    .set-width {
+      width: 90%;
+    }
+  }
+  .font-landing-des1 {
+    color: #022345 !important;
+    font-size: 20px !important;
+    width: 30%;
+    font-family: 'Heading' !important;
+    letter-spacing: normal;
+    line-height: 1.5;
+    padding-top: 2px;
+}
+@media only screen and (max-width: 600px) {
+    .font-landing-body1 {
+        /* margin-left:20%; */
+        display: flex;
+        justify-content:center;
+        flex-direction:column;
+        align-items: center;
+    }
+    .font-landing-des1 {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+    .font-landing-des2 {
+        margin-left: 30px;
+        width: 185px;
+        text-align: left;
+    }
+  }
+
+  .icon-align {
+    display: flex;
+    justify-content: center;
+    margin-top: 2px;
+    width: auto;
+  }
+
+  .button-school-container-arrow {
+    display: flex;
+    justify-content: center;
+  }

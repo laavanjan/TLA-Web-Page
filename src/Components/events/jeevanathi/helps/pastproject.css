@@ -1,0 +1,76 @@
+h1 {
+    font-family: "Heading";
+    color: #022345;
+    text-align: center;
+    margin-top: 12vh;
+  }
+  
+ .cardContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.card {
+  width: 70%;
+  margin: 16px;
+ 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #DFE5E8;
+}
+
+.projectName {
+  margin-bottom: 18px;
+  font-family: "Heading";
+  color: #022345;
+  text-align: center;
+  margin-bottom: 4vh !important;
+}
+
+.photoGrid {
+  margin-bottom: 20px;
+}
+
+.photoItem {
+  padding: 2vw;
+  box-sizing: border-box;
+}
+
+.photo {
+  object-fit: cover;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.buttonContainer {
+  text-align: center;
+  margin: 8px;
+}
+
+.button {
+  background-color: #022345;
+  color: #ffffff;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  margin-right: 8px;
+  font-family: "Heading";
+}
+
+.description {
+  text-align: center;
+  max-width: 100%;
+  margin: 20px;
+  font-family: "Para";
+  color: #022345;
+}

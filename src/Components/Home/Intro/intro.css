@@ -1,0 +1,159 @@
+.intro-container-div {
+    /* height: 100vh; */
+    background-image: url(../../../images/Introduction/intro_back.png),url(../../../images/Introduction/intro_back_flip.png);
+    background-position: right,left;
+    background-size: 20%;
+    background-repeat: no-repeat; 
+}
+   
+
+.intro-container {
+    /* height: 100vh; */
+}
+
+.intro-heading {
+    color: #022345 !important;
+    font-size: 80px !important;
+    font-family: 'Heading' !important;
+    letter-spacing: normal;
+
+    text-align: center;
+
+}
+
+.intro-heading1 {
+    color: #717274 !important;
+    font-size: 30px !important;
+    font-family: 'Para' !important;
+    letter-spacing: normal;
+    text-align: center;
+}
+
+
+.intro-heading2 {
+    color: #080808 !important;
+    font-size: 35px !important;
+    font-family: 'Para' !important;
+    letter-spacing: normal;
+    text-align: center;
+}
+
+
+
+
+
+/* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {
+    .intro-container-div {
+        /* height: 100vh; */
+        background-image:none;
+    }
+    .intro-heading {
+        font-size: 80px !important;
+    }
+    
+    .intro-heading1 {
+        font-size: 30px !important;
+        width: 100%;
+        padding: 0 !important;
+    }
+    
+    
+    .intro-heading2 {
+       
+        font-size: 35px !important;
+        
+    }
+}
+
+/* Small devices (portrait tablets and large phones, 600px and up) */
+@media only screen and (min-width: 600px) {
+    .intro-heading {
+        font-size: 80px !important;
+    }
+    
+    .intro-heading1 {
+        font-size: 30px !important;
+        
+    }
+    
+    .intro-heading2 {
+        font-size: 35px !important;
+    }
+}
+
+/* Medium devices (landscape tablets, 768px and up) */
+@media only screen and (min-width: 768px) {
+    .intro-heading {
+        font-size: 80px !important;
+    }
+    
+    .intro-heading1 {
+        font-size: 30px !important;
+        
+    }
+    
+    
+    .intro-heading2 {
+       
+        font-size: 35px !important;
+        
+    }
+}
+
+/* Large devices (laptops/desktops, 992px and up) */
+@media only screen and (min-width: 992px) {
+    .intro-heading {
+        font-size: 80px !important;
+    }
+    
+    .intro-heading1 {
+        font-size: 30px !important;
+        
+    }
+    
+    
+    .intro-heading2 {
+       
+        font-size: 35px !important;
+        
+    }
+    
+}
+@media only screen and (min-width: 1100px) {
+    .intro-heading {
+        font-size: 80px !important;
+    }
+    
+    .intro-heading1 {
+        font-size: 30px !important;
+        
+    }
+    
+    
+    .intro-heading2 {
+       
+        font-size: 35px !important;
+        
+    }
+    
+}
+
+/* Extra large devices (large laptops and desktops, 1200px and up) */
+@media only screen and (min-width: 1296px) {
+    .intro-heading {
+        font-size: 80px !important;
+    }
+    
+    .intro-heading1 {
+        font-size: 30px !important;
+        
+    }
+    
+    
+    .intro-heading2 {
+       
+        font-size: 35px !important;
+        
+    }
+}

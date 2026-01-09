@@ -1,0 +1,50 @@
+.memory-card-item {
+	box-shadow: 0px 4px 4px 0px hsla(0, 0%, 0%, 0.25);
+	background-color: hsla(210, 17%, 91%, 1) !important;
+	padding: 20px;
+	margin-bottom: 20px;
+}
+
+.shared-by {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	column-gap: 10px;
+}
+
+.shared-by img {
+	width: 50px;
+	grid-row: span 2;
+	border-radius: 50%;
+}
+
+.shared-by-name {
+	font-size: 1.2em;
+}
+
+.shared-by-email {
+	font-size: 0.9em;
+}
+
+.memory-card-item h3 {
+	font-size: 1.8em;
+	margin-bottom: 10px;
+	font-family: "Heading";
+}
+.memory-card-item p {
+	max-width: min(120ch, 90vw);
+	font-size: 1.1em;
+	font-family: "Para";
+}
+
+.memory-card-item .image-container {
+	display: flex;
+	flex-direction: row;
+	gap: 20px;
+	overflow-x: scroll;
+}
+
+.memory-card-item .image-container img {
+	height: 200px;
+	width: auto;
+	border-radius: 8px;
+}
