@@ -1,0 +1,16 @@
+.memory-sharing-landing-container h1 {
+	margin: 0;
+	color: #022345 !important;
+	font-size: 50px;
+	font-family: "Heading" !important;
+	letter-spacing: normal;
+	text-align: center;
+	line-height: 1.5;
+	padding-top: 2rem;
+}
+
+.memory-sharing-landing-container p {
+	color: hsla(210, 100%, 14%, 1);
+	font-weight: 400;
+	font-family: "Heading";
+}

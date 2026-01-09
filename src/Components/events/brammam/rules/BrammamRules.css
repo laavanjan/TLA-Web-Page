@@ -1,0 +1,22 @@
+.rules-landing-heading1 {
+    color: #022345 !important;
+    font-size: 30px !important;
+    font-family: 'Heading' !important;
+    letter-spacing: normal;
+    text-align: center;
+    line-height: 1.5;
+    padding-top: 2rem;
+    background-color: #E3E7EB !important;
+}
+.rules-decription {
+    color: #717274 !important;
+    font-size: 30px !important;
+    font-family: 'Para' !important;
+    letter-spacing: normal;
+    text-align: left;
+}
+
+.centerx
+{
+    text-align: center;
+}

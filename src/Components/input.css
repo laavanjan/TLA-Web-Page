@@ -1,0 +1,55 @@
+.input {
+	margin: 10px 0 !important;
+}
+
+label,
+.label {
+	color: #022345;
+	font-size: 28px !important;
+	font-family: "Para" !important;
+	margin-top: 2vh;
+}
+
+label {
+	cursor: pointer;
+}
+
+.input input,
+.input textarea {
+	resize: none;
+	width: 100%;
+	border: none;
+	border-radius: 5px;
+	font-size: 18px;
+	padding: 10px 12px;
+}
+
+.input textarea {
+	height: 180px;
+}
+
+.input .valid-input {
+	display: none;
+	font-size: 12px;
+}
+
+.input .inValid-input {
+	display: block;
+	font-size: 12px;
+	color: red;
+}
+
+.input .input-container {
+	display: flex;
+	align-items: center;
+	border: 2px solid rgb(226, 225, 225);
+	border-radius: 5px;
+	background-color: #ffffff;
+}
+
+.input .icon {
+	margin: 0px;
+	font-size: 25px;
+	color: #022345;
+	width: 35px;
+}

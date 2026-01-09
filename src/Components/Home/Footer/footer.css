@@ -1,0 +1,17 @@
+.footer-container {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    /* margin-top: 30px; */
+}
+
+.footer-text{
+    background-color: #DFE5E8;
+    text-align: center;
+    padding: 10px 30px;
+    font-family: "Heading";
+    color:#002146;
+    font-size: 16px;
+    word-spacing: normal;
+    font-weight: 500;
+}

@@ -1,0 +1,59 @@
+.book-intro{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.left{
+    flex:50%;
+}
+
+.cover-text{
+    color: #022345 !important;
+    font-size: 30px;
+    font-family: 'Para' !important;
+    letter-spacing: normal;
+    text-align: center;
+    margin-top: 3vh;
+    animation: topToBottom 2s forwards; 
+}
+
+@keyframes topToBottom {
+    from {
+      transform: translateY(10px); /* Start from top */
+      opacity: 0; /* Start with opacity 0 */
+    }
+    to {
+      transform: translateY(0); /* End at original position */
+      opacity: 1; /* Gradually fade in */
+    }
+  }
+
+.right{
+    flex:50%;
+}
+
+.cover-img{
+    width: 50%;
+    height: 50%;
+    object-fit: cover;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+}
+
+.cover-img.fade-in {
+    opacity: 1;
+}
+
+@media only screen and (max-width: 600px) {
+    .right{
+        display: none;
+    }
+}

@@ -1,0 +1,26 @@
+.input-images-container {
+	display: flex;
+	min-height: 180px;
+	border-radius: 5px;
+	outline: 2px solid rgb(226, 225, 225);
+	padding: 4px;
+	gap: 2px;
+	flex-wrap: wrap;
+}
+.input-images-container img {
+	height: 180px;
+}
+.input-images-container input[type="file"] {
+	display: none;
+}
+
+.input-images-container .add-image-example {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	font-size: 14px;
+	background: hsl(0, 2%, 94%);
+	padding: 16px;
+	border-radius: 5px;
+}

@@ -1,0 +1,185 @@
+.mmvc-main-container {
+    width: 100vw;
+    min-height: calc(100vh - 102px);
+    display: flex;
+    /* align-items: center; */
+    justify-content: center;
+
+}
+
+.mmvc-container {
+    width: 70vw;
+    margin-top: 25px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.mmvc-heading {
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 32px;
+    text-align: center;
+}
+
+.mmvc-question {
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 38px;
+    text-align: center;
+    color: #002245;
+}
+
+.mmvc-tobe {
+    font-size: 20px;
+    margin-top: 40px;
+    font-weight: 400;
+    line-height: 24px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.mmvc-vote-done {
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 24px;
+    text-align: center;
+}
+
+.mmvc-opened {
+    display: flex;
+    gap: 20px;
+    margin-top: 40px;
+}
+
+.mmvc-button {
+    border: none;
+    background-color: #002245;
+    font-family: Poppins;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 30px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    padding: 10px 20px;
+    color: #E3E7EB;
+}
+
+.mmvc-button img {
+    width: 30px;
+    height: 30px;
+}
+
+.mmvc-result-view {
+    font-family: "Para" !important;
+    margin-top: 40px;
+    /* font-family: Anonymous Pro; */
+    font-size: 26px;
+    /* font-style: italic; */
+    font-weight: 400;
+    line-height: 20px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.refresh-icon-load {
+    display: inline-block;
+    animation: rotate 2s linear infinite;
+    /* 2s is the duration, adjust as needed */
+    transform-origin: center;
+    /* Ensures rotation from the center */
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+
+@media all and (max-width: 596px) {
+
+
+    .mmvc-question {
+        font-size: 18px;
+        font-weight: 400;
+        line-height: 28px;
+        text-align: center;
+        color: #002245;
+    }
+
+    .mmvc-vote-done {
+        font-size: 25px;
+        font-weight: 400;
+        line-height: 24px;
+        text-align: center;
+    }
+
+    .mmvc-opened {
+        display: flex;
+        gap: 20px;
+        margin-top: 20px;
+        flex-direction: column;
+    }
+
+    .mmvc-result-view {
+        margin-top: 40px;
+        font-family: Anonymous Pro;
+        font-size: 16px;
+        /* font-style: italic; */
+        font-weight: 400;
+        line-height: 20px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .mmvc-heading {
+        font-size: 22px;
+        font-weight: 400;
+        line-height: 32px;
+        text-align: center;
+    }
+
+    .mmvc-image {
+        width: 120px;
+    }
+
+    .mmvc-container {
+        width: 85vw;
+        margin-top: 11px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        align-items: center;
+    }
+}
+
+
+@media all and (max-width: 596px) {
+    .mmvc-tobe {
+        font-family: "Para" !important;
+        font-size: 30px;
+        margin: 0;
+        margin-bottom: 2vh;
+        flex-direction: column;
+    }
+}
