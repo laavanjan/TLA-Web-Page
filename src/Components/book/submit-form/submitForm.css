@@ -1,0 +1,539 @@
+.submit-form-page{
+    --navy: #022345;
+    --navy-soft: #0a3a6b;
+    --accent: #c8932f;
+    --bg-soft: #f6f8fa;
+    --danger: #c0392b;
+    --success: #2e8b57;
+    --line: #e4e7eb;
+    color: var(--navy);
+    padding-bottom: 8vh;
+}
+
+/* Hero */
+.submit-form-page .sf-hero{
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-soft) 100%);
+    color: white;
+    padding: 6vh 8vw 9vh 8vw;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.submit-form-page .sf-hero::after{
+    content: "";
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    top: -260px;
+    right: -160px;
+}
+
+.submit-form-page .sf-back{
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.12);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 18px;
+    font-family: 'Para' !important;
+    font-size: 19px;
+    cursor: pointer;
+    margin-bottom: 22px;
+    position: relative;
+    z-index: 1;
+    transition: background 0.2s ease;
+}
+
+.submit-form-page .sf-back:hover{
+    background: rgba(255,255,255,0.22);
+}
+
+.submit-form-page .sf-hero-title{
+    font-family: 'Heading' !important;
+    font-size: 52px;
+    margin: 0 0 16px 0;
+    position: relative;
+    z-index: 1;
+    color: white;
+}
+
+.submit-form-page .sf-hero-text{
+    font-family: 'Para' !important;
+    font-size: 23px;
+    line-height: 1.8;
+    max-width: 720px;
+    margin: 0 auto;
+    opacity: 0.92;
+    position: relative;
+    z-index: 1;
+}
+
+/* Form shell */
+.submit-form-page .sf-form{
+    max-width: 900px;
+    margin: -5vh auto 0 auto;
+    padding: 0 5vw;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+}
+
+.submit-form-page .sf-section{
+    background: white;
+    border: none;
+    border-radius: 12px;
+    box-shadow: rgba(99, 99, 99, 0.15) 0px 2px 10px 0px;
+    padding: 32px 34px 34px 34px;
+    margin: 0;
+}
+
+.submit-form-page .sf-legend{
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: 'Heading' !important;
+    font-size: 30px;
+    color: var(--navy);
+    margin: 0 0 18px 0;
+    padding: 0;
+}
+
+.submit-form-page .sf-legend-icon{
+    color: var(--accent);
+    font-size: 24px;
+}
+
+/* Grid */
+.submit-form-page .sf-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px 24px;
+}
+
+.submit-form-page .sf-full{
+    grid-column: 1 / -1;
+}
+
+.submit-form-page .sf-field{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.submit-form-page .sf-label{
+    font-family: 'Para' !important;
+    font-size: 20px;
+    color: var(--navy);
+    font-weight: bold;
+}
+
+.submit-form-page .sf-req{
+    color: var(--danger);
+}
+
+.submit-form-page .sf-input,
+.submit-form-page .sf-textarea{
+    width: 100%;
+    box-sizing: border-box;
+    font-family: 'Para' !important;
+    font-size: 20px;
+    color: var(--navy);
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.submit-form-page .sf-textarea{
+    resize: vertical;
+    line-height: 1.7;
+}
+
+.submit-form-page .sf-input:focus,
+.submit-form-page .sf-textarea:focus{
+    background: white;
+    border-color: var(--navy-soft);
+    box-shadow: 0 0 0 3px rgba(10, 58, 107, 0.12);
+}
+
+.submit-form-page .sf-input::placeholder,
+.submit-form-page .sf-textarea::placeholder{
+    color: #9aa2ab;
+}
+
+.submit-form-page .sf-select{
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23022345' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 18px;
+    padding-right: 40px;
+}
+
+.submit-form-page .sf-invalid{
+    border-color: var(--danger) !important;
+    background: #fdf4f3;
+}
+
+.submit-form-page .sf-error{
+    font-family: 'Para' !important;
+    font-size: 17px;
+    color: var(--danger);
+}
+
+.submit-form-page .sf-hint{
+    font-family: 'Para' !important;
+    font-size: 17px;
+    color: #717274;
+}
+
+.submit-form-page .sf-help-row{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.submit-form-page .sf-count{
+    font-family: 'Para' !important;
+    font-size: 16px;
+    color: #9aa2ab;
+    flex-shrink: 0;
+}
+
+/* Radios */
+.submit-form-page .sf-radio-row{
+    display: flex;
+    gap: 12px;
+    padding-top: 4px;
+}
+
+.submit-form-page .sf-radio{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Para' !important;
+    font-size: 20px;
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 11px 20px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.submit-form-page .sf-radio:hover{
+    border-color: var(--navy-soft);
+}
+
+.submit-form-page .sf-radio input{
+    accent-color: var(--navy);
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* Uploads */
+.submit-form-page .sf-upload-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.submit-form-page .sf-file-input{
+    display: none;
+}
+
+.submit-form-page .sf-dropzone{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+    background: var(--bg-soft);
+    border: 2px dashed #c9d1d9;
+    border-radius: 10px;
+    padding: 30px 20px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.submit-form-page .sf-dropzone:hover{
+    border-color: var(--accent);
+    background: #fdfaf4;
+}
+
+.submit-form-page .sf-drop-icon{
+    font-size: 34px;
+    color: var(--navy-soft);
+    display: flex;
+}
+
+.submit-form-page .sf-drop-text{
+    font-family: 'Para' !important;
+    font-size: 19px;
+    color: var(--navy);
+}
+
+.submit-form-page .sf-drop-hint{
+    font-family: 'Para' !important;
+    font-size: 16px;
+    color: #717274;
+}
+
+.submit-form-page .sf-file-chosen{
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #f2f8f4;
+    border: 1px solid #bfe0cb;
+    border-radius: 10px;
+    padding: 16px 18px;
+    box-sizing: border-box;
+}
+
+.submit-form-page .sf-file-icon{
+    font-size: 26px;
+    color: var(--success);
+    display: flex;
+    flex-shrink: 0;
+}
+
+.submit-form-page .sf-file-meta{
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+}
+
+.submit-form-page .sf-file-name{
+    font-family: 'Para' !important;
+    font-size: 18px;
+    color: var(--navy);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.submit-form-page .sf-file-size{
+    font-family: 'Para' !important;
+    font-size: 16px;
+    color: #717274;
+}
+
+.submit-form-page .sf-file-clear{
+    background: none;
+    border: none;
+    color: #717274;
+    font-size: 18px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    padding: 4px;
+    border-radius: 4px;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+
+.submit-form-page .sf-file-clear:hover{
+    color: var(--danger);
+    background: rgba(192, 57, 43, 0.08);
+}
+
+/* Declaration */
+.submit-form-page .sf-declaration{
+    background: white;
+    border-radius: 12px;
+    box-shadow: rgba(99, 99, 99, 0.15) 0px 2px 10px 0px;
+    padding: 26px 30px;
+}
+
+.submit-form-page .sf-check{
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    font-family: 'Para' !important;
+    font-size: 20px;
+    line-height: 1.8;
+    color: #333;
+    cursor: pointer;
+}
+
+.submit-form-page .sf-check input{
+    accent-color: var(--navy);
+    width: 20px;
+    height: 20px;
+    margin-top: 5px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+/* Alerts */
+.submit-form-page .sf-alert{
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-radius: 10px;
+    padding: 18px 22px;
+    font-family: 'Para' !important;
+    font-size: 20px;
+    line-height: 1.7;
+}
+
+.submit-form-page .sf-alert-error{
+    background: #fdecea;
+    border: 1px solid #f5c6c0;
+    color: var(--danger);
+}
+
+.submit-form-page .sf-alert-warn{
+    background: #fdf6e3;
+    border: 1px solid #f0dfae;
+    color: #8a6d1f;
+}
+
+/* Actions */
+.submit-form-page .sf-actions{
+    display: flex;
+    justify-content: center;
+    padding-top: 6px;
+}
+
+.submit-form-page .sf-btn-primary{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background-color: var(--navy);
+    color: white;
+    font-size: 24px;
+    font-family: 'Para' !important;
+    border: none;
+    border-radius: 30px;
+    padding: 15px 52px;
+    cursor: pointer;
+    box-shadow: rgba(2, 35, 69, 0.3) 0px 6px 16px 0px;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.submit-form-page .sf-btn-primary:hover:not(:disabled){
+    transform: scale(1.03);
+}
+
+.submit-form-page .sf-btn-primary:disabled{
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.submit-form-page .sf-btn-ghost{
+    background: none;
+    color: var(--navy);
+    font-size: 22px;
+    font-family: 'Para' !important;
+    border: 2px solid var(--navy);
+    border-radius: 30px;
+    padding: 13px 40px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.submit-form-page .sf-btn-ghost:hover{
+    background: var(--navy);
+    color: white;
+}
+
+.submit-form-page .sf-spinner{
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255,255,255,0.35);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: sf-spin 0.7s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes sf-spin{
+    to { transform: rotate(360deg); }
+}
+
+/* Success */
+.submit-form-page .sf-success{
+    max-width: 760px;
+    margin: 8vh auto;
+    background: white;
+    border-radius: 14px;
+    box-shadow: rgba(99, 99, 99, 0.15) 0px 4px 16px 0px;
+    padding: 60px 40px;
+    text-align: center;
+}
+
+.submit-form-page .sf-success-icon{
+    font-size: 70px;
+    color: var(--success);
+    margin-bottom: 24px;
+}
+
+.submit-form-page .sf-success-title{
+    font-family: 'Heading' !important;
+    font-size: 40px;
+    color: var(--navy);
+    margin: 0 0 20px 0;
+}
+
+.submit-form-page .sf-success-text{
+    font-family: 'Para' !important;
+    font-size: 22px;
+    line-height: 1.9;
+    color: #333;
+    margin: 0 0 34px 0;
+}
+
+.submit-form-page .sf-success-actions{
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Responsive */
+@media only screen and (max-width: 800px) {
+    .submit-form-page .sf-grid,
+    .submit-form-page .sf-upload-grid{
+        grid-template-columns: 1fr;
+    }
+
+    .submit-form-page .sf-hero-title{
+        font-size: 34px;
+    }
+
+    .submit-form-page .sf-hero-text{
+        font-size: 20px;
+    }
+
+    .submit-form-page .sf-section{
+        padding: 26px 22px 28px 22px;
+    }
+
+    .submit-form-page .sf-legend{
+        font-size: 25px;
+    }
+
+    .submit-form-page .sf-success{
+        padding: 44px 24px;
+    }
+
+    .submit-form-page .sf-success-title{
+        font-size: 30px;
+    }
+}

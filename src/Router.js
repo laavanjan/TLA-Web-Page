@@ -20,6 +20,8 @@ import ComingSoon from "./shared/comingSoon/ComingSoon";
 
 import Contact from "./Components/Home/Contact/contact";
 import Books from "./Pages/Books";
+import BookSubmitGuidelines from "./Pages/BookSubmitGuidelines";
+import BookSubmitForm from "./Pages/BookSubmitForm";
 import HistoryPage from "./Pages/History";
 import Ideathon from "./Pages/Ideathon";
 import MemorySharing from "./Pages/Memory-Sharing";
@@ -117,6 +119,14 @@ function Router() {
     {
       path: "/books",
       element: <Books />,
+    },
+    {
+      path: "/books/submit",
+      element: <BookSubmitGuidelines />,
+    },
+    {
+      path: "/books/submit/form",
+      element: <BookSubmitForm />,
     },
     {
       path: "/seniors",
