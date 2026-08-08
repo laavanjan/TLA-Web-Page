@@ -1,0 +1,563 @@
+.guidelines-page{
+    --navy: #022345;
+    --navy-soft: #0a3a6b;
+    --accent: #c8932f;
+    --bg-soft: #f6f8fa;
+    color: var(--navy);
+}
+
+/* Hero */
+.guidelines-hero{
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-soft) 100%);
+    color: white;
+    padding: 8vh 8vw 10vh 8vw;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.guidelines-hero::after{
+    content: "";
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    top: -250px;
+    right: -150px;
+}
+
+.guidelines-hero-kicker{
+    display: inline-block;
+    font-family: 'Para' !important;
+    font-size: 21px;
+    letter-spacing: 1px;
+    background: rgba(255,255,255,0.12);
+    padding: 6px 16px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+}
+
+.guidelines-hero-title{
+    font-family: 'Heading' !important;
+    font-size: 62px;
+    margin: 0 0 20px 0;
+}
+
+.guidelines-hero-text{
+    font-family: 'Para' !important;
+    font-size: 25px;
+    line-height: 1.9;
+    max-width: 800px;
+    margin: 0 auto;
+    opacity: 0.92;
+    position: relative;
+    z-index: 1;
+}
+
+/* Body layout */
+.guidelines-body{
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 40px;
+    max-width: 1200px;
+    margin: -6vh auto 0 auto;
+    padding: 0 5vw 10vh 5vw;
+    position: relative;
+    z-index: 2;
+}
+
+.guidelines-nav{
+    align-self: start;
+    position: sticky;
+    top: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 12px 0px;
+    padding: 20px;
+}
+
+.guidelines-nav-title{
+    font-family: 'Heading' !important;
+    font-size: 20px;
+    color: #717274;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0 0 12px 4px;
+}
+
+.guidelines-nav ul{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-link{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 10px;
+    font-family: 'Para' !important;
+    font-size: 21px;
+    color: var(--navy);
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav-link:hover{
+    background: var(--bg-soft);
+}
+
+.nav-link.active{
+    background: var(--navy);
+    color: white;
+}
+
+.nav-num{
+    font-weight: bold;
+    color: var(--accent);
+    font-size: 17px;
+    min-width: 20px;
+}
+
+.nav-link.active .nav-num{
+    color: white;
+}
+
+/* Content */
+.guidelines-content{
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.guidelines-section{
+    background: white;
+    border-radius: 10px;
+    box-shadow: rgba(99, 99, 99, 0.15) 0px 2px 10px 0px;
+    padding: 35px;
+    scroll-margin-top: 20px;
+}
+
+.section-heading{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.section-num{
+    font-family: 'Heading' !important;
+    font-size: 15px;
+    color: white;
+    background: var(--accent);
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.section-heading h2{
+    font-family: 'Heading' !important;
+    font-size: 34px;
+    color: var(--navy);
+    margin: 0;
+}
+
+.section-lead{
+    font-family: 'Para' !important;
+    font-size: 22px;
+    line-height: 1.9;
+    color: #333;
+    margin: 0 0 20px 0;
+}
+
+.section-note{
+    font-family: 'Para' !important;
+    font-size: 20px;
+    color: #717274;
+    font-style: italic;
+    margin-top: 16px;
+}
+
+/* Type grid */
+.type-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.type-card{
+    border: 1px solid #e4e7eb;
+    border-radius: 8px;
+    padding: 18px;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.type-card:hover{
+    transform: translateY(-3px);
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 4px 12px 0px;
+}
+
+.type-icon{
+    font-size: 26px;
+    color: var(--accent);
+    margin-bottom: 10px;
+}
+
+.type-name{
+    font-family: 'Para' !important;
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--navy);
+    margin: 0;
+}
+
+.type-sub{
+    font-family: 'Para' !important;
+    font-size: 17px;
+    color: #717274;
+    margin: 4px 0 0 0;
+}
+
+.type-limit{
+    display: inline-block;
+    margin-top: 10px;
+    font-family: 'Para' !important;
+    font-size: 18px;
+    background: var(--bg-soft);
+    color: var(--navy);
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.topics-link{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    font-family: 'Para' !important;
+    font-size: 20px;
+    color: var(--navy-soft);
+    text-decoration: underline;
+}
+
+/* Checklist */
+.checklist{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.checklist li{
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-family: 'Para' !important;
+    font-size: 22px;
+    line-height: 1.8;
+    color: #333;
+}
+
+.check-icon{
+    color: #2e8b57;
+    flex-shrink: 0;
+    margin-top: 3px;
+}
+
+/* Example card */
+.example-card{
+    background: var(--bg-soft);
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+    padding: 20px 24px;
+}
+
+.example-label{
+    font-family: 'Heading' !important;
+    font-size: 18px;
+    color: #717274;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0 0 10px 0;
+}
+
+.example-fields{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.example-fields li{
+    display: flex;
+    gap: 10px;
+    font-family: 'Para' !important;
+    font-size: 22px;
+    padding: 4px 0;
+}
+
+.example-fields strong{
+    color: var(--navy);
+    min-width: 110px;
+}
+
+/* Spec grid */
+.spec-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.spec-card{
+    border: 1px solid #e4e7eb;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.spec-title{
+    font-family: 'Heading' !important;
+    font-size: 22px;
+    color: var(--navy);
+    margin: 0 0 12px 0;
+}
+
+.spec-row{
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-family: 'Para' !important;
+    font-size: 21px;
+    padding: 8px 0;
+    border-bottom: 1px dashed #e4e7eb;
+}
+
+.spec-row:last-child{
+    border-bottom: none;
+}
+
+.spec-value{
+    color: var(--accent);
+    font-weight: bold;
+    text-align: right;
+}
+
+/* Required info list */
+.info-list{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+    margin: 0;
+    padding: 0 0 0 20px;
+}
+
+.info-list li{
+    font-family: 'Para' !important;
+    font-size: 22px;
+    padding: 4px 0;
+    color: #333;
+}
+
+/* Tags */
+.tag-list{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.tag{
+    font-family: 'Para' !important;
+    font-size: 18px;
+    background: var(--navy);
+    color: white;
+    padding: 6px 16px;
+    border-radius: 20px;
+}
+
+/* File format */
+.file-format-box{
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: var(--bg-soft);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.file-icon{
+    font-size: 40px;
+    color: var(--navy-soft);
+    flex-shrink: 0;
+}
+
+.file-name-pattern{
+    display: inline-block;
+    margin-top: 10px;
+    background: var(--navy);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 20px;
+}
+
+.file-example{
+    font-family: 'Para' !important;
+    font-size: 20px;
+    color: #717274;
+    margin-top: 8px;
+}
+
+/* Contact */
+.contact-grid{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+@media only screen and (max-width: 700px) {
+    .contact-grid{
+        grid-template-columns: 1fr;
+    }
+}
+
+.guidelines-page .contact-card{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    border: 1px solid #e4e7eb;
+    border-radius: 12px;
+    padding: 28px 20px;
+    background: linear-gradient(135deg, #ffffff 0%, var(--bg-soft) 100%);
+    text-decoration: none;
+    box-sizing: border-box;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.guidelines-page .contact-card:hover{
+    transform: translateY(-4px);
+    box-shadow: rgba(2, 35, 69, 0.18) 0px 10px 24px 0px;
+    border-color: var(--accent);
+}
+
+.contact-icon-badge{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    border-radius: 50%;
+    background: var(--navy);
+    transition: background 0.2s ease;
+}
+
+.guidelines-page .contact-card:hover .contact-icon-badge{
+    background: var(--accent);
+}
+
+.contact-icon{
+    font-size: 20px;
+    color: white;
+}
+
+.contact-text{
+    min-width: 0;
+    text-align: center;
+}
+
+.contact-name,
+.contact-phone{
+    white-space: nowrap;
+}
+
+.contact-name{
+    font-family: 'Para' !important;
+    font-weight: bold;
+    font-size: 21px;
+    color: var(--navy);
+    margin: 0;
+}
+
+.contact-phone{
+    font-family: 'Para' !important;
+    font-size: 18px;
+    color: #717274;
+    margin: 4px 0 0 0;
+    letter-spacing: 1px;
+}
+
+/* CTA */
+.guidelines-cta{
+    display: flex;
+    justify-content: center;
+    padding: 10px 0 30px 0;
+}
+
+.guidelines-cta-button{
+    background-color: var(--navy);
+    color: white;
+    font-size: 26px;
+    font-family: 'Para' !important;
+    letter-spacing: normal;
+    border: none;
+    border-radius: 30px;
+    padding: 14px 46px;
+    cursor: pointer;
+    box-shadow: rgba(2, 35, 69, 0.3) 0px 6px 16px 0px;
+}
+
+.guidelines-cta-button:hover{
+    transform: scale(1.03);
+    transition-duration: 0.3s;
+}
+
+/* Responsive */
+@media only screen and (max-width: 900px) {
+    .guidelines-body{
+        grid-template-columns: 1fr;
+        margin-top: -4vh;
+    }
+
+    .guidelines-nav{
+        position: static;
+        overflow-x: auto;
+    }
+
+    .guidelines-nav ul{
+        display: flex;
+        gap: 8px;
+    }
+
+    .guidelines-nav ul li{
+        flex-shrink: 0;
+    }
+
+    .guidelines-nav-title{
+        display: none;
+    }
+
+    .spec-grid{
+        grid-template-columns: 1fr;
+    }
+
+    .guidelines-hero-title{
+        font-size: 30px;
+    }
+}
