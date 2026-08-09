@@ -253,11 +253,16 @@
     border-radius: 6px;
 }
 
+.topics-link-wrap{
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
 .topics-link{
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    margin-top: 20px;
     font-family: 'Para' !important;
     font-size: 20px;
     color: var(--navy-soft);
