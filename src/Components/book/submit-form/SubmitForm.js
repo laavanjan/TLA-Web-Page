@@ -306,7 +306,7 @@ const SubmitForm = () => {
               value={values.fullName}
               error={errors.fullName}
               onChange={handleChange}
-              placeholder="உ.ம். ம. திகர்ணன்"
+              placeholder="உ.ம். மதிசூதனன் திகர்ணன்"
             />
             <Field
               label="புனைபெயர்"
