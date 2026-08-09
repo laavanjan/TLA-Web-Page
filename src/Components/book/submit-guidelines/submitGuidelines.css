@@ -240,6 +240,19 @@
     border-radius: 20px;
 }
 
+.topics-note{
+    font-family: 'Para' !important;
+    font-size: 19px;
+    line-height: 1.9;
+    color: var(--navy);
+    margin-top: 22px;
+    margin-bottom: 0;
+    padding: 16px 20px;
+    background: #f0f4fa;
+    border-left: 4px solid var(--navy-soft);
+    border-radius: 6px;
+}
+
 .topics-link{
     display: inline-flex;
     align-items: center;
