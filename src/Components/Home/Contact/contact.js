@@ -1,19 +1,9 @@
-import React, { useState, useRef } from "react";
-import { Container, Grid } from "@mui/material";
+import React, { useState } from "react";
 import "./contact.css";
-import Heading from "../../../shared/Heading";
-import { FaEnvelope, FaFacebook, FaYoutube, FaPhoneAlt } from "react-icons/fa";
+import { FaEnvelope, FaFacebook, FaYoutube, FaPhoneAlt, FaUser, FaPaperPlane, FaTag, FaCommentDots, FaInstagram } from "react-icons/fa";
 import emailjs from "@emailjs/browser";
 
 function Contact() {
-    const [formValid, setFormValid] = useState({
-        userName: false,
-        email: false,
-        message: false,
-        category: false,
-        phoneNumber: false,
-    });
-    const [buttonClicked, setButtonClicked] = useState(false);
     const [formData, setFormData] = useState({
         userName: "",
         email: "",
@@ -21,363 +11,177 @@ function Contact() {
         category: "",
         phoneNumber: "",
     });
-
-    const form = useRef();
-
+    const [buttonClicked, setButtonClicked] = useState(false);
     const [responseMessage, setResponseMessage] = useState("");
+    const [responseType, setResponseType] = useState("");
 
-    const validateName = (userName) => {
-        return userName.length > 0;
-    };
-    const validatePhoneNumber = (phoneNumber) => {
-        return phoneNumber.length > 0;
-    };
-    const validateEmail = (email) => {
-        return /\S+@\S+\.\S+/.test(email);
-    };
-    const validateCategory = (category) => {
-        return category.length > 0;
-    };
-    const validateMessage = (message) => {
-        return message.length > 0 ? true : false;
+    const validateName     = (v) => v.length > 0;
+    const validatePhone    = (v) => v.length > 0;
+    const validateEmail    = (v) => /\S+@\S+\.\S+/.test(v);
+    const validateCategory = (v) => v.length > 0;
+    const validateMessage  = (v) => v.length > 0;
+
+    const isValid = {
+        userName:    validateName(formData.userName),
+        phoneNumber: validatePhone(formData.phoneNumber),
+        email:       validateEmail(formData.email),
+        category:    validateCategory(formData.category),
+        message:     validateMessage(formData.message),
     };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prevData) => ({ ...prevData, [name]: value }));
-
-        switch (name) {
-            case "userName":
-                setFormValid((prevFormValid) => ({
-                    ...prevFormValid,
-                    userName: validateName(value),
-                }));
-                break;
-            case "phoneNumber":
-                setFormValid((prevFormValid) => ({
-                    ...prevFormValid,
-                    phoneNumber: validatePhoneNumber(value),
-                }));
-                break;
-            case "email":
-                setFormValid((prevFormValid) => ({
-                    ...prevFormValid,
-                    email: validateEmail(value),
-                }));
-                break;
-            case "category":
-                setFormValid((prevFormValid) => ({
-                    ...prevFormValid,
-                    category: validateCategory(value),
-                }));
-                break;
-            case "message":
-                setFormValid((prevFormValid) => ({
-                    ...prevFormValid,
-                    message: validateMessage(value),
-                }));
-                break;
-            default:
-            // Handle default case if needed
-        }
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         setButtonClicked(true);
+        if (!isValid.userName || !isValid.phoneNumber || !isValid.email || !isValid.category || !isValid.message) return;
+
         emailjs.init("2l7l4CqPtakXvObMJ");
-
-        try {
-            if (
-                formValid.category &&
-                formValid.email &&
-                formValid.message &&
-                formValid.userName &&
-                formValid.phoneNumber
-            ) {
-                // const response = await fetch("http://localhost:3001/contacts", {
-                //     method: "POST",
-                //     headers: {
-                //         "Content-Type": "application/json",
-                //     },
-                //     body: JSON.stringify(formData),
-                // });
-                emailjs
-                    .send("service_v9oy0xw", "template_c9bgvus", formData)
-                    .then(
-                        () => {
-                            setResponseMessage(
-                                "உங்களுடைய தகவல் வெற்றிகரமாக அனுப்பப்பட்டுள்ளது"
-                            );
-                            document.getElementsByClassName(
-                                "response-message"
-                            )[0].style.color = "green";
-                            setFormData({
-                                userName: "",
-                                email: "",
-                                message: "",
-                                category: "",
-                                phoneNumber: "",
-                            });
-                            setButtonClicked(false);
-                        },
-                        (error) => {
-                            setResponseMessage(
-                                "உங்களுடைய தகவல் அனுப்பப்படவில்லை"
-                            );
-                            document.getElementsByClassName(
-                                "response-message"
-                            )[0].style.color = "red";
-                        }
-                    );
+        emailjs.send("service_v9oy0xw", "template_c9bgvus", formData).then(
+            () => {
+                setResponseMessage("உங்களுடைய தகவல் வெற்றிகரமாக அனுப்பப்பட்டுள்ளது");
+                setResponseType("success");
+                setFormData({ userName: "", email: "", message: "", category: "", phoneNumber: "" });
+                setButtonClicked(false);
+            },
+            () => {
+                setResponseMessage("உங்களுடைய தகவல் அனுப்பப்படவில்லை");
+                setResponseType("error");
             }
-        } catch (error) {
-            setResponseMessage("உங்களுடைய தகவல் அனுப்பப்படவில்லை");
-            document.getElementsByClassName("response-message")[0].style.color =
-                "red";
-        }
+        );
     };
 
-    const goSocialMedia = (url) => {
-        window.open(url, "_blank");
-    };
+    const goSocial = (url) => window.open(url, "_blank");
+
+    const showErr = (field) => buttonClicked && !isValid[field];
 
     return (
-        <div className="contact-container" id="contact">
-            <Container
-                maxWidth="lg"
-                className="contact-container-div"
-                id="contact"
-            >
-                <Heading>தொடர்புகள்</Heading>
+        <div className="contact-section" id="contact">
+            <div className="contact-inner">
 
-                <Grid container spacing={2}>
-                    <Grid item className="col-left">
-                        <Grid item container spacing={{ md: 2 }}>
-                            <Grid item xs={12} md={6}>
-                                <div className="contact-row">பெயர்</div>
-                                <div className="contact-icon-div">
-                                    <input
-                                        className="contact-input"
-                                        name="userName"
-                                        value={formData.userName}
-                                        onChange={handleInputChange}
-                                    ></input>
-                                    <span className="contact-icon material-symbols-outlined">
-                                        person
-                                    </span>
-                                </div>
-                                <div
-                                    className={
-                                        buttonClicked && !formData.userName
-                                            ? "inValid-input"
-                                            : "valid-input"
-                                    }
-                                >
-                                    பெயரை சரியாக உள்ளிடவும்
-                                </div>
-                            </Grid>
-                            <Grid item xs={12} md={6}>
-                                <div className="contact-row">தொலைபேசி எண்</div>
-                                <div className="contact-icon-div">
-                                    <input
-                                        className="contact-input"
-                                        name="phoneNumber"
-                                        value={formData.phoneNumber}
-                                        onChange={handleInputChange}
-                                    ></input>
-                                    <span className="contact-icon material-symbols-outlined">
-                                        phone
-                                    </span>
-                                </div>
-                                <div
-                                    className={
-                                        buttonClicked && !formData.phoneNumber
-                                            ? "inValid-input"
-                                            : "valid-input"
-                                    }
-                                >
-                                    தொலைபேசி எண்னை சரியாக உள்ளிடவும்
-                                </div>
-                            </Grid>
-                        </Grid>
-                        <Grid item>
-                            <div className="contact-row">மின்னஞ்சல்</div>
-                            <div className="contact-icon-div">
-                                <input
-                                    className="contact-input"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleInputChange}
-                                ></input>
-                                <span className="contact-icon material-symbols-outlined">
-                                    mail
-                                </span>
-                            </div>
-                            <div
-                                className={
-                                    buttonClicked && !formData.email
-                                        ? "inValid-input"
-                                        : "valid-input"
-                                }
-                            >
-                                மின்னஞ்சலை சரியாக உள்ளிடவும்
-                            </div>
-                        </Grid>
-                        <Grid item>
-                            <div className="contact-row">தொடர்பு வகை</div>
-                            <div className="contact-icon-div">
-                                <select
-                                    className="contact-select contact-icon-div ${formData.category ? '' : 'inValid'}"
-                                    name="category"
-                                    value={formData.category}
-                                    onChange={handleInputChange}
-                                >
-                                    <option value="" disabled hidden>
-                                        {/* ஓர் வகைய தேர்ந்தெடு */}
-                                    </option>
-                                    <option value="Sponsor">
-                                        அனுசரனையாளர்
-                                    </option>
-                                    <option value="Wellwisher">
-                                        நலன் விரும்பி
-                                    </option>
-                                    <option value="Student">மாணவர்</option>
-                                </select>
-                            </div>
-                            <div
-                                className={
-                                    buttonClicked && !formData.category
-                                        ? "inValid-input"
-                                        : "valid-input"
-                                }
-                            >
-                                தொடர்புவகையை தெரிவு செய்யவும்
-                            </div>
-                        </Grid>
-                        <Grid item>
-                            <div className="contact-row">தகவல்</div>
-                            <div className="contact-icon-div">
-                                <textarea
-                                    className="contact-input message-input"
-                                    name="message"
-                                    value={formData.message}
-                                    onChange={handleInputChange}
-                                ></textarea>
-                            </div>
-                            <div
-                                className={
-                                    buttonClicked && !formData.message
-                                        ? "inValid-input"
-                                        : "valid-input"
-                                }
-                            >
-                                தகவலை சரியாக உள்ளிடவும்
-                            </div>
-                        </Grid>
-                        <Grid
-                            container
-                            item
-                            justifyContent="flex-end"
-                            paddingBottom={2}
-                            paddingTop={2}
-                        >
-                            <button
-                                className="contact-send-button"
-                                onClick={handleSubmit}
-                            >
-                                அனுப்பு
-                            </button>
-                        </Grid>
-                        <Grid item>
-                            <div className="response-message">
-                                {responseMessage}
-                            </div>
-                        </Grid>
-                    </Grid>
+                <div className="contact-heading-wrap">
+                    <div className="contact-kicker">தொடர்புகள்</div>
+                    <h2 className="contact-main-heading">எங்களை தொடர்பு கொள்ளுங்கள்</h2>
+                    <p className="contact-sub">கேள்விகள், அனுசரணை, அல்லது ஆர்வத்துக்கு நாங்கள் இங்கே இருக்கிறோம்</p>
+                </div>
 
-                    <Grid item>
-                        <div className="col-right">
-                            <Grid item>
-                                <div
-                                    className="nav-text"
-                                    style={{
-                                        display: "flex",
-                                        marginRight: "10px",
-                                    }}
-                                >
-                                    <FaEnvelope />
-                                    <div style={{ marginLeft: "10px" }}>
-                                        மின்னஞ்சல்
+                <div className="cf-layout-grid">
+
+                    {/* Form */}
+                    <div className="contact-form-card">
+                        <form onSubmit={handleSubmit} noValidate>
+
+                            <div className="cf-row">
+                                <div className="cf-field-inline">
+                                    <label className="cf-label">பெயர்</label>
+                                    <div className={`cf-input-wrap${showErr("userName") ? " cf-invalid" : ""}`}>
+                                        <span className="cf-icon"><FaUser /></span>
+                                        <input className="cf-input" name="userName" value={formData.userName} onChange={handleInputChange} placeholder="உங்கள் பெயர்" />
                                     </div>
+                                    <span className={`cf-error${showErr("userName") ? " show" : ""}`}>பெயரை உள்ளிடவும்</span>
                                 </div>
-                                <a
-                                    className="nav-link"
-                                    href="mailto:thamizhiyam@gmail.com"
-                                >
-                                    thamizhiyam@gmail.com
-                                </a>
-                            </Grid>
-                            <Grid item>
-                                <div
-                                    className="nav-text"
-                                    style={{
-                                        display: "flex",
-                                        marginRight: "10px",
-                                    }}
-                                >
-                                    <FaPhoneAlt />
-                                    <div style={{ marginLeft: "10px" }}>
-                                        தொலைபேசி
+
+                                <div className="cf-field-inline">
+                                    <label className="cf-label">தொலைபேசி எண்</label>
+                                    <div className={`cf-input-wrap${showErr("phoneNumber") ? " cf-invalid" : ""}`}>
+                                        <span className="cf-icon"><FaPhoneAlt /></span>
+                                        <input className="cf-input" name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} placeholder="07X XXX XXXX" />
                                     </div>
+                                    <span className={`cf-error${showErr("phoneNumber") ? " show" : ""}`}>தொலைபேசி எண்னை உள்ளிடவும்</span>
                                 </div>
-                                <a className="nav-link" href="">
-                                    அபினேஷ் - 076 843 2752
-                                </a>
-                            </Grid>
-                            <Grid item>
-                                <div
-                                    className="nav-text"
-                                    style={{
-                                        display: "flex",
-                                        marginRight: "10px",
-                                    }}
-                                    onClick={() =>
-                                        goSocialMedia(
-                                            "https://web.facebook.com/TLAuom"
-                                        )
-                                    }
-                                >
-                                    <FaFacebook />{" "}
-                                    <div style={{ marginLeft: "10px" }}>
-                                        முகப்புத்தகம்
-                                    </div>
+                            </div>
+
+                            <div className="cf-field">
+                                <label className="cf-label">மின்னஞ்சல்</label>
+                                <div className={`cf-input-wrap${showErr("email") ? " cf-invalid" : ""}`}>
+                                    <span className="cf-icon"><FaEnvelope /></span>
+                                    <input className="cf-input" name="email" value={formData.email} onChange={handleInputChange} placeholder="example@email.com" />
                                 </div>
-                            </Grid>
-                            <Grid item>
-                                <div
-                                    className="nav-text"
-                                    style={{
-                                        display: "flex",
-                                        marginRight: "10px",
-                                    }}
-                                    onClick={() =>
-                                        goSocialMedia(
-                                            "https://www.youtube.com/@TLAUOM"
-                                        )
-                                    }
-                                >
-                                    <FaYoutube />{" "}
-                                    <div style={{ marginLeft: "10px" }}>
-                                        வலைஒளி
-                                    </div>
+                                <span className={`cf-error${showErr("email") ? " show" : ""}`}>சரியான மின்னஞ்சலை உள்ளிடவும்</span>
+                            </div>
+
+                            <div className="cf-field">
+                                <label className="cf-label">தொடர்பு வகை</label>
+                                <div className={`cf-input-wrap${showErr("category") ? " cf-invalid" : ""}`}>
+                                    <span className="cf-icon"><FaTag /></span>
+                                    <select className="cf-select" name="category" value={formData.category} onChange={handleInputChange}>
+                                        <option value="" disabled hidden>தேர்ந்தெடுக்கவும்</option>
+                                        <option value="Sponsor">அனுசரனையாளர்</option>
+                                        <option value="Wellwisher">நலன் விரும்பி</option>
+                                        <option value="Student">மாணவர்</option>
+                                    </select>
                                 </div>
-                            </Grid>
+                                <span className={`cf-error${showErr("category") ? " show" : ""}`}>தொடர்பு வகையை தெரிவு செய்யவும்</span>
+                            </div>
+
+                            <div className="cf-field">
+                                <label className="cf-label">தகவல்</label>
+                                <div className={`cf-input-wrap${showErr("message") ? " cf-invalid" : ""}`}>
+                                    <span className="cf-icon" style={{ alignSelf: "flex-start", paddingTop: "13px" }}><FaCommentDots /></span>
+                                    <textarea className="cf-textarea" name="message" value={formData.message} onChange={handleInputChange} placeholder="உங்கள் தகவலை இங்கே எழுதுங்கள்..." />
+                                </div>
+                                <span className={`cf-error${showErr("message") ? " show" : ""}`}>தகவலை உள்ளிடவும்</span>
+                            </div>
+
+                            <div className="cf-submit-row">
+                                <span className={`cf-response${responseType ? ` ${responseType}` : ""}`}>{responseMessage}</span>
+                                <button className="cf-btn" type="submit">
+                                    <FaPaperPlane /> அனுப்பு
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+
+                    {/* Info panel */}
+                    <div className="contact-info-panel">
+
+                        <div className="contact-info-card">
+                            <p className="contact-info-card-title">தொடர்பு விவரங்கள்</p>
+
+                            <a className="contact-info-item" href="mailto:thamizhiyam@gmail.com">
+                                <div className="contact-info-icon"><FaEnvelope /></div>
+                                <div className="contact-info-text">
+                                    <span className="contact-info-label">மின்னஞ்சல்</span>
+                                    <span className="contact-info-value">thamizhiyam@gmail.com</span>
+                                </div>
+                            </a>
+
+                            <div className="contact-info-item">
+                                <div className="contact-info-icon"><FaPhoneAlt /></div>
+                                <div className="contact-info-text">
+                                    <span className="contact-info-label">தொலைபேசி</span>
+                                    <span className="contact-info-value">அபினேஷ் - 076 843 2752</span>
+                                </div>
+                            </div>
                         </div>
-                    </Grid>
-                </Grid>
-            </Container>
+
+                        <div className="contact-social-card">
+                            <p className="contact-social-title">சமூக ஊடகங்கள்</p>
+                            <div className="contact-social-row">
+                                <button className="contact-social-btn" onClick={() => goSocial("https://web.facebook.com/TLAuom")}>
+                                    <FaFacebook />
+                                    முகப்புத்தகம்
+                                </button>
+                                <button className="contact-social-btn" onClick={() => goSocial("https://www.youtube.com/@TLAUOM")}>
+                                    <FaYoutube />
+                                    வலைஒளி
+                                </button>
+                                <button className="contact-social-btn" onClick={() => goSocial("https://www.instagram.com/tla_uom/")}>
+                                    <FaInstagram />
+                                    இன்ஸ்டாகிராம்
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
+
 export default Contact;
