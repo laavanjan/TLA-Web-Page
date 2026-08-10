@@ -31,4 +31,6 @@ export const ACCEPTED_DOC_TYPES = [
   "application/msword",
 ];
 
+export const ACCEPTED_PDF_TYPES = ["application/pdf"];
+
 export const ACCEPTED_PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];

@@ -37,6 +37,7 @@ var HEADERS = [
   'ஏற்கனவே வெளிவந்ததா',
   'எங்கு',
   'Word கோப்பு',
+  'PDF கோப்பு',
   'புகைப்படம்',
   'Folder'
 ];
@@ -64,9 +65,10 @@ function doPost(e) {
     var folder = parent.createFolder(folderName);
 
     var docUrl = saveFile(folder, data.document, buildDocName(data));
+    var pdfUrl = data.pdf ? saveFile(folder, data.pdf, buildDocName(data)) : '';
     var photoUrl = data.photo ? saveFile(folder, data.photo, buildPhotoName(data)) : '';
 
-    logToSheet(data, docUrl, photoUrl, folder.getUrl());
+    logToSheet(data, docUrl, pdfUrl, photoUrl, folder.getUrl());
 
     return jsonOut({
       status: 'success',
@@ -99,6 +101,10 @@ function validate(data) {
 
   if (!data.document || !data.document.data) {
     missing.push('document');
+  }
+
+  if (!data.pdf || !data.pdf.data) {
+    missing.push('pdf');
   }
 
   return missing;
@@ -140,7 +146,7 @@ function sanitize(value) {
     .slice(0, 60);
 }
 
-function logToSheet(data, docUrl, photoUrl, folderUrl) {
+function logToSheet(data, docUrl, pdfUrl, photoUrl, folderUrl) {
   if (!SHEET_ID || SHEET_ID.indexOf('PASTE_') === 0) return;
 
   var book = SpreadsheetApp.openById(SHEET_ID);
@@ -172,6 +178,7 @@ function logToSheet(data, docUrl, photoUrl, folderUrl) {
     data.alreadyPublished === 'yes' ? 'ஆம்' : 'இல்லை',
     data.publishedWhere || '',
     docUrl,
+    pdfUrl,
     photoUrl,
     folderUrl
   ]);

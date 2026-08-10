@@ -247,7 +247,7 @@
 /* Uploads */
 .submit-form-page .sf-upload-grid{
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 24px;
 }
 
@@ -508,7 +508,9 @@
 
 /* Responsive */
 @media only screen and (max-width: 800px) {
-    .submit-form-page .sf-grid,
+    .submit-form-page .sf-grid{
+        grid-template-columns: 1fr;
+    }
     .submit-form-page .sf-upload-grid{
         grid-template-columns: 1fr;
     }
