@@ -5,6 +5,7 @@ import {
   FaBookOpen,
   FaFileUpload,
   FaFileWord,
+  FaFilePdf,
   FaImage,
   FaCheckCircle,
   FaExclamationTriangle,
@@ -18,6 +19,7 @@ import {
   MAX_DOC_SIZE,
   MAX_PHOTO_SIZE,
   ACCEPTED_DOC_TYPES,
+  ACCEPTED_PDF_TYPES,
   ACCEPTED_PHOTO_TYPES,
 } from "./formOptions";
 
@@ -62,6 +64,7 @@ const SubmitForm = () => {
   const navigate = useNavigate();
   const [values, setValues] = useState(INITIAL_VALUES);
   const [docFile, setDocFile] = useState(null);
+  const [pdfFile, setPdfFile] = useState(null);
   const [photoFile, setPhotoFile] = useState(null);
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState("idle"); // idle | sending | success | error
@@ -97,6 +100,25 @@ const SubmitForm = () => {
     setErrors((prev) => {
       const next = { ...prev };
       delete next.docFile;
+      return next;
+    });
+  };
+
+  const handlePdfChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!ACCEPTED_PDF_TYPES.includes(file.type) && !file.name.match(/\.pdf$/i)) {
+      setErrors((prev) => ({ ...prev, pdfFile: "PDF கோப்பு மட்டுமே ஏற்றுக்கொள்ளப்படும்." }));
+      return;
+    }
+    if (file.size > MAX_DOC_SIZE) {
+      setErrors((prev) => ({ ...prev, pdfFile: `கோப்பின் அளவு ${formatSize(MAX_DOC_SIZE)}-ஐ விடக் குறைவாக இருக்க வேண்டும்.` }));
+      return;
+    }
+    setPdfFile(file);
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next.pdfFile;
       return next;
     });
   };
@@ -159,6 +181,7 @@ const SubmitForm = () => {
     }
 
     if (!docFile) next.docFile = "படைப்பின் Word கோப்பை இணைக்கவும்.";
+    if (!pdfFile) next.pdfFile = "படைப்பின் PDF கோப்பை இணைக்கவும்.";
     if (!values.agreed) next.agreed = "விதிமுறைகளை ஏற்றுக்கொள்ள வேண்டும்.";
 
     return next;
@@ -198,6 +221,11 @@ const SubmitForm = () => {
           mimeType: docFile.type || "application/octet-stream",
           data: await readFileAsBase64(docFile),
         },
+        pdf: {
+          name: pdfFile.name,
+          mimeType: "application/pdf",
+          data: await readFileAsBase64(pdfFile),
+        },
         photo: photoFile
           ? {
               name: photoFile.name,
@@ -234,6 +262,7 @@ const SubmitForm = () => {
   const resetForm = () => {
     setValues(INITIAL_VALUES);
     setDocFile(null);
+    setPdfFile(null);
     setPhotoFile(null);
     setErrors({});
     setStatus("idle");
@@ -488,6 +517,18 @@ const SubmitForm = () => {
               hint="Category_Name_Batch.docx - அதிகபட்சம் 10 MB"
               onChange={handleDocChange}
               onClear={() => setDocFile(null)}
+            />
+            <FileDrop
+              id="pdfFile"
+              label="படைப்பின் PDF கோப்பு"
+              required
+              icon={<FaFilePdf />}
+              accept=".pdf"
+              file={pdfFile}
+              error={errors.pdfFile}
+              hint="Category_Name_Batch.pdf - அதிகபட்சம் 10 MB"
+              onChange={handlePdfChange}
+              onClear={() => setPdfFile(null)}
             />
             <FileDrop
               id="photoFile"
