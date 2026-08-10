@@ -243,15 +243,15 @@ const SubmitGuidelines = () => {
             ref={(el) => (sectionRefs.current["file-format"] = el)}
             className="guidelines-section"
           >
-            <SectionHeading num="08" title="படைப்பை சமர்ப்பிக்கும் File Format" />
+            <SectionHeading num="08" title="File Format – Word & PDF" />
             <div className="file-format-box">
               <FaFileWord className="file-icon" />
               <div>
                 <p className="section-lead" style={{ margin: 0 }}>
-                  ஒவ்வொரு படைப்பும் Microsoft Word (.docx) வடிவில் சமர்ப்பிக்கப்பட வேண்டும்.
+                  ஒவ்வொரு படைப்பும் Microsoft Word (.doc / .docx) மற்றும் PDF (.pdf) ஆகிய இரண்டு வடிவங்களிலும் சமர்ப்பிக்கப்பட வேண்டும்.
                 </p>
                 <code className="file-name-pattern">Category_Name_Batch</code>
-                <p className="file-example">உதாரணம்: <code>Poem_Thikarnan_TMLE24.docx</code></p>
+                <p className="file-example">உதாரணம்: <code>Poem_Thikarnan_TMLE24.docx</code> மற்றும் <code>Poem_Thikarnan_TMLE24.pdf</code></p>
               </div>
             </div>
 
