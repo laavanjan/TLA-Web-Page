@@ -245,17 +245,15 @@ const SubmitGuidelines = () => {
           >
             <SectionHeading num="08" title="File Format - Word & PDF" />
             <div className="file-format-box">
-              <div className="file-icon-group">
-                <FaFileWord className="file-icon" />
-                <FaFilePdf className="file-icon file-icon-pdf" />
-              </div>
-              <div>
-                <p className="section-lead" style={{ margin: 0 }}>
-                  ஒவ்வொரு படைப்பும் Microsoft Word (.doc / .docx) மற்றும் PDF (.pdf) ஆகிய இரண்டு வடிவங்களிலும் சமர்ப்பிக்கப்பட வேண்டும்.
-                </p>
-                <code className="file-name-pattern">Category_Name_Batch</code>
-                <p className="file-example">உதாரணம்: <code>Poem_Thikarnan_TMLE24.docx</code> மற்றும் <code>Poem_Thikarnan_TMLE24.pdf</code></p>
-              </div>
+              <p className="section-lead" style={{ margin: 0 }}>
+                ஒவ்வொரு படைப்பும்{" "}
+                <span className="file-format-inline"><FaFileWord className="file-inline-icon file-inline-word" /> Microsoft Word (.doc / .docx)</span>
+                {" "}மற்றும்{" "}
+                <span className="file-format-inline"><FaFilePdf className="file-inline-icon file-inline-pdf" /> PDF (.pdf)</span>
+                {" "}ஆகிய இரண்டு வடிவங்களிலும் சமர்ப்பிக்கப்பட வேண்டும்.
+              </p>
+              <code className="file-name-pattern">Category_Name_Batch</code>
+              <p className="file-example">உதாரணம்: <code>Poem_Thikarnan_TMLE24.docx</code> மற்றும் <code>Poem_Thikarnan_TMLE24.pdf</code></p>
             </div>
 
             <p className="section-lead">ஆக்கங்கள் சார்ந்த மேலதிக விளக்கங்களைப் பெற தொடர்பு கொள்ளவும்:</p>

@@ -405,31 +405,27 @@
 
 /* File format */
 .file-format-box{
-    display: flex;
-    align-items: center;
-    gap: 20px;
     background: var(--bg-soft);
     border-radius: 8px;
     padding: 24px;
     margin-bottom: 24px;
 }
 
-.file-icon-group{
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+.file-format-inline{
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.file-inline-icon{
+    font-size: 0.9em;
     flex-shrink: 0;
 }
 
-.file-icon{
-    font-size: 40px;
-    color: var(--navy-soft);
-    flex-shrink: 0;
-}
-
-.file-icon-pdf{
-    color: #c0392b;
-}
+.file-inline-word{ color: var(--navy-soft); }
+.file-inline-pdf{ color: #c0392b; }
 
 .file-name-pattern{
     display: inline-block;
