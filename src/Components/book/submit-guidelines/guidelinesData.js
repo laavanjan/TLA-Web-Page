@@ -86,6 +86,8 @@ export const REQUIRED_INFO = [
   "படைப்பின் தலைப்பு",
   "சொற்களின் எண்ணிக்கை",
   "படைப்பின் சுருக்கமான அறிமுகம் (2 அல்லது 3 வரிகள்)",
+  "படைப்பின் Word கோப்பு (.doc / .docx)",
+  "படைப்பின் PDF கோப்பு (.pdf)",
 ];
 
 export const SELECTION_CRITERIA = [
@@ -110,7 +112,7 @@ export const EXTRA_WORKS = [
 ];
 
 export const CONTACTS = [
-  { name: "பபினையா", phone: "0741122471" },
+  { name: "பபினயா", phone: "0741122471" },
   { name: "கீதசஞ்சாரன்", phone: "0757822809" },
   { name: "அபீத்", phone: "0772202766" },
 ];

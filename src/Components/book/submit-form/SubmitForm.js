@@ -514,7 +514,7 @@ const SubmitForm = () => {
               accept=".doc,.docx"
               file={docFile}
               error={errors.docFile}
-              hint="Category_Name_Batch.docx - அதிகபட்சம் 10 MB"
+              hint="Category_Name_Batch.doc / .docx - அதிகபட்சம் 10 MB"
               onChange={handleDocChange}
               onClear={() => setDocFile(null)}
             />
