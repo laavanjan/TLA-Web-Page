@@ -13,10 +13,10 @@
 
 // Drive folder that will hold the submissions.
 // Grab it from the folder URL: drive.google.com/drive/folders/<FOLDER_ID>
-var FOLDER_ID = '1lEOlZQvKUFw1XOH314V__GAqgL7kGzFn';
+var FOLDER_ID = '1dGJPPRbR6LHZiHAWbeeOqvLXCtVfhNt_';
 
 // Google Sheet that logs the submissions.
-var SHEET_ID = '1HVfXj5p4CiQnPtQKvAjyAdGiLPHf3Bh7bMMVIlu68lM';
+var SHEET_ID = '1xesqw-44glVBivYrA58OitfjCAIBnqpfY_eLHgdY7Rc';
 
 // Sheet tab name. Created automatically if missing.
 var SHEET_NAME = 'Submissions';
