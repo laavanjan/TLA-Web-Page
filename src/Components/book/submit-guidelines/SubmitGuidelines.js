@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaCheckCircle, FaPhoneAlt, FaFileWord, FaExternalLinkAlt } from "react-icons/fa";
+import { FaCheckCircle, FaPhoneAlt, FaFileWord, FaFilePdf, FaExternalLinkAlt } from "react-icons/fa";
 import "./submitGuidelines.css";
 import {
   SECTIONS,
@@ -243,9 +243,12 @@ const SubmitGuidelines = () => {
             ref={(el) => (sectionRefs.current["file-format"] = el)}
             className="guidelines-section"
           >
-            <SectionHeading num="08" title="File Format – Word & PDF" />
+            <SectionHeading num="08" title="File Format - Word & PDF" />
             <div className="file-format-box">
-              <FaFileWord className="file-icon" />
+              <div className="file-icon-group">
+                <FaFileWord className="file-icon" />
+                <FaFilePdf className="file-icon file-icon-pdf" />
+              </div>
               <div>
                 <p className="section-lead" style={{ margin: 0 }}>
                   ஒவ்வொரு படைப்பும் Microsoft Word (.doc / .docx) மற்றும் PDF (.pdf) ஆகிய இரண்டு வடிவங்களிலும் சமர்ப்பிக்கப்பட வேண்டும்.

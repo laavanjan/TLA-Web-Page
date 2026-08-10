@@ -414,10 +414,21 @@
     margin-bottom: 24px;
 }
 
+.file-icon-group{
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
 .file-icon{
     font-size: 40px;
     color: var(--navy-soft);
     flex-shrink: 0;
+}
+
+.file-icon-pdf{
+    color: #c0392b;
 }
 
 .file-name-pattern{
