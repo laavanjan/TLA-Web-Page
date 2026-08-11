@@ -25,9 +25,9 @@ There are three different websites/tools involved in making `tlauom.com` work, a
 
 | Service | What it actually does | Think of it as... |
 |---|---|---|
-| **Vercel** | Actually runs the website — this is where the code lives and gets served to visitors | The "building" the shop operates out of |
-| **Namecheap** | Where the domain name `tlauom.com` was purchased/registered | The company that legally owns the "street address" on paper |
-| **Cloudflare** | Controls where the domain name actually points on the internet | The "signpost" that tells visitors' browsers which building to walk into |
+| **[Vercel](https://vercel.com/dashboard)** | Actually runs the website — this is where the code lives and gets served to visitors | The "building" the shop operates out of |
+| **[Namecheap](https://ap.www.namecheap.com/domains/list)** | Where the domain name `tlauom.com` was purchased/registered | The company that legally owns the "street address" on paper |
+| **[Cloudflare](https://dash.cloudflare.com/)** | Controls where the domain name actually points on the internet | The "signpost" that tells visitors' browsers which building to walk into |
 
 Even though `tlauom.com` was bought through Namecheap, Namecheap is **not** in charge of directing traffic — that job was handed over to Cloudflare when Namecheap's "nameservers" were set to Cloudflare's nameservers. So any changes to where the domain points must be made **in Cloudflare**, not in Namecheap.
 
@@ -47,7 +47,7 @@ The article submission form (`/books/submit/form`) needs to know *where* to send
 
 - **Locally** (on a developer's own computer), this is stored in a file called `.env` in the project's main folder.
 - **On the live website**, it's stored inside Vercel itself, under:
-  **Vercel dashboard → select the project → Settings → Environment Variables → `REACT_APP_SUBMIT_URL`**
+  **[Vercel dashboard](https://vercel.com/dashboard) → select the project → Settings → Environment Variables → `REACT_APP_SUBMIT_URL`**
 
 ⚠️ **Important:** if this value is ever changed (for example, because the Google Apps Script was redeployed under a different Google account — see the "Article Submission Feature" section below), you must:
 1. Update the value in the Vercel Environment Variables screen, **and**
@@ -58,7 +58,7 @@ The article submission form (`/books/submit/form`) needs to know *where* to send
 This only needs to be done once, but it's documented here in case the domain, hosting, or DNS provider ever needs to be changed again.
 
 **Step 1 — Tell Vercel about the domain**
-1. Go to the Vercel dashboard → select the project → **Settings → Domains**
+1. Go to the [Vercel dashboard](https://vercel.com/dashboard) → select the project → **Settings → Domains**
 2. Type in `tlauom.com` and click **Add Domain**
 3. Vercel will show you the DNS records it needs — normally an `A` record value like `76.76.21.21` for the root domain, and a `CNAME` value like `cname.vercel-dns.com` for `www`. (Always use whatever values Vercel is currently showing on that screen, since they can change.)
 
