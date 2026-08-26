@@ -49,6 +49,7 @@
 
 .team-hero-back:hover {
     background: rgba(255, 255, 255, 0.22);
+    color: white;
 }
 
 .team-hero-title {
@@ -311,7 +312,8 @@
     margin-bottom: 24px;
 }
 
-.team-back-btn {
+.team-back-btn,
+.team-back-btn:hover {
     display: inline-flex;
     align-items: center;
     gap: 10px;
@@ -348,6 +350,7 @@
 }
 
 .team-cta-btn:hover {
+    color: white;
     transform: scale(1.03);
 }
 
