@@ -13,11 +13,31 @@ p {
 }
 
 .teams-card {
+    display: block;
     background-color: #e3e7eb;
     border-radius: 5px;
     padding: 3%;
     margin-bottom: 4%;
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.teams-card:hover {
+    transform: translateY(-4px);
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 8px 20px;
+}
+
+.teams-card-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    font-family: "Para" !important;
+    font-size: 18px;
+    font-weight: bold;
+    color: #c8932f;
 }
 
 .intro {
