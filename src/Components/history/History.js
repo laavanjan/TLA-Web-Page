@@ -1,5 +1,6 @@
 import React from "react";
 import "./history.css";
+import Reveal from "../../shared/Reveal/Reveal";
 import img1 from "../../images/HistoryPage/1.jpeg";
 import img2 from "../../images/HistoryPage/2.jpeg";
 import img3 from "../../images/HistoryPage/3.jpeg";
@@ -12,7 +13,7 @@ const History = () => {
         <div className="history">
             <div class="container">
                 <h1>எமது வரலாறு</h1>
-                <p className="history-para">
+                <Reveal as="p" className="history-para">
                     மூவாயிரத்திற்கும் அதிகமான ஆண்டு வரலாற்றை உடைய எம் கண்ணியாம்
                     தமிழை பல நல்ல அறிஞர்கள் வளர்த்து செழுமைபடுத்தியமை வரலாற்றில்
                     பதிவாகியுள்ளது. தொன்மையான வரலாற்றுப் பாரம்பரியத்தை உடைய
@@ -26,9 +27,9 @@ const History = () => {
                     கலாச்சார, பண்பாட்டை, விளக்கும் கவிதை, கட்டுரை. நாடகம்.
                     விவாதம் என்று அத்தனை கலையம்சமும் சேர்ந்த “நுட்பம்” எனும்
                     சஞ்சிகை வெற்றிகரமாக வெளியிடப்பட்டது.
-                </p>
-                <img src={img1} alt="sample" class="img" />
-                <p>
+                </Reveal>
+                <Reveal as="img" src={img1} alt="sample" className="img" />
+                <Reveal as="p">
                     1970 ம் ஆண்டு தமிழின் தொன்மையும் இலக்கிய இலக்கண அழகையும்
                     உலகிற்கு கூறும் முகமாக முதல் கலாச்சார விழா "கலை விழா" என்ற
                     பெயரில் கொழும்பு இராமகிருஷ்ண மிசன் மண்டபத்தில்
@@ -42,9 +43,9 @@ const History = () => {
                     இனப்பிரிவினை தலை தூக்கத் தொடங்கிய காலமது.1976, 1977, 1978,
                     1979 வரை கலை நிகழ்ச்சி, விவாதம், கருத்தரங்கு. நாடகம் போன்ற
                     நிகழ்வுகள் மேடையேற்றப்பட்டது.
-                </p>
+                </Reveal>
 
-                <div class="sub-container">
+                <Reveal as="div" className="sub-container">
                     <div class="container_img">
                         <img src={img2} alt="sample" />
                     </div>
@@ -60,9 +61,9 @@ const History = () => {
                         மன்றத்தின் செயற்பாடுகள் சில ஆண்டுகளுக்கு
                         நிறுத்தப்பட்டது.
                     </div>
-                </div>
+                </Reveal>
 
-                <div class="sub-container">
+                <Reveal as="div" className="sub-container">
                     <div class="container_text">
                         1990 களின் ஆரம்ப பகுதிகளில் மீண்டும் தமிழ் மாணவர்களின்
                         அக்கறை, தமிழ் மீது கொண்ட பற்று போன்றவற்றால் மீண்டும்
@@ -78,18 +79,18 @@ const History = () => {
                     <div class="container_img">
                         <img src={img3} alt="sample" />
                     </div>
-                </div>
-                <p>
+                </Reveal>
+                <Reveal as="p">
                     இதுவரை இனப்பிரச்சனை. கலவரம். பொருளாதாரச் சிக்கல்.
                     அடக்குமுறை. ஈழப்போர் என அத்தனை வளைவுகளிலும் பயணித்து ஐந்து
                     தசாப்தங்களை கடந்தும் அரை அங்குலம் கூட அசைக்க படாமல் வான் உயர
                     தூணாய் நிமிர்ந்து நிற்கிறது தமிழ் இலக்கிய மன்றம்.
-                </p>
-                <div class="sub-container">
+                </Reveal>
+                <Reveal as="div" className="sub-container">
                     <img src={img41} class="book-image" alt="sample" />
                     <img src={img42} class="book-image" alt="sample" />
-                </div>
-                <p>
+                </Reveal>
+                <Reveal as="p">
                     தமிழ் இலக்கிய மன்றமானது தமிழ் பல்கலைக்கழக மாணவர்கள்
                     இடத்திலும் அதை தாண்டி பாடசாலை மாணவர்களிடத்தில் தமிழ் மொழி
                     அறிவையும் மாணவர்கள் தமிழ் மீது உள்ள திறமைகளை வெளிக்கொண்டு
@@ -103,9 +104,9 @@ const History = () => {
                     உதவிக்கரம் என பலவற்றை நோக்காக கொண்டு சொற்கணை, ஒளிச்சுவடு,
                     உதவித்தொகை, ஜீவநதி, பொங்கல் விழா, தமிழருவி போன்ற
                     செயற்பாடுகளை முன்னெடுத்து வருகின்றது.
-                </p>
-                <img src={img5} alt="sample" class="img" />
-                
+                </Reveal>
+                <Reveal as="img" src={img5} alt="sample" className="img" />
+
             </div>
         </div>
     );
