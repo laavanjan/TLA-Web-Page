@@ -26,6 +26,7 @@ import HistoryPage from "./Pages/History";
 import Ideathon from "./Pages/Ideathon";
 import MemorySharing from "./Pages/Memory-Sharing";
 import TeamsPage from "./Pages/Teams-Page";
+import TeamDetailPage from "./Pages/TeamDetailPage";
 
 import Login from "./Components/Login";
 import Signup from "./Components/Signup";
@@ -135,6 +136,10 @@ function Router() {
     {
       path: "teams",
       element: <TeamsPage />,
+    },
+    {
+      path: "teams/:teamId",
+      element: <TeamDetailPage />,
     },
     {
       path: "login",
