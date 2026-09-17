@@ -1,0 +1,194 @@
+.frame-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: radial-gradient(120% 80% at 50% 0%, #1b2437 0%, #0d1017 55%, #070810 100%);
+  color: #f4f6fb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 18px 16px calc(24px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.frame-topbar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.frame-brand {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  background: linear-gradient(90deg, #ffd76e, #e6b422);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.frame-subtitle {
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #8a94ab;
+}
+
+.frame-stage-wrap {
+  width: 100%;
+  max-width: 460px;
+  display: flex;
+  justify-content: center;
+}
+
+.frame-stage-shadow {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #11151f;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.frame-dropzone {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 2px dashed rgba(230, 180, 34, 0.4);
+  border-radius: 16px;
+  background: transparent;
+  color: #cbd2e0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.frame-dropzone:hover {
+  border-color: rgba(230, 180, 34, 0.85);
+  background: rgba(230, 180, 34, 0.06);
+}
+
+.frame-dropzone-icon {
+  font-size: 40px;
+  line-height: 1;
+  color: #e6b422;
+}
+
+.frame-dropzone-title {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.frame-dropzone-hint {
+  font-size: 12.5px;
+  color: #8a94ab;
+  max-width: 220px;
+  text-align: center;
+}
+
+.frame-tip {
+  margin: 12px 0 0;
+  font-size: 12.5px;
+  color: #8a94ab;
+  text-align: center;
+}
+
+.frame-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.frame-seg {
+  display: inline-flex;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  gap: 2px;
+}
+
+.frame-seg-btn {
+  border: none;
+  background: transparent;
+  color: #aeb6c8;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.frame-seg-btn.is-active {
+  background: linear-gradient(180deg, #ffd76e, #e6b422);
+  color: #1a1400;
+  box-shadow: 0 2px 8px rgba(230, 180, 34, 0.35);
+}
+
+.frame-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 16px;
+  width: 100%;
+  max-width: 460px;
+}
+
+.frame-btn {
+  flex: 1 1 auto;
+  min-width: 120px;
+  border: none;
+  border-radius: 12px;
+  padding: 13px 18px;
+  font-size: 14.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.12s ease, opacity 0.15s ease, background 0.15s ease;
+}
+
+.frame-btn:active {
+  transform: translateY(1px);
+}
+
+.frame-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.frame-btn-ghost {
+  background: rgba(255, 255, 255, 0.08);
+  color: #eef1f7;
+}
+
+.frame-btn-ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.frame-btn-primary {
+  background: linear-gradient(180deg, #ffd76e, #e6b422);
+  color: #1a1400;
+  box-shadow: 0 6px 18px rgba(230, 180, 34, 0.35);
+}
+
+.frame-btn-text {
+  background: none;
+  color: #8a94ab;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 12px;
+  margin-top: 4px;
+}
+
+.frame-btn-text:hover:not(:disabled) {
+  color: #cbd2e0;
+}
