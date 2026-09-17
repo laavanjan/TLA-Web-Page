@@ -1,0 +1,53 @@
+.admin-card {
+  width: 100%;
+  max-width: 360px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 24px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+}
+
+.admin-qr {
+  background: #ffffff;
+  padding: 14px;
+  border-radius: 14px;
+  line-height: 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.admin-caption {
+  margin: 16px 0 20px;
+  font-size: 13px;
+  color: #8a94ab;
+  text-align: center;
+}
+
+.admin-label {
+  align-self: flex-start;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #8a94ab;
+  margin-bottom: 6px;
+}
+
+.admin-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 11px 12px;
+  color: #f4f6fb;
+  font-size: 13.5px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.admin-input:focus {
+  outline: none;
+  border-color: rgba(230, 180, 34, 0.7);
+}
