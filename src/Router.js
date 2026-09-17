@@ -33,6 +33,8 @@ import Signup from "./Components/Signup";
 import MakkalMantramVote from "./Pages/MakkalMantramVote";
 import Seniors from "./Pages/Seniors";
 import MakkalMantramVoteResults from "./Pages/MakkalMantramVoteResults";
+import Frame from "./Pages/Frame";
+import FrameAdmin from "./Pages/FrameAdmin";
 
 function Router() {
   return useRoutes([
@@ -164,6 +166,14 @@ function Router() {
     {
       path: "vote/mm-2024-results-screen",
       element: <MakkalMantramVoteResults />,
+    },
+    {
+      path: "frame",
+      element: <Frame />,
+    },
+    {
+      path: "frame/admin",
+      element: <FrameAdmin />,
     },
   ]);
 }
