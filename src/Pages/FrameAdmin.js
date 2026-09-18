@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useRef, useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import { Helmet } from "react-helmet";
 
+import LotusDivider from "./LotusDivider";
 import "./Frame.css";
 import "./FrameAdmin.css";
 
@@ -36,7 +37,8 @@ export default function FrameAdmin() {
       </Helmet>
 
       <header className="frame-topbar">
-        <span className="frame-brand">தமிழ் மன்றம்</span>
+        <span className="frame-brand">தமிழ் இலக்கிய மன்றம்</span>
+        <LotusDivider />
         <span className="frame-subtitle">Photo frame · QR</span>
       </header>
 
