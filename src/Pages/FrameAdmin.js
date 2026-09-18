@@ -69,7 +69,7 @@ export default function FrameAdmin() {
           <h2 className="admin-title">Share this frame</h2>
           <p className="admin-desc">
             Print or display this QR at your event. Anyone who scans it lands
-            straight on the photo-frame editor — no app, no sign-in.
+            straight on the photo-frame editor no app, no sign-in.
           </p>
 
           <span className="admin-label">Page URL</span>
