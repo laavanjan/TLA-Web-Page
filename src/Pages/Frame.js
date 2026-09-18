@@ -469,7 +469,7 @@ export default function Frame() {
 
       {photo && (
         <div className="frame-zoom">
-          <span className="frame-zoom-label">Zoom</span>
+          <span className="frame-zoom-label">Photo Zoom</span>
           <input
             type="range"
             className="frame-range"
@@ -501,7 +501,7 @@ export default function Frame() {
 
       {photo && selected && (
         <div className="frame-zoom">
-          <span className="frame-zoom-label">Size</span>
+          <span className="frame-zoom-label">Sticker Size</span>
           <input
             type="range"
             className="frame-range"
@@ -509,7 +509,7 @@ export default function Frame() {
             max={DESIGN_MAX_W}
             step="0.01"
             value={norm.w}
-            aria-label="Design size"
+            aria-label="Sticker size"
             style={{
               backgroundSize: `${
                 ((norm.w - DESIGN_MIN_W) / (DESIGN_MAX_W - DESIGN_MIN_W)) * 100

@@ -153,6 +153,7 @@
   text-transform: uppercase;
   color: #a6b0c4;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .frame-range {
