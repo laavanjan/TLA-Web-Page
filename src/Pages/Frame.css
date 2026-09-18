@@ -48,6 +48,23 @@
   color: #a6b0c4;
 }
 
+/* Layout wrappers: a single stacked column on phones (default), a two-column
+   canvas + control-panel layout from tablet width up (see @media below). */
+.frame-layout {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.frame-main,
+.frame-panel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .frame-stage-wrap {
   width: 100%;
   max-width: 460px;
@@ -343,4 +360,96 @@
 
 .frame-btn-text:hover:not(:disabled) {
   color: #cbd2e0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Tablet & laptop: two-column layout (canvas left, controls right).  */
+/* Phones (< 768px) keep the stacked single-column layout above.      */
+/* ------------------------------------------------------------------ */
+@media (min-width: 768px) {
+  .frame-page {
+    padding: 28px 24px calc(32px + env(safe-area-inset-bottom));
+  }
+
+  .frame-layout {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 28px;
+    max-width: 980px;
+  }
+
+  .frame-main {
+    width: auto;
+    flex: 0 0 auto;
+  }
+
+  .frame-stage-wrap {
+    width: clamp(320px, 44vw, 540px);
+    max-width: none;
+  }
+
+  .frame-tip {
+    max-width: none;
+    width: clamp(320px, 44vw, 540px);
+  }
+
+  /* Right-hand control panel */
+  .frame-panel {
+    flex: 0 0 300px;
+    align-items: stretch;
+    gap: 6px;
+    padding: 22px 20px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  }
+
+  /* Controls fill the panel instead of centering as narrow blocks */
+  .frame-panel .frame-zoom,
+  .frame-panel .frame-controls,
+  .frame-panel .frame-designs,
+  .frame-panel .frame-actions {
+    width: 100%;
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .frame-panel .frame-controls {
+    margin-top: 14px;
+    justify-content: stretch;
+  }
+
+  .frame-panel .frame-controls .frame-seg {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .frame-panel .frame-controls .frame-seg-btn {
+    flex: 1;
+    text-align: center;
+  }
+
+  .frame-panel .frame-designs {
+    flex-wrap: wrap;
+    overflow: visible;
+    justify-content: center;
+  }
+
+  /* Stack the action buttons full-width in the panel */
+  .frame-panel .frame-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .frame-panel .frame-actions .frame-btn {
+    width: 100%;
+    flex: none;
+  }
+
+  .frame-panel .frame-btn-text {
+    align-self: center;
+  }
 }
