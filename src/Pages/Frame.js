@@ -20,7 +20,7 @@ const ASPECTS = {
   "9:16": 9 / 16,
 };
 
-const MAX_STAGE_WIDTH = 460;
+const MAX_STAGE_WIDTH = 540;
 
 // photo zoom range (1 = "cover" the frame exactly)
 const MIN_ZOOM = 1;
@@ -324,6 +324,8 @@ export default function Frame() {
         <span className="frame-subtitle">Frame your photo</span>
       </header>
 
+      <div className="frame-layout">
+        <div className="frame-main">
       <div className="frame-stage-wrap" ref={containerRef}>
         <div className="frame-stage-shadow" style={{ width: stage.width, height: stage.height }}>
           {!photo && (
@@ -452,6 +454,9 @@ export default function Frame() {
           Drag the photo to reposition · drag the text to move, resize or rotate it
         </p>
       )}
+        </div>{/* frame-main */}
+
+        <div className="frame-panel">
 
       {photo && (
         <div className="frame-zoom">
@@ -571,6 +576,8 @@ export default function Frame() {
           or download instead
         </button>
       )}
+        </div>{/* frame-panel */}
+      </div>{/* frame-layout */}
     </div>
   );
 }
