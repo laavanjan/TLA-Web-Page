@@ -13,6 +13,7 @@ export default function FrameAdmin() {
   }, []);
 
   const [url, setUrl] = useState(defaultUrl);
+  const [copied, setCopied] = useState(false);
   const qrWrapRef = useRef(null);
 
   const downloadQr = useCallback(() => {
@@ -27,11 +28,18 @@ export default function FrameAdmin() {
   }, []);
 
   const copyUrl = useCallback(() => {
-    if (navigator.clipboard) navigator.clipboard.writeText(url).catch(() => {});
+    if (!navigator.clipboard) return;
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1600);
+      })
+      .catch(() => {});
   }, [url]);
 
   return (
-    <div className="frame-page">
+    <div className="frame-page admin-page">
       <Helmet>
         <title>Frame QR · Admin</title>
       </Helmet>
@@ -43,44 +51,56 @@ export default function FrameAdmin() {
       </header>
 
       <div className="admin-card">
-        <div className="admin-qr" ref={qrWrapRef}>
-          <QRCodeCanvas
-            value={url || " "}
-            size={240}
-            level="H"
-            includeMargin
-            bgColor="#ffffff"
-            fgColor="#0d1017"
-          />
+        <div className="admin-qr-col">
+          <div className="admin-qr" ref={qrWrapRef}>
+            <QRCodeCanvas
+              value={url || " "}
+              size={220}
+              level="H"
+              includeMargin
+              bgColor="#ffffff"
+              fgColor="#0d1017"
+            />
+          </div>
+          <p className="admin-caption">Scan to open the editor</p>
         </div>
 
-        <p className="admin-caption">Scan to open the photo-frame page</p>
+        <div className="admin-info">
+          <h2 className="admin-title">Share this frame</h2>
+          <p className="admin-desc">
+            Print or display this QR at your event. Anyone who scans it lands
+            straight on the photo-frame editor — no app, no sign-in.
+          </p>
 
-        <label className="admin-label" htmlFor="frame-url">
-          Page URL
-        </label>
-        <input
-          id="frame-url"
-          className="admin-input"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          spellCheck={false}
-        />
+          <span className="admin-label">Page URL</span>
+          <div className="admin-url-row">
+            <input
+              id="frame-url"
+              className="admin-input"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              spellCheck={false}
+            />
+            <button
+              type="button"
+              className="admin-copy"
+              onClick={copyUrl}
+              title="Copy link"
+              aria-label="Copy link"
+            >
+              {copied ? "✓" : "Copy"}
+            </button>
+          </div>
 
-        <div className="frame-actions" style={{ marginTop: 18 }}>
-          <button type="button" className="frame-btn frame-btn-ghost" onClick={copyUrl}>
-            Copy link
-          </button>
-          <button type="button" className="frame-btn frame-btn-primary" onClick={downloadQr}>
+          <button
+            type="button"
+            className="frame-btn frame-btn-primary admin-download"
+            onClick={downloadQr}
+          >
             Download QR
           </button>
         </div>
       </div>
-
-      <p className="frame-tip" style={{ maxWidth: 320 }}>
-        Print or display this QR. Anyone who scans it lands directly on the frame
-        editor to add their photo.
-      </p>
     </div>
   );
 }
