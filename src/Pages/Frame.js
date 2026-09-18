@@ -9,7 +9,8 @@ import React, {
 import { Stage, Layer, Image as KonvaImage, Transformer, Line } from "react-konva";
 import { Helmet } from "react-helmet";
 
-import { tamilDesignDataUrl } from "../assets/frame/tamilDesign";
+import { DESIGNS } from "../assets/frame/designs";
+import LotusDivider from "./LotusDivider";
 import "./Frame.css";
 
 // aspect preset value = width / height
@@ -19,10 +20,13 @@ const ASPECTS = {
   "9:16": 9 / 16,
 };
 
-// natural ratio (w/h) of the design artwork — keeps it undistorted while scaling
-const DESIGN_RATIO = 520 / 200;
-
 const MAX_STAGE_WIDTH = 460;
+
+// photo zoom range (1 = "cover" the frame exactly)
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 3;
+
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
 // Load an HTMLImageElement from any src (data URL / object URL). Returns the
 // element once it has decoded, or null while loading.
@@ -55,19 +59,28 @@ export default function Frame() {
 
   const [photoSrc, setPhotoSrc] = useState(null);
   const [aspectKey, setAspectKey] = useState("4:5");
-  const [designColor, setDesignColor] = useState("#ffffff");
+  const [designId, setDesignId] = useState(DESIGNS[0].id);
   const [selected, setSelected] = useState(false);
   const [stage, setStage] = useState({ width: 360, height: 450 });
   const [guides, setGuides] = useState({ v: false, h: false });
   const [busy, setBusy] = useState(false);
 
+  // Photo transform within the frame: zoom (>= cover) and pan stored as
+  // fractions of the pannable overflow (0.5 = centred) so it stays valid
+  // across resizes and aspect changes.
+  const [photoZoom, setPhotoZoom] = useState(1);
+  const [photoPan, setPhotoPan] = useState({ fx: 0.5, fy: 0.5 });
+
   // Design placement stored as fractions of the stage so it stays correct
   // across resizes and aspect changes. cx/cy = center, w = width fraction.
   const [norm, setNorm] = useState({ cx: 0.5, cy: 0.72, w: 0.6, rotation: 0 });
 
+  const currentDesign = useMemo(
+    () => DESIGNS.find((d) => d.id === designId) || DESIGNS[0],
+    [designId]
+  );
   const photo = useHtmlImage(photoSrc);
-  const designUrl = useMemo(() => tamilDesignDataUrl(designColor), [designColor]);
-  const design = useHtmlImage(designUrl);
+  const design = useHtmlImage(currentDesign.dataUrl);
 
   // Keep the stage sized to its container (responsive, capped for desktop).
   useLayoutEffect(() => {
@@ -102,10 +115,43 @@ export default function Frame() {
     if (layer) layer.batchDraw();
   }, [selected, design, stage, photo]);
 
+  // Pinch-to-zoom the photo on touch devices (two-finger). Pan fractions are
+  // preserved, so zooming keeps the same region roughly centred.
+  useEffect(() => {
+    const stageNode = stageRef.current;
+    const el = stageNode && stageNode.container();
+    if (!el) return undefined;
+    let lastDist = 0;
+    const distOf = (t) =>
+      Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+    const onMove = (ev) => {
+      if (ev.touches && ev.touches.length === 2) {
+        ev.preventDefault();
+        const d = distOf(ev.touches);
+        if (lastDist > 0) {
+          const ratio = d / lastDist;
+          setPhotoZoom((z) => clamp(+(z * ratio).toFixed(3), MIN_ZOOM, MAX_ZOOM));
+        }
+        lastDist = d;
+      }
+    };
+    const onEnd = (ev) => {
+      if (!ev.touches || ev.touches.length < 2) lastDist = 0;
+    };
+    el.addEventListener("touchmove", onMove, { passive: false });
+    el.addEventListener("touchend", onEnd);
+    el.addEventListener("touchcancel", onEnd);
+    return () => {
+      el.removeEventListener("touchmove", onMove);
+      el.removeEventListener("touchend", onEnd);
+      el.removeEventListener("touchcancel", onEnd);
+    };
+  }, [photo, stage]);
+
   // Derived pixel geometry for the design from the normalized state.
   const designPx = useMemo(() => {
     const w = norm.w * stage.width;
-    const h = w / DESIGN_RATIO;
+    const h = w / currentDesign.ratio;
     return {
       width: w,
       height: h,
@@ -115,16 +161,49 @@ export default function Frame() {
       offsetY: h / 2,
       rotation: norm.rotation,
     };
-  }, [norm, stage]);
+  }, [norm, stage, currentDesign]);
 
-  // Photo geometry: "cover" the whole stage, centered (photo is fixed).
-  const photoPx = useMemo(() => {
+  // Photo geometry: scaled to at least "cover" the frame, then panned. The
+  // photo is draggable but clamped so it always fills the frame (no gaps).
+  const photoView = useMemo(() => {
     if (!photo) return null;
-    const scale = Math.max(stage.width / photo.width, stage.height / photo.height);
+    const cover = Math.max(stage.width / photo.width, stage.height / photo.height);
+    const scale = cover * photoZoom;
     const w = photo.width * scale;
     const h = photo.height * scale;
-    return { x: (stage.width - w) / 2, y: (stage.height - h) / 2, width: w, height: h };
-  }, [photo, stage]);
+    const overflowX = Math.max(0, w - stage.width);
+    const overflowY = Math.max(0, h - stage.height);
+    return {
+      width: w,
+      height: h,
+      overflowX,
+      overflowY,
+      x: -overflowX * photoPan.fx,
+      y: -overflowY * photoPan.fy,
+      draggable: overflowX > 0.5 || overflowY > 0.5,
+    };
+  }, [photo, stage, photoZoom, photoPan]);
+
+  const commitPhotoPan = useCallback(
+    (e) => {
+      if (!photo) return;
+      const node = e.target;
+      const cover = Math.max(stage.width / photo.width, stage.height / photo.height);
+      const scale = cover * photoZoom;
+      const overflowX = Math.max(0, photo.width * scale - stage.width);
+      const overflowY = Math.max(0, photo.height * scale - stage.height);
+      setPhotoPan({
+        fx: overflowX > 0 ? clamp(-node.x() / overflowX, 0, 1) : 0.5,
+        fy: overflowY > 0 ? clamp(-node.y() / overflowY, 0, 1) : 0.5,
+      });
+    },
+    [photo, stage, photoZoom]
+  );
+
+  const resetPhoto = useCallback(() => {
+    setPhotoZoom(1);
+    setPhotoPan({ fx: 0.5, fy: 0.5 });
+  }, []);
 
   const onPickFile = useCallback((e) => {
     const file = e.target.files && e.target.files[0];
@@ -132,6 +211,8 @@ export default function Frame() {
     const reader = new FileReader();
     reader.onload = () => {
       setPhotoSrc(reader.result);
+      setPhotoZoom(1);
+      setPhotoPan({ fx: 0.5, fy: 0.5 });
       setNorm({ cx: 0.5, cy: 0.72, w: 0.6, rotation: 0 });
       setSelected(true);
     };
@@ -216,7 +297,7 @@ export default function Frame() {
         const blob = await (await fetch(uri)).blob();
         const file = new File([blob], "tamil-frame.png", { type: "image/png" });
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file], title: "தமிழ் மன்றம்" });
+          await navigator.share({ files: [file], title: "தமிழ் இலக்கிய மன்றம்" });
         } else {
           download();
         }
@@ -233,12 +314,13 @@ export default function Frame() {
   return (
     <div className="frame-page">
       <Helmet>
-        <title>Frame your photo · தமிழ் மன்றம்</title>
+        <title>Frame your photo · தமிழ் இலக்கிய மன்றம்</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
       </Helmet>
 
       <header className="frame-topbar">
-        <span className="frame-brand">தமிழ் மன்றம்</span>
+        <span className="frame-brand">தமிழ் இலக்கிய மன்றம்</span>
+        <LotusDivider />
         <span className="frame-subtitle">Frame your photo</span>
       </header>
 
@@ -267,9 +349,31 @@ export default function Frame() {
               onTouchStart={(e) => {
                 if (e.target === e.target.getStage()) setSelected(false);
               }}
+              onWheel={(e) => {
+                e.evt.preventDefault();
+                const factor = e.evt.deltaY > 0 ? 0.94 : 1.06;
+                setPhotoZoom((z) => clamp(+(z * factor).toFixed(3), MIN_ZOOM, MAX_ZOOM));
+              }}
             >
-              <Layer listening={false}>
-                {photoPx && <KonvaImage image={photo} {...photoPx} />}
+              <Layer>
+                {photoView && (
+                  <KonvaImage
+                    image={photo}
+                    x={photoView.x}
+                    y={photoView.y}
+                    width={photoView.width}
+                    height={photoView.height}
+                    draggable={photoView.draggable}
+                    dragBoundFunc={(pos) => ({
+                      x: clamp(pos.x, -photoView.overflowX, 0),
+                      y: clamp(pos.y, -photoView.overflowY, 0),
+                    })}
+                    onDragMove={commitPhotoPan}
+                    onDragEnd={commitPhotoPan}
+                    onMouseDown={() => setSelected(false)}
+                    onTouchStart={() => setSelected(false)}
+                  />
+                )}
               </Layer>
 
               <Layer>
@@ -343,7 +447,43 @@ export default function Frame() {
         </div>
       </div>
 
-      {photo && <p className="frame-tip">Drag the text · pinch or drag a corner to resize · twist to rotate</p>}
+      {photo && (
+        <p className="frame-tip">
+          Drag the photo to reposition · drag the text to move, resize or rotate it
+        </p>
+      )}
+
+      {photo && (
+        <div className="frame-zoom">
+          <span className="frame-zoom-label">Zoom</span>
+          <input
+            type="range"
+            className="frame-range"
+            min={MIN_ZOOM}
+            max={MAX_ZOOM}
+            step="0.01"
+            value={photoZoom}
+            aria-label="Photo zoom"
+            style={{
+              backgroundSize: `${
+                ((photoZoom - MIN_ZOOM) / (MAX_ZOOM - MIN_ZOOM)) * 100
+              }% 100%`,
+            }}
+            onChange={(e) =>
+              setPhotoZoom(clamp(parseFloat(e.target.value), MIN_ZOOM, MAX_ZOOM))
+            }
+          />
+          <button
+            type="button"
+            className="frame-zoom-reset"
+            onClick={resetPhoto}
+            title="Reset photo position and zoom"
+            aria-label="Reset photo"
+          >
+            ⟳
+          </button>
+        </div>
+      )}
 
       <input
         ref={fileInputRef}
@@ -366,23 +506,22 @@ export default function Frame() {
             </button>
           ))}
         </div>
+      </div>
 
-        <div className="frame-seg" role="group" aria-label="Design colour">
+      <div className="frame-designs" role="group" aria-label="Choose a design">
+        {DESIGNS.map((d) => (
           <button
+            key={d.id}
             type="button"
-            className={`frame-seg-btn ${designColor === "#ffffff" ? "is-active" : ""}`}
-            onClick={() => setDesignColor("#ffffff")}
+            title={d.label}
+            aria-label={d.label}
+            aria-pressed={designId === d.id}
+            className={`frame-design-tile ${designId === d.id ? "is-active" : ""}`}
+            onClick={() => setDesignId(d.id)}
           >
-            Light
+            <img src={d.dataUrl} alt={d.label} draggable={false} />
           </button>
-          <button
-            type="button"
-            className={`frame-seg-btn ${designColor === "#111111" ? "is-active" : ""}`}
-            onClick={() => setDesignColor("#111111")}
-          >
-            Dark
-          </button>
-        </div>
+        ))}
       </div>
 
       <div className="frame-actions">
