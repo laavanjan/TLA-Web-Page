@@ -80,7 +80,7 @@ export default function Frame() {
     [designId]
   );
   const photo = useHtmlImage(photoSrc);
-  const design = useHtmlImage(currentDesign.dataUrl);
+  const design = useHtmlImage(currentDesign.src);
 
   // Keep the stage sized to its container (responsive, capped for desktop).
   useLayoutEffect(() => {
@@ -524,7 +524,7 @@ export default function Frame() {
             className={`frame-design-tile ${designId === d.id ? "is-active" : ""}`}
             onClick={() => setDesignId(d.id)}
           >
-            <img src={d.dataUrl} alt={d.label} draggable={false} />
+            <img src={d.src} alt={d.label} draggable={false} />
           </button>
         ))}
       </div>
