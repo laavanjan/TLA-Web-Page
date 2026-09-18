@@ -26,6 +26,10 @@ const MAX_STAGE_WIDTH = 540;
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 3;
 
+// design size = its width as a fraction of the stage width
+const DESIGN_MIN_W = 0.25;
+const DESIGN_MAX_W = 1.6;
+
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
 // Load an HTMLImageElement from any src (data URL / object URL). Returns the
@@ -265,6 +269,11 @@ export default function Frame() {
     setNorm({ cx: 0.5, cy: 0.72, w: 0.6, rotation: 0 });
   }, []);
 
+  // Scale the design from its width fraction (keeps its centre and rotation).
+  const setDesignSize = useCallback((val) => {
+    setNorm((n) => ({ ...n, w: clamp(val, DESIGN_MIN_W, DESIGN_MAX_W) }));
+  }, []);
+
   const exportUri = useCallback(
     () => stageRef.current.toDataURL({ pixelRatio: 2, mimeType: "image/png" }),
     []
@@ -484,6 +493,36 @@ export default function Frame() {
             onClick={resetPhoto}
             title="Reset photo position and zoom"
             aria-label="Reset photo"
+          >
+            ⟳
+          </button>
+        </div>
+      )}
+
+      {photo && selected && (
+        <div className="frame-zoom">
+          <span className="frame-zoom-label">Size</span>
+          <input
+            type="range"
+            className="frame-range"
+            min={DESIGN_MIN_W}
+            max={DESIGN_MAX_W}
+            step="0.01"
+            value={norm.w}
+            aria-label="Design size"
+            style={{
+              backgroundSize: `${
+                ((norm.w - DESIGN_MIN_W) / (DESIGN_MAX_W - DESIGN_MIN_W)) * 100
+              }% 100%`,
+            }}
+            onChange={(e) => setDesignSize(parseFloat(e.target.value))}
+          />
+          <button
+            type="button"
+            className="frame-zoom-reset"
+            onClick={resetDesign}
+            title="Reset design size and position"
+            aria-label="Reset design"
           >
             ⟳
           </button>
