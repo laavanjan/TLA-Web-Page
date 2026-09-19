@@ -1,0 +1,426 @@
+/* Vertically centre the admin hub on wider screens. */
+@media (min-width: 768px) {
+  .admin-page {
+    justify-content: center;
+  }
+}
+
+/* Hub: a stack of admin tool cards. Add more cards to grow the dashboard. */
+.admin-hub {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.admin-card {
+  width: 100%;
+  max-width: 380px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 26px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+.admin-qr-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.admin-qr {
+  background: #ffffff;
+  padding: 14px;
+  border-radius: 16px;
+  line-height: 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.admin-caption {
+  margin: 14px 0 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 12.5px !important;
+  color: #a6b0c4;
+  text-align: center;
+}
+
+.admin-info {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.admin-title {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 20px !important;
+  font-weight: 800;
+  color: #f4f6fb;
+  text-align: center;
+}
+
+.admin-desc {
+  margin: 8px 0 18px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 13.5px !important;
+  line-height: 1.55;
+  color: #c6cede;
+  text-align: center;
+}
+
+.admin-label {
+  align-self: flex-start;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 11px !important;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #a6b0c4 !important;
+  margin: 0 0 6px !important;
+}
+
+.admin-url-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.admin-input {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 11px 12px;
+  color: #f4f6fb;
+  font-size: 13.5px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.admin-input:focus {
+  outline: none;
+  border-color: rgba(230, 180, 34, 0.7);
+}
+
+.admin-copy {
+  flex: 0 0 auto;
+  min-width: 64px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #eef1f7;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.admin-copy:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.admin-download {
+  margin-top: 16px;
+  width: 100%;
+}
+
+/* Two-column card on tablet & laptop: QR left, details right. */
+@media (min-width: 768px) {
+  .admin-card {
+    max-width: 660px;
+    flex-direction: row;
+    align-items: center;
+    gap: 34px;
+    padding: 32px 34px;
+  }
+
+  .admin-info {
+    margin-top: 0;
+    align-items: flex-start;
+  }
+
+  .admin-title,
+  .admin-desc {
+    text-align: left;
+  }
+}
+
+/* -------------------------------------------------------------- */
+/* Dashboard tile grid                                            */
+/* -------------------------------------------------------------- */
+.admin-dash {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  width: 100%;
+  max-width: 400px;
+}
+
+@media (min-width: 768px) {
+  .admin-dash {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 680px;
+  }
+}
+
+.admin-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 168px;
+  padding: 22px 20px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.admin-tile:hover {
+  transform: translateY(-3px);
+  border-color: rgba(230, 180, 34, 0.5);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.admin-tile-ic {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ffd76e, #e6b422);
+  color: #1a1400;
+  font-size: 26px;
+  margin-bottom: 4px;
+}
+
+.admin-tile-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #f4f6fb;
+}
+
+.admin-tile-desc {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #b3bccd;
+}
+
+.admin-tile-go {
+  margin-top: auto;
+  font-size: 13px;
+  font-weight: 700;
+  color: #e6b422;
+}
+
+.admin-tile.is-soon {
+  opacity: 0.65;
+  cursor: default;
+}
+
+.admin-tile.is-soon:hover {
+  transform: none;
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.admin-tile.is-soon .admin-tile-ic {
+  background: rgba(255, 255, 255, 0.1);
+  color: #cbd2e0;
+}
+
+.admin-tile-badge {
+  margin-top: auto;
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #a6b0c4;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+/* Back link on a tool sub-page */
+.admin-back {
+  display: block;
+  width: 100%;
+  max-width: 660px;
+  text-align: left;
+  margin-bottom: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #a6b0c4;
+  cursor: pointer;
+}
+
+.admin-back:hover {
+  color: #e6b422;
+}
+
+/* -------------------------------------------------------------- */
+/* Admin auth + account + sticker manager                         */
+/* -------------------------------------------------------------- */
+.admin-field {
+  width: 100%;
+}
+
+.admin-form .admin-info,
+.admin-account .admin-info {
+  width: 100%;
+}
+
+.admin-error {
+  color: #ff8a8a;
+  font-size: 13px;
+  margin: 12px 0 0;
+  text-align: left;
+}
+
+.admin-ok {
+  color: #7ee0a0;
+  font-size: 13px;
+  margin: 12px 0 0;
+  text-align: left;
+}
+
+.admin-account {
+  margin-top: 20px;
+}
+
+.admin-account-head,
+.admin-stickers-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Forms and the sticker manager stay single-column, even on desktop. */
+.admin-form,
+.admin-account,
+.admin-stickers-card {
+  max-width: 460px;
+  align-items: stretch;
+}
+
+@media (min-width: 768px) {
+  .admin-form,
+  .admin-account {
+    flex-direction: column;
+    max-width: 460px;
+    padding: 28px 26px;
+  }
+
+  .admin-stickers-card {
+    flex-direction: column;
+    max-width: 640px;
+    padding: 28px 26px;
+  }
+}
+
+/* Sticker toggle grid */
+.admin-sticker-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 18px;
+}
+
+@media (min-width: 540px) {
+  .admin-sticker-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.admin-sticker {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 10px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #232c3d, #171d29);
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  transition: border-color 0.15s ease, opacity 0.15s ease, transform 0.12s ease;
+}
+
+.admin-sticker:active {
+  transform: translateY(1px);
+}
+
+.admin-sticker:not(.is-on) {
+  opacity: 0.45;
+}
+
+.admin-sticker.is-on {
+  border-color: #e6b422;
+}
+
+.admin-sticker-thumb {
+  width: 100%;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-sticker-thumb img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.admin-sticker-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #eef1f7;
+}
+
+.admin-sticker-toggle {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+}
+
+.admin-sticker.is-on .admin-sticker-toggle {
+  border-color: #e6b422;
+  background: #e6b422;
+}
+
+.admin-sticker.is-on .admin-sticker-toggle::after {
+  content: "✓";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #1a1400;
+  font-size: 12px;
+  font-weight: 900;
+}
