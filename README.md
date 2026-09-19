@@ -11,13 +11,13 @@ npm install
 npm start
 ```
 
-The app runs on `http://localhost:3000`. A separate backend is required for certain features (memory-sharing, books listing) — see `src/helpers/server.js` for the API base URL.
+The app runs on `http://localhost:3000`. A separate backend is required for certain features (memory-sharing, books listing) see `src/helpers/server.js` for the API base URL.
 
 ---
 
 ## Deployment Guide (Vercel + Custom Domain)
 
-This section explains how the live website works "behind the scenes" — where it's hosted, how the custom domain (`tlauom.com`) is connected to it, and how to make changes safely in the future. It's written so that someone with no coding background can still follow it.
+This section explains how the live website works "behind the scenes"  where it's hosted, how the custom domain (`tlauom.com`) is connected to it, and how to make changes safely in the future. It's written so that someone with no coding background can still follow it.
 
 ### The three services involved
 
@@ -25,21 +25,21 @@ There are three different websites/tools involved in making `tlauom.com` work, a
 
 | Service | What it actually does | Think of it as... |
 |---|---|---|
-| **[Vercel](https://vercel.com/dashboard)** | Actually runs the website — this is where the code lives and gets served to visitors | The "building" the shop operates out of |
+| **[Vercel](https://vercel.com/dashboard)** | Actually runs the website  this is where the code lives and gets served to visitors | The "building" the shop operates out of |
 | **[Namecheap](https://ap.www.namecheap.com/domains/list)** | Where the domain name `tlauom.com` was purchased/registered | The company that legally owns the "street address" on paper |
 | **[Cloudflare](https://dash.cloudflare.com/)** | Controls where the domain name actually points on the internet | The "signpost" that tells visitors' browsers which building to walk into |
 
-Even though `tlauom.com` was bought through Namecheap, Namecheap is **not** in charge of directing traffic — that job was handed over to Cloudflare when Namecheap's "nameservers" were set to Cloudflare's nameservers. So any changes to where the domain points must be made **in Cloudflare**, not in Namecheap.
+Even though `tlauom.com` was bought through Namecheap, Namecheap is **not** in charge of directing traffic  that job was handed over to Cloudflare when Namecheap's "nameservers" were set to Cloudflare's nameservers. So any changes to where the domain points must be made **in Cloudflare**, not in Namecheap.
 
 ### How the website itself is deployed
 
 - The code for this website lives in this GitHub repository.
-- Vercel is connected directly to this repository. Every time new code is pushed to the `main` branch, Vercel automatically rebuilds and re-publishes the live site — no manual upload needed.
+- Vercel is connected directly to this repository. Every time new code is pushed to the `main` branch, Vercel automatically rebuilds and re-publishes the live site  no manual upload needed.
 - The build command Vercel uses is set to:
   ```
   DISABLE_ESLINT_PLUGIN=true react-scripts build
   ```
-  In plain terms: normally, small code-style warnings would completely block the website from being published on Vercel. This setting tells Vercel to ignore those warnings and publish anyway. (It does **not** ignore real errors — only style warnings.)
+  In plain terms: normally, small code-style warnings would completely block the website from being published on Vercel. This setting tells Vercel to ignore those warnings and publish anyway. (It does **not** ignore real errors  only style warnings.)
 
 ### The submission form's "backend" link (environment variable)
 
@@ -49,23 +49,23 @@ The article submission form (`/books/submit/form`) needs to know *where* to send
 - **On the live website**, it's stored inside Vercel itself, under:
   **[Vercel dashboard](https://vercel.com/dashboard) → select the project → Settings → Environment Variables → `REACT_APP_SUBMIT_URL`**
 
-⚠️ **Important:** if this value is ever changed (for example, because the Google Apps Script was redeployed under a different Google account — see the "Article Submission Feature" section below), you must:
+⚠️ **Important:** if this value is ever changed (for example, because the Google Apps Script was redeployed under a different Google account  see the "Article Submission Feature" section below), you must:
 1. Update the value in the Vercel Environment Variables screen, **and**
-2. Go to the **Deployments** tab and trigger a new deployment (or just push any small code change) — Vercel does **not** apply environment variable changes to a site that's already live until it's redeployed.
+2. Go to the **Deployments** tab and trigger a new deployment (or just push any small code change)  Vercel does **not** apply environment variable changes to a site that's already live until it's redeployed.
 
-### Connecting the custom domain (`tlauom.com`) to Vercel — full walkthrough
+### Connecting the custom domain (`tlauom.com`) to Vercel  full walkthrough
 
 This only needs to be done once, but it's documented here in case the domain, hosting, or DNS provider ever needs to be changed again.
 
 **Step 1 — Tell Vercel about the domain**
 1. Go to the [Vercel dashboard](https://vercel.com/dashboard) → select the project → **Settings → Domains**
 2. Type in `tlauom.com` and click **Add Domain**
-3. Vercel will show you the DNS records it needs — normally an `A` record value like `76.76.21.21` for the root domain, and a `CNAME` value like `cname.vercel-dns.com` for `www`. (Always use whatever values Vercel is currently showing on that screen, since they can change.)
+3. Vercel will show you the DNS records it needs  normally an `A` record value like `76.76.21.21` for the root domain, and a `CNAME` value like `cname.vercel-dns.com` for `www`. (Always use whatever values Vercel is currently showing on that screen, since they can change.)
 
 **Step 2 — Point the domain at Vercel, inside Cloudflare**
 1. Go to [dash.cloudflare.com](https://dash.cloudflare.com) and log in with the account that manages this domain (the Google account tied to it is `thamizhiyam@gmail.com`)
 2. Select `tlauom.com`, then go to **DNS → DNS Records**
-3. Find the row where **Name = `tlauom.com`** and **Type = `A`** (there are several other rows with similar names like `mail.tlauom.com`, `cpanel.tlauom.com` — make sure you pick the one with *just* `tlauom.com`, nothing in front of it)
+3. Find the row where **Name = `tlauom.com`** and **Type = `A`** (there are several other rows with similar names like `mail.tlauom.com`, `cpanel.tlauom.com`  make sure you pick the one with *just* `tlauom.com`, nothing in front of it)
 4. Click **Edit** on that row:
    - Change the address to the `A` record value Vercel gave you (e.g. `76.76.21.21`)
    - Click the orange **"Proxied"** cloud icon so it turns grey and says **"DNS only"** instead
@@ -80,7 +80,7 @@ This only needs to be done once, but it's documented here in case the domain, ho
 
 ### ⚠️ Records you must NEVER change
 
-The same Cloudflare DNS page also lists many other records that have nothing to do with the website — they run the organization's email and file-hosting instead. **Do not edit or delete any of these:**
+The same Cloudflare DNS page also lists many other records that have nothing to do with the website  they run the organization's email and file-hosting instead. **Do not edit or delete any of these:**
 
 - `mail.tlauom.com`, `webmail.tlauom.com`, `autodiscover.tlauom.com`, `autoconfig.tlauom.com` — email
 - `cpanel.tlauom.com`, `whm.tlauom.com`, `cpcalendars.tlauom.com`, `cpcontacts.tlauom.com`, `webdisk.tlauom.com`, `ftp.tlauom.com` — hosting control panel
@@ -101,7 +101,7 @@ DNS changes are usually visible within a few minutes, but can occasionally take 
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | Browser says "too many redirects" | The Cloudflare record is still set to "Proxied" instead of "DNS only" | Go back into the Cloudflare DNS record and switch it to "DNS only" |
-| Google Drive page says "Sorry, the file you have requested does not exist" when opening the Apps Script URL | The Apps Script deployment URL was mistyped somewhere (easy to happen — the URLs are long and contain look-alike characters like `l`/`I`/`1` or `O`/`0`) | Go back to the Apps Script's **Deploy → Manage deployments** screen and use the **Copy** button instead of retyping the URL |
+| Google Drive page says "Sorry, the file you have requested does not exist" when opening the Apps Script URL | The Apps Script deployment URL was mistyped somewhere (easy to happen  the URLs are long and contain look-alike characters like `l`/`I`/`1` or `O`/`0`) | Go back to the Apps Script's **Deploy → Manage deployments** screen and use the **Copy** button instead of retyping the URL |
 | The website loads, but shows old/outdated content | Vercel hasn't been redeployed since the last code change, or the domain hasn't finished pointing at Vercel yet | Check the **Deployments** tab in Vercel for the latest build; wait a few minutes for DNS and try again in a private browser window |
 | Submitting the article form shows a Tamil error message ("படைப்பை அனுப்புவதில் பிழை ஏற்பட்டது...") | `REACT_APP_SUBMIT_URL` on Vercel is missing, outdated, or the site hasn't been redeployed after changing it | Check the value in Vercel's Environment Variables screen, correct it, then redeploy |
 
@@ -115,7 +115,7 @@ A three-step flow that lets students submit creative works for the annual **த�
 
 | Step | Route | Description |
 |------|-------|-------------|
-| 1 | `/books` | Entry banner — "படைப்பு அனுப்ப" button |
+| 1 | `/books` | Entry banner  "படைப்பு அனுப்ப" button |
 | 2 | `/books/submit` | Rules & guidelines page (sticky side-nav, 8 sections) |
 | 3 | `/books/submit/form` | Submission form → Google Drive |
 
@@ -173,7 +173,7 @@ Create a `.env` file in the project root (already in `.gitignore`):
 REACT_APP_SUBMIT_URL=https://script.google.com/macros/s/<deployment-id>/exec
 ```
 
-Restart the dev server after adding the file — CRA reads `.env` only at startup.
+Restart the dev server after adding the file  CRA reads `.env` only at startup.
 
 For production (Netlify / Vercel), set `REACT_APP_SUBMIT_URL` in the host's environment variables panel instead.
 
