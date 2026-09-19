@@ -38,6 +38,7 @@ import Admin from "./Pages/Admin";
 import AdminQr from "./Pages/AdminQr";
 import AdminStickers from "./Pages/AdminStickers";
 import AdminAccount from "./Pages/AdminAccount";
+import AdminBooks from "./Pages/AdminBooks";
 import AdminLogin from "./Pages/AdminLogin";
 import RequireAdmin from "./Pages/RequireAdmin";
 
@@ -209,6 +210,14 @@ function Router() {
       element: (
         <RequireAdmin>
           <AdminAccount />
+        </RequireAdmin>
+      ),
+    },
+    {
+      path: "admin/books",
+      element: (
+        <RequireAdmin>
+          <AdminBooks />
         </RequireAdmin>
       ),
     },

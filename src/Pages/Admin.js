@@ -55,6 +55,15 @@ export default function Admin() {
           <span className="admin-tile-go">Open →</span>
         </Link>
 
+        <Link className="admin-tile" to="/admin/books">
+          <span className="admin-tile-ic">📖</span>
+          <span className="admin-tile-title">Book Submissions</span>
+          <span className="admin-tile-desc">
+            Open/close submissions, set the deadline, dropdowns and limits.
+          </span>
+          <span className="admin-tile-go">Open →</span>
+        </Link>
+
         <Link className="admin-tile" to="/admin/account">
           <span className="admin-tile-ic">🔑</span>
           <span className="admin-tile-title">Account & Password</span>
