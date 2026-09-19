@@ -10,6 +10,7 @@ import { Stage, Layer, Image as KonvaImage, Transformer, Line } from "react-konv
 import { Helmet } from "react-helmet";
 
 import { DESIGNS } from "../assets/frame/designs";
+import { getEnabledStickerIds } from "../admin/adminStore";
 import LotusDivider from "./LotusDivider";
 import "./Frame.css";
 
@@ -61,9 +62,18 @@ export default function Frame() {
   const trRef = useRef(null);
   const fileInputRef = useRef(null);
 
+  // Only the designs the admin enabled (falls back to all). Read once at mount.
+  const visibleDesigns = useMemo(() => {
+    const ids = getEnabledStickerIds();
+    if (!ids) return DESIGNS;
+    const set = new Set(ids);
+    const list = DESIGNS.filter((d) => set.has(d.id));
+    return list.length ? list : DESIGNS;
+  }, []);
+
   const [photoSrc, setPhotoSrc] = useState(null);
   const [aspectKey, setAspectKey] = useState("4:5");
-  const [designId, setDesignId] = useState(DESIGNS[0].id);
+  const [designId, setDesignId] = useState(visibleDesigns[0].id);
   const [selected, setSelected] = useState(false);
   const [stage, setStage] = useState({ width: 360, height: 450 });
   const [guides, setGuides] = useState({ v: false, h: false });
@@ -80,8 +90,8 @@ export default function Frame() {
   const [norm, setNorm] = useState({ cx: 0.5, cy: 0.72, w: 0.6, rotation: 0 });
 
   const currentDesign = useMemo(
-    () => DESIGNS.find((d) => d.id === designId) || DESIGNS[0],
-    [designId]
+    () => visibleDesigns.find((d) => d.id === designId) || visibleDesigns[0],
+    [designId, visibleDesigns]
   );
   const photo = useHtmlImage(photoSrc);
   const design = useHtmlImage(currentDesign.src);
@@ -553,7 +563,7 @@ export default function Frame() {
       </div>
 
       <div className="frame-designs" role="group" aria-label="Choose a design">
-        {DESIGNS.map((d) => (
+        {visibleDesigns.map((d) => (
           <button
             key={d.id}
             type="button"
