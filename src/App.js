@@ -15,7 +15,7 @@ function App() {
   const { pathname } = useLocation();
   // Standalone pages (e.g. the QR photo-frame editor) render without the
   // site nav/footer so they work as a focused, full-screen landing.
-  const standalone = pathname.startsWith("/frame");
+  const standalone = pathname.startsWith("/frame") || pathname.startsWith("/admin");
   useEffect(() => {
     currentUser().then(auth.loggedIn).catch(() => { });
   }, []);

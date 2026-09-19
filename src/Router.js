@@ -1,4 +1,4 @@
-import { useRoutes } from "react-router-dom";
+import { useRoutes, Navigate } from "react-router-dom";
 
 import BrammamEventAbout from "./Components/events/brammam/aboutEvent/BrammamEventAbout";
 import ExtraInfo from "./Components/events/brammam/ExtraInfo/ExtraInfo";
@@ -34,7 +34,12 @@ import MakkalMantramVote from "./Pages/MakkalMantramVote";
 import Seniors from "./Pages/Seniors";
 import MakkalMantramVoteResults from "./Pages/MakkalMantramVoteResults";
 import Frame from "./Pages/Frame";
-import FrameAdmin from "./Pages/FrameAdmin";
+import Admin from "./Pages/Admin";
+import AdminQr from "./Pages/AdminQr";
+import AdminStickers from "./Pages/AdminStickers";
+import AdminAccount from "./Pages/AdminAccount";
+import AdminLogin from "./Pages/AdminLogin";
+import RequireAdmin from "./Pages/RequireAdmin";
 
 function Router() {
   return useRoutes([
@@ -172,8 +177,45 @@ function Router() {
       element: <Frame />,
     },
     {
+      path: "admin/login",
+      element: <AdminLogin />,
+    },
+    {
+      path: "admin",
+      element: (
+        <RequireAdmin>
+          <Admin />
+        </RequireAdmin>
+      ),
+    },
+    {
+      path: "admin/qr",
+      element: (
+        <RequireAdmin>
+          <AdminQr />
+        </RequireAdmin>
+      ),
+    },
+    {
+      path: "admin/stickers",
+      element: (
+        <RequireAdmin>
+          <AdminStickers />
+        </RequireAdmin>
+      ),
+    },
+    {
+      path: "admin/account",
+      element: (
+        <RequireAdmin>
+          <AdminAccount />
+        </RequireAdmin>
+      ),
+    },
+    {
+      // old QR route → the QR tool in the new admin dashboard
       path: "frame/admin",
-      element: <FrameAdmin />,
+      element: <Navigate to="/admin/qr" replace />,
     },
   ]);
 }
