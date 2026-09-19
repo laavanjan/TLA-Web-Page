@@ -1,21 +1,20 @@
-// Admin-managed configuration for the book/article submission pages.
+// Configuration for the book/article submission pages. Frontend-only: there is
+// no backend, so the admin page's edits are saved in the admin's own browser
+// (localStorage) and act as a live preview on that device.
 //
-// Where it lives: the SAME Google Apps Script Web App that already receives
-// submissions also serves/stores this config (in a "Config" tab of the sheet) —
-// so an admin's changes are shared with every visitor, with no new server.
-//   - read:  GET  <APPS_SCRIPT_URL>?action=getConfig   (public)
-//   - write: POST { action:"setConfig", secret, config } (admin secret required)
-//
-// Fallbacks keep the site working no matter what: if the Apps Script isn't
-// reachable (or not yet updated), we use the admin's last localStorage copy, and
-// finally the hardcoded defaults below. So the submission page never breaks.
+// The ONE setting that must apply to EVERY visitor — whether submissions are
+// open — is a build-time flag below. Flip SUBMISSIONS_OPEN and redeploy to
+// open/close the form site-wide (a per-browser toggle can't reach other people).
 import {
   WORK_TYPE_OPTIONS,
   FACULTY_OPTIONS,
 } from "../Components/book/submit-form/formOptions";
 import { CONTACTS } from "../Components/book/submit-guidelines/guidelinesData";
 
-const APPS_SCRIPT_URL = process.env.REACT_APP_SUBMIT_URL || "";
+// ⇩⇩ SITE-WIDE ON/OFF SWITCH — set to false to close submissions for everyone,
+//    then `git push` to deploy. Set back to true to re-open. ⇩⇩
+export const SUBMISSIONS_OPEN = true;
+
 const LS_KEY = "tla_book_config";
 
 // Dropdown lists are stored as items { name, hidden } so an option can be
@@ -104,8 +103,11 @@ export function getCachedConfig() {
   return mergeConfig(readLocal());
 }
 
-// True if submissions should be accepted right now (respects deadline auto-close).
+// True if submissions should be accepted right now. The build-time
+// SUBMISSIONS_OPEN flag is the site-wide master; the per-browser `open` toggle
+// and the deadline can only narrow it further.
 export function isSubmissionOpen(cfg) {
+  if (!SUBMISSIONS_OPEN) return false;
   const c = mergeConfig(cfg);
   if (!c.open) return false;
   if (c.autoCloseOnDeadline && c.deadline) {
@@ -115,46 +117,17 @@ export function isSubmissionOpen(cfg) {
   return true;
 }
 
+// Frontend-only: config comes from this browser's saved copy (or defaults).
 export async function fetchBookConfig() {
-  if (APPS_SCRIPT_URL) {
-    try {
-      const res = await fetch(`${APPS_SCRIPT_URL}?action=getConfig`);
-      if (res.ok) {
-        const data = await res.json();
-        // Only trust a real config object (older deployments won't send one).
-        if (data && data.config && typeof data.config === "object") {
-          const cfg = mergeConfig(data.config);
-          writeLocal(cfg);
-          return cfg;
-        }
-      }
-    } catch {
-      /* fall through to local/defaults */
-    }
-  }
   return mergeConfig(readLocal());
 }
 
-// Saves config. Always caches locally; also syncs to the Apps Script when a URL
-// and admin secret are provided. Returns { synced } so the UI can tell the admin
-// whether the change reached everyone or is local-only.
-export async function saveBookConfig(cfg, secret) {
+// Saves config to this browser only (localStorage). `synced` is always false —
+// there is no backend, so it never publishes to other visitors.
+export async function saveBookConfig(cfg) {
   const merged = mergeConfig(cfg);
   writeLocal(merged);
-
-  if (APPS_SCRIPT_URL && secret) {
-    const res = await fetch(APPS_SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ action: "setConfig", secret, config: merged }),
-    });
-    const result = await res.json().catch(() => ({}));
-    if (!res.ok || result.status === "error") {
-      throw new Error(result.message || "Apps Script rejected the save.");
-    }
-    return { synced: true };
-  }
   return { synced: false };
 }
 
-export const HAS_REMOTE_CONFIG = !!APPS_SCRIPT_URL;
+export const HAS_REMOTE_CONFIG = false;
