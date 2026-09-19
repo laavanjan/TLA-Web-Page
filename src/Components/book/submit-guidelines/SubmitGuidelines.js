@@ -15,6 +15,7 @@ import {
   EXTRA_WORKS,
   CONTACTS,
 } from "./guidelinesData";
+import { fetchBookConfig, getCachedConfig } from "../../../book/bookConfig";
 
 const TOPICS_SHEET_URL =
   "https://docs.google.com/spreadsheets/d/1-wILuWyyXn6fJbMjIXX6iC6XJNhXtJX3bYvAoZodJ54/edit?usp=sharing";
@@ -23,6 +24,20 @@ const SubmitGuidelines = () => {
   const navigate = useNavigate();
   const [activeId, setActiveId] = useState(SECTIONS[0].id);
   const sectionRefs = useRef({});
+
+  // Admin-managed contacts (falls back to the built-in list).
+  const [contacts, setContacts] = useState(() => getCachedConfig().contacts);
+  useEffect(() => {
+    let alive = true;
+    fetchBookConfig()
+      .then((c) => {
+        if (alive && Array.isArray(c.contacts)) setContacts(c.contacts);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -258,17 +273,19 @@ const SubmitGuidelines = () => {
 
             <p className="section-lead">ஆக்கங்கள் சார்ந்த மேலதிக விளக்கங்களைப் பெற தொடர்பு கொள்ளவும்:</p>
             <div className="contact-grid">
-              {CONTACTS.map((c) => (
-                <a className="contact-card" href={`tel:${c.phone}`} key={c.name}>
-                  <span className="contact-icon-badge">
-                    <FaPhoneAlt className="contact-icon" />
-                  </span>
-                  <div className="contact-text">
-                    <p className="contact-name">{c.name}</p>
-                    <p className="contact-phone">{c.phone}</p>
-                  </div>
-                </a>
-              ))}
+              {(contacts && contacts.length ? contacts : CONTACTS)
+                .filter((c) => c && (c.name || c.phone))
+                .map((c, i) => (
+                  <a className="contact-card" href={`tel:${c.phone}`} key={i}>
+                    <span className="contact-icon-badge">
+                      <FaPhoneAlt className="contact-icon" />
+                    </span>
+                    <div className="contact-text">
+                      <p className="contact-name">{c.name}</p>
+                      <p className="contact-phone">{c.phone}</p>
+                    </div>
+                  </a>
+                ))}
             </div>
           </section>
 
