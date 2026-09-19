@@ -52,11 +52,6 @@ function doPost(e) {
 
     var data = JSON.parse(e.postData.contents);
 
-    // Admin config save (books/submit settings) — guarded by ADMIN_SECRET.
-    if (data.action === 'setConfig') {
-      return handleSetConfig(data);
-    }
-
     var missing = validate(data);
     if (missing.length) {
       return jsonOut({ status: 'error', message: 'Missing fields: ' + missing.join(', ') });
@@ -87,49 +82,8 @@ function doPost(e) {
   }
 }
 
-function doGet(e) {
-  // Public read of the admin-managed books/submit config.
-  if (e && e.parameter && e.parameter.action === 'getConfig') {
-    return jsonOut({ status: 'ok', config: getConfigObj() });
-  }
+function doGet() {
   return jsonOut({ status: 'ok', message: 'Thamilaruvi submission endpoint is live.' });
-}
-
-// ---- Admin config --------------------------------------------------------
-// Stores the books/submit settings as a JSON string in cell A1 of a "Config"
-// tab in the same sheet. Writes require the ADMIN_SECRET Script Property:
-//   Apps Script editor → Project Settings → Script Properties →
-//   add key "ADMIN_SECRET" with a value only you know, then redeploy.
-
-var CONFIG_SHEET_NAME = 'Config';
-
-function configSheet_() {
-  var ss = SpreadsheetApp.openById(SHEET_ID);
-  var sh = ss.getSheetByName(CONFIG_SHEET_NAME);
-  if (!sh) {
-    sh = ss.insertSheet(CONFIG_SHEET_NAME);
-    sh.getRange('A1').setValue('');
-  }
-  return sh;
-}
-
-function getConfigObj() {
-  try {
-    var raw = configSheet_().getRange('A1').getValue();
-    return raw ? JSON.parse(raw) : {};
-  } catch (err) {
-    return {};
-  }
-}
-
-function handleSetConfig(data) {
-  var secret = PropertiesService.getScriptProperties().getProperty('ADMIN_SECRET');
-  if (!secret || String(data.secret) !== String(secret)) {
-    return jsonOut({ status: 'error', message: 'Unauthorized.' });
-  }
-  var config = data.config || {};
-  configSheet_().getRange('A1').setValue(JSON.stringify(config));
-  return jsonOut({ status: 'success', message: 'Config saved.', config: config });
 }
 
 // ---- Helpers -------------------------------------------------------------

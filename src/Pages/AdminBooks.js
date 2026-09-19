@@ -160,9 +160,7 @@ export default function AdminBooks() {
           type: "ok",
           text: synced
             ? "Saved and published to everyone."
-            : HAS_REMOTE_CONFIG
-            ? "Saved on this device. Enter the admin secret to publish to everyone."
-            : "Saved on this device (no submission backend configured yet).",
+            : "Saved on this device (preview). The site-wide open/close switch lives in code — see the note below.",
         });
       } catch (err) {
         setMsg({ type: "err", text: err.message || "Could not save." });
@@ -204,7 +202,10 @@ export default function AdminBooks() {
             <label className="admin-switch-row">
               <span>
                 <strong>Accepting submissions</strong>
-                <small>Master switch off means closed regardless of the deadline.</small>
+                <small>
+                  Preview on this device only. To open/close for everyone, flip
+                  SUBMISSIONS_OPEN in src/book/bookConfig.js and redeploy.
+                </small>
               </span>
               <input
                 type="checkbox"
