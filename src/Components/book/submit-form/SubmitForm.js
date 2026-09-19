@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaUser,
@@ -14,14 +14,16 @@ import {
 } from "react-icons/fa";
 import "./submitForm.css";
 import {
-  WORK_TYPE_OPTIONS,
-  FACULTY_OPTIONS,
-  MAX_DOC_SIZE,
-  MAX_PHOTO_SIZE,
   ACCEPTED_DOC_TYPES,
   ACCEPTED_PDF_TYPES,
   ACCEPTED_PHOTO_TYPES,
 } from "./formOptions";
+import {
+  fetchBookConfig,
+  isSubmissionOpen,
+  getCachedConfig,
+  visibleOptions,
+} from "../../../book/bookConfig";
 
 // Paste the deployed Google Apps Script Web App URL here (see google-apps-script/README.md).
 const APPS_SCRIPT_URL = process.env.REACT_APP_SUBMIT_URL || "";
@@ -70,6 +72,24 @@ const SubmitForm = () => {
   const [status, setStatus] = useState("idle"); // idle | sending | success | error
   const [serverMessage, setServerMessage] = useState("");
 
+  // Admin-managed config (dropdowns, limits, open/closed, announcement).
+  const [cfg, setCfg] = useState(getCachedConfig);
+  useEffect(() => {
+    let alive = true;
+    fetchBookConfig()
+      .then((c) => {
+        if (alive) setCfg(c);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const MAX_DOC = cfg.maxDocMB * 1024 * 1024;
+  const MAX_PHOTO = cfg.maxPhotoMB * 1024 * 1024;
+  const submissionsOpen = isSubmissionOpen(cfg);
+
   const setField = (name, value) => {
     setValues((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => {
@@ -92,8 +112,8 @@ const SubmitForm = () => {
       setErrors((prev) => ({ ...prev, docFile: "Microsoft Word (.doc / .docx) கோப்பு மட்டுமே ஏற்றுக்கொள்ளப்படும்." }));
       return;
     }
-    if (file.size > MAX_DOC_SIZE) {
-      setErrors((prev) => ({ ...prev, docFile: `கோப்பின் அளவு ${formatSize(MAX_DOC_SIZE)}-ஐ விடக் குறைவாக இருக்க வேண்டும்.` }));
+    if (file.size > MAX_DOC) {
+      setErrors((prev) => ({ ...prev, docFile: `கோப்பின் அளவு ${formatSize(MAX_DOC)}-ஐ விடக் குறைவாக இருக்க வேண்டும்.` }));
       return;
     }
     setDocFile(file);
@@ -111,8 +131,8 @@ const SubmitForm = () => {
       setErrors((prev) => ({ ...prev, pdfFile: "PDF கோப்பு மட்டுமே ஏற்றுக்கொள்ளப்படும்." }));
       return;
     }
-    if (file.size > MAX_DOC_SIZE) {
-      setErrors((prev) => ({ ...prev, pdfFile: `கோப்பின் அளவு ${formatSize(MAX_DOC_SIZE)}-ஐ விடக் குறைவாக இருக்க வேண்டும்.` }));
+    if (file.size > MAX_DOC) {
+      setErrors((prev) => ({ ...prev, pdfFile: `கோப்பின் அளவு ${formatSize(MAX_DOC)}-ஐ விடக் குறைவாக இருக்க வேண்டும்.` }));
       return;
     }
     setPdfFile(file);
@@ -130,8 +150,8 @@ const SubmitForm = () => {
       setErrors((prev) => ({ ...prev, photoFile: "JPG, PNG அல்லது WEBP படம் மட்டுமே ஏற்றுக்கொள்ளப்படும்." }));
       return;
     }
-    if (file.size > MAX_PHOTO_SIZE) {
-      setErrors((prev) => ({ ...prev, photoFile: `படத்தின் அளவு ${formatSize(MAX_PHOTO_SIZE)}-ஐ விடக் குறைவாக இருக்க வேண்டும்.` }));
+    if (file.size > MAX_PHOTO) {
+      setErrors((prev) => ({ ...prev, photoFile: `படத்தின் அளவு ${formatSize(MAX_PHOTO)}-ஐ விடக் குறைவாக இருக்க வேண்டும்.` }));
       return;
     }
     setPhotoFile(file);
@@ -292,6 +312,27 @@ const SubmitForm = () => {
     );
   }
 
+  if (!submissionsOpen) {
+    return (
+      <div className="submit-form-page">
+        <div className="sf-success">
+          <FaExclamationTriangle className="sf-success-icon" />
+          <h1 className="sf-success-title">சமர்ப்பிப்பு தற்போது மூடப்பட்டுள்ளது</h1>
+          <p className="sf-success-text">
+            {cfg.announcement
+              ? cfg.announcement
+              : "தற்போது புதிய படைப்புகள் ஏற்றுக்கொள்ளப்படவில்லை. பின்னர் மீண்டும் முயற்சிக்கவும்."}
+          </p>
+          <div className="sf-success-actions">
+            <button className="sf-btn-ghost" onClick={() => navigate("/books")}>
+              நூல்கள் பக்கத்திற்குச் செல்ல
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="submit-form-page">
       <div className="sf-hero">
@@ -306,6 +347,13 @@ const SubmitForm = () => {
       </div>
 
       <form className="sf-form" onSubmit={handleSubmit} noValidate>
+        {cfg.announcement && (
+          <div className="sf-alert sf-alert-warn">
+            <FaExclamationTriangle />
+            <span>{cfg.announcement}</span>
+          </div>
+        )}
+
         {status === "error" && (
           <div className="sf-alert sf-alert-error">
             <FaExclamationTriangle />
@@ -352,7 +400,7 @@ const SubmitForm = () => {
               value={values.faculty}
               error={errors.faculty}
               onChange={handleChange}
-              options={FACULTY_OPTIONS}
+              options={visibleOptions(cfg.faculties)}
               placeholder="பீடத்தைத் தெரிவுசெய்யவும்"
             />
             <Field
@@ -412,7 +460,7 @@ const SubmitForm = () => {
               value={values.workType}
               error={errors.workType}
               onChange={handleChange}
-              options={WORK_TYPE_OPTIONS}
+              options={visibleOptions(cfg.workTypes)}
               placeholder="வகையைத் தெரிவுசெய்யவும்"
             />
             <Field
