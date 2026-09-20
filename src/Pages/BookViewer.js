@@ -13,7 +13,7 @@ export default function BookViewer() {
   return (
     <div className="frame-page">
       <Helmet>
-        <title>TLA 26 — நூல் | தமிழ் இலக்கிய மன்றம்</title>
+        <title>TLA 26 - நூல் | தமிழ் இலக்கிய மன்றம்</title>
         <meta
           name="description"
           content="தமிழ் இலக்கிய மன்றம் — TLA 26 நூல். Read and download the TLA 26 book."
