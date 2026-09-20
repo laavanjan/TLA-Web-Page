@@ -8,7 +8,7 @@ export default function QrShareCard({
   title = "Share this frame",
   description = "Print or display this QR at your event. Anyone who scans it lands straight on the photo-frame editor no app, no sign-in.",
   caption = "Scan to open the editor",
-  downloadFilename = "qr-code.png",
+  downloadFilename = "qr-code",
 }) {
   const defaultUrl = useMemo(() => {
     if (baseUrl) return baseUrl;
@@ -20,16 +20,37 @@ export default function QrShareCard({
   const [copied, setCopied] = useState(false);
   const qrWrapRef = useRef(null);
 
-  const downloadQr = useCallback(() => {
-    const canvas = qrWrapRef.current && qrWrapRef.current.querySelector("canvas");
+  const getCanvas = () =>
+    qrWrapRef.current && qrWrapRef.current.querySelector("canvas");
+
+  const downloadPng = useCallback(() => {
+    const canvas = getCanvas();
     if (!canvas) return;
     const a = document.createElement("a");
-    a.download = downloadFilename;
+    a.download = `${downloadFilename}.png`;
     a.href = canvas.toDataURL("image/png");
     document.body.appendChild(a);
     a.click();
     a.remove();
   }, [downloadFilename]);
+
+  const downloadPdf = useCallback(async () => {
+    const canvas = getCanvas();
+    if (!canvas) return;
+    const { jsPDF } = await import("jspdf");
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const qrSize = 80;
+    const x = (pageW - qrSize) / 2;
+    const y = (pageH - qrSize) / 2 - 10;
+    pdf.addImage(imgData, "PNG", x, y, qrSize, qrSize);
+    pdf.setFontSize(11);
+    pdf.setTextColor(80, 80, 80);
+    pdf.text(url, pageW / 2, y + qrSize + 10, { align: "center" });
+    pdf.save(`${downloadFilename}.pdf`);
+  }, [downloadFilename, url]);
 
   const copyUrl = useCallback(() => {
     if (!navigator.clipboard) return;
@@ -82,13 +103,22 @@ export default function QrShareCard({
           </button>
         </div>
 
-        <button
-          type="button"
-          className="frame-btn frame-btn-primary admin-download"
-          onClick={downloadQr}
-        >
-          Download QR
-        </button>
+        <div className="admin-download-row">
+          <button
+            type="button"
+            className="frame-btn frame-btn-ghost"
+            onClick={downloadPng}
+          >
+            PNG
+          </button>
+          <button
+            type="button"
+            className="frame-btn frame-btn-primary"
+            onClick={downloadPdf}
+          >
+            PDF
+          </button>
+        </div>
       </div>
     </div>
   );
