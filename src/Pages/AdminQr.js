@@ -26,6 +26,17 @@ export default function AdminQr() {
           ← Dashboard
         </Link>
         <QrShareCard />
+        <QrShareCard
+          baseUrl={
+            typeof window !== "undefined"
+              ? `${window.location.origin}/books/tla26`
+              : "/books/tla26"
+          }
+          title="TLA 26 Book"
+          description="Scan to read and download the TLA 26 book — opens directly on any phone, no app needed."
+          caption="Scan to read the book"
+          downloadFilename="tla26-book-qr.png"
+        />
       </div>
     </div>
   );

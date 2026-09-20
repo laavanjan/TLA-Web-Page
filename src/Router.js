@@ -20,6 +20,7 @@ import ComingSoon from "./shared/comingSoon/ComingSoon";
 
 import Contact from "./Components/Home/Contact/contact";
 import Books from "./Pages/Books";
+import BookViewer from "./Pages/BookViewer";
 import BookSubmitGuidelines from "./Pages/BookSubmitGuidelines";
 import BookSubmitForm from "./Pages/BookSubmitForm";
 import HistoryPage from "./Pages/History";
@@ -128,6 +129,10 @@ function Router() {
     {
       path: "/books",
       element: <Books />,
+    },
+    {
+      path: "/books/tla26",
+      element: <BookViewer />,
     },
     {
       path: "/books/submit",

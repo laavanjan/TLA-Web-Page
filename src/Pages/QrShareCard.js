@@ -1,13 +1,20 @@
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 
-// QR generator for the photo-frame editor, packaged as a self-contained card so
-// it can be dropped into the admin hub (or anywhere else).
-export default function QrShareCard() {
+// QR generator packaged as a self-contained card.
+// `baseUrl` overrides the default URL; all other props customise the copy.
+export default function QrShareCard({
+  baseUrl,
+  title = "Share this frame",
+  description = "Print or display this QR at your event. Anyone who scans it lands straight on the photo-frame editor — no app, no sign-in.",
+  caption = "Scan to open the editor",
+  downloadFilename = "qr-code.png",
+}) {
   const defaultUrl = useMemo(() => {
+    if (baseUrl) return baseUrl;
     if (typeof window === "undefined") return "/frame";
     return `${window.location.origin}/frame`;
-  }, []);
+  }, [baseUrl]);
 
   const [url, setUrl] = useState(defaultUrl);
   const [copied, setCopied] = useState(false);
@@ -17,12 +24,12 @@ export default function QrShareCard() {
     const canvas = qrWrapRef.current && qrWrapRef.current.querySelector("canvas");
     if (!canvas) return;
     const a = document.createElement("a");
-    a.download = "frame-qr.png";
+    a.download = downloadFilename;
     a.href = canvas.toDataURL("image/png");
     document.body.appendChild(a);
     a.click();
     a.remove();
-  }, []);
+  }, [downloadFilename]);
 
   const copyUrl = useCallback(() => {
     if (!navigator.clipboard) return;
@@ -48,15 +55,12 @@ export default function QrShareCard() {
             fgColor="#0d1017"
           />
         </div>
-        <p className="admin-caption">Scan to open the editor</p>
+        <p className="admin-caption">{caption}</p>
       </div>
 
       <div className="admin-info">
-        <h2 className="admin-title">Share this frame</h2>
-        <p className="admin-desc">
-          Print or display this QR at your event. Anyone who scans it lands
-          straight on the photo-frame editor — no app, no sign-in.
-        </p>
+        <h2 className="admin-title">{title}</h2>
+        <p className="admin-desc">{description}</p>
 
         <span className="admin-label">Page URL</span>
         <div className="admin-url-row">
