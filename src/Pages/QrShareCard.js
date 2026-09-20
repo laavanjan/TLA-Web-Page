@@ -6,7 +6,7 @@ import { QRCodeCanvas } from "qrcode.react";
 export default function QrShareCard({
   baseUrl,
   title = "Share this frame",
-  description = "Print or display this QR at your event. Anyone who scans it lands straight on the photo-frame editor — no app, no sign-in.",
+  description = "Print or display this QR at your event. Anyone who scans it lands straight on the photo-frame editor no app, no sign-in.",
   caption = "Scan to open the editor",
   downloadFilename = "qr-code.png",
 }) {

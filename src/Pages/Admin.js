@@ -40,7 +40,7 @@ export default function Admin() {
           </span>
           <span className="admin-tile-title">QR Code Generator</span>
           <span className="admin-tile-desc">
-            Create a QR that opens the photo-frame editor — ready to print or
+            Create a QR that opens the photo-frame editor ready to print or
             share.
           </span>
           <span className="admin-tile-go">Open →</span>
