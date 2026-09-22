@@ -131,7 +131,7 @@ function Router() {
       element: <Books />,
     },
     {
-      path: "/books/tla26",
+      path: "/books/:slug",
       element: <BookViewer />,
     },
     {

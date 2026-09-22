@@ -16,19 +16,24 @@
   background: #fff;
 }
 
-.book-viewer-download {
+.book-viewer-wrap .frame-actions a.frame-btn {
+  text-decoration: none;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 12px 32px;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 700;
-  text-decoration: none;
-  cursor: pointer;
-  transition: opacity 0.15s;
 }
 
-.book-viewer-download:hover {
-  opacity: 0.88;
+.book-viewer-not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  margin-top: 40px;
+}
+
+.book-viewer-not-found p {
+  color: #a6b0c4;
+  max-width: 340px;
 }
