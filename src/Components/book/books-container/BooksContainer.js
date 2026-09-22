@@ -1,8 +1,23 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./booksContainer.css";
 import { Container } from "@material-ui/core";
 
+// Books added locally (no backend record) that open their own /books/:slug
+// viewer page — see src/Pages/booksData.js and src/Pages/BookViewer.js.
+const LOCAL_BOOKS = [
+    {
+        bookName: "தமிழருவி'26",
+        year: 2026,
+        img: "/images/logo.png",
+        isTlaBook: true,
+        isAccept: true,
+        viewerPath: "/books/thamilaruvi26",
+    },
+];
+
 const BooksContainer = () => {
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [books, setBooks] = useState([]);
 
@@ -29,8 +44,14 @@ const BooksContainer = () => {
     }, []);
 
     const handleOpen = (book) => {
-        window.open(book.pdfUrl, '_blank');
+        if (book.viewerPath) {
+            navigate(book.viewerPath);
+        } else {
+            window.open(book.pdfUrl, '_blank');
+        }
     };
+
+    const allBooks = [...books, ...LOCAL_BOOKS];
 
     return (
         <Container className="books-container">
@@ -38,7 +59,7 @@ const BooksContainer = () => {
                 <p className="sub-heading">தமிழ் இலக்கிய மன்றத்தின் வெளியீடுகள்</p>
                 <hr class="underline"></hr>
                 <div className="books">
-                    {books
+                    {allBooks
                         .filter(book => book.isTlaBook && book.isAccept)
                         .sort((a, b) => a.year - b.year)
                         .map((book) => {
