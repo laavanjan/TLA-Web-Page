@@ -27,26 +27,11 @@ export default function AdminQr() {
         </Link>
         <QrShareCard />
         <QrShareCard
-          baseUrl={
-            typeof window !== "undefined"
-              ? `${window.location.origin}/books/tla26`
-              : "/books/tla26"
-          }
-          title="TLA 26 Book"
-          description="Scan to read and download the TLA 26 book opens directly on any phone, no app needed."
-          caption="Scan to read the book"
-          downloadFilename="tla26-book-qr.png"
-        />
-        <QrShareCard
-          baseUrl={
-            typeof window !== "undefined"
-              ? `${window.location.origin}/books/thamilaruvi26`
-              : "/books/thamilaruvi26"
-          }
-          title="தமிழருவி'26 Book"
-          description="Scan to read and download தமிழருவி'26 (PDF or Document) — opens directly on any phone, no app needed."
-          caption="Scan to read the book"
-          downloadFilename="thamilaruvi26-book-qr.png"
+          baseUrl={typeof window !== "undefined" ? window.location.origin : ""}
+          title="QR Code Generator"
+          description="Paste any link below to generate a scannable QR code for it — download as PNG or PDF."
+          caption="Scan to open the link"
+          downloadFilename="qr-code"
         />
       </div>
     </div>
