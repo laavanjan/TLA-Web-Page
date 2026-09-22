@@ -37,6 +37,17 @@ export default function AdminQr() {
           caption="Scan to read the book"
           downloadFilename="tla26-book-qr.png"
         />
+        <QrShareCard
+          baseUrl={
+            typeof window !== "undefined"
+              ? `${window.location.origin}/books/thamilaruvi26`
+              : "/books/thamilaruvi26"
+          }
+          title="தமிழருவி'26 Book"
+          description="Scan to read and download தமிழருவி'26 (PDF or Document) — opens directly on any phone, no app needed."
+          caption="Scan to read the book"
+          downloadFilename="thamilaruvi26-book-qr.png"
+        />
       </div>
     </div>
   );
