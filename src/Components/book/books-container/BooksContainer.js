@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./booksContainer.css";
 import { Container } from "@material-ui/core";
+import thamilaruvi26Cover from "../../../images/Books/thamilaruvi26-cover.webp";
 
 // Books added locally (no backend record) that open their own /books/:slug
 // viewer page — see src/Pages/booksData.js and src/Pages/BookViewer.js.
@@ -9,7 +10,7 @@ const LOCAL_BOOKS = [
     {
         bookName: "தமிழருவி'26",
         year: 2026,
-        img: "/images/logo.png",
+        img: thamilaruvi26Cover,
         isTlaBook: true,
         isAccept: true,
         viewerPath: "/books/thamilaruvi26",
