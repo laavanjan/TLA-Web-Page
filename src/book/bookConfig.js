@@ -1,19 +1,24 @@
-// Configuration for the book/article submission pages. Frontend-only: there is
-// no backend, so the admin page's edits are saved in the admin's own browser
-// (localStorage) and act as a live preview on that device.
+// Configuration for the book/article submission pages. The admin page's
+// edits are saved to a single row in the Supabase `book_config` table (see
+// supabase/migrations/book_config.sql), so they're live for every visitor —
+// not just the admin's own browser.
 //
-// The ONE setting that must apply to EVERY visitor — whether submissions are
-// open — is a build-time flag below. Flip SUBMISSIONS_OPEN and redeploy to
-// open/close the form site-wide (a per-browser toggle can't reach other people).
+// SUBMISSIONS_OPEN below is a separate, build-time hard override: it can
+// force-close the form even if the database says otherwise (e.g. the DB is
+// unreachable, or you want an override that doesn't depend on it at all).
+// The `open` toggle in the admin page is the normal day-to-day switch now.
 import {
   WORK_TYPE_OPTIONS,
   FACULTY_OPTIONS,
 } from "../Components/book/submit-form/formOptions";
 import { CONTACTS } from "../Components/book/submit-guidelines/guidelinesData";
+import { supabase } from "../helpers/supabaseClient";
 
-// ⇩⇩ SITE-WIDE ON/OFF SWITCH — set to false to close submissions for everyone,
-//    then `git push` to deploy. Set back to true to re-open. ⇩⇩
+// ⇩⇩ HARD SITE-WIDE OVERRIDE — set to false to force-close submissions for
+//    everyone regardless of the admin page, then `git push` to deploy. ⇩⇩
 export const SUBMISSIONS_OPEN = true;
+
+const CONFIG_ROW_ID = 1;
 
 const LS_KEY = "tla_book_config";
 
@@ -117,17 +122,39 @@ export function isSubmissionOpen(cfg) {
   return true;
 }
 
-// Frontend-only: config comes from this browser's saved copy (or defaults).
+// Reads the shared config from Supabase, falling back to the local cache (or
+// defaults) if the row can't be reached — e.g. offline, or not migrated yet.
 export async function fetchBookConfig() {
-  return mergeConfig(readLocal());
+  const { data, error } = await supabase
+    .from("book_config")
+    .select("data")
+    .eq("id", CONFIG_ROW_ID)
+    .single();
+
+  if (error || !data) {
+    return getCachedConfig();
+  }
+
+  const merged = mergeConfig(data.data);
+  writeLocal(merged);
+  return merged;
 }
 
-// Saves config to this browser only (localStorage). `synced` is always false —
-// there is no backend, so it never publishes to other visitors.
+// Publishes config to Supabase — live for every visitor. Requires a signed-in
+// admin session (RLS only allows authenticated writes; see the migration).
 export async function saveBookConfig(cfg) {
   const merged = mergeConfig(cfg);
+  const { error } = await supabase
+    .from("book_config")
+    .update({ data: merged, updated_at: new Date().toISOString() })
+    .eq("id", CONFIG_ROW_ID);
+
+  if (error) {
+    throw new Error(error.message || "Could not save.");
+  }
+
   writeLocal(merged);
-  return { synced: false };
+  return { synced: true };
 }
 
-export const HAS_REMOTE_CONFIG = false;
+export const HAS_REMOTE_CONFIG = true;
