@@ -1,6 +1,6 @@
-import pongal from "../../src/images/Events/Card Illustration/pongal.png";
-import tamilaruvi from "../../src/images/Events/Card Illustration/tamilaruvi.png";
-import vanivila from "../../src/images/Events/Card Illustration/vanivila.png";
+import pongal from "../../src/images/Events/Card Illustration/pongal.webp";
+import tamilaruvi from "../../src/images/Events/Card Illustration/tamilaruvi.webp";
+import vanivila from "../../src/images/Events/Card Illustration/vanivila.webp";
 
 import aramiyam from "../../src/images/Events/Card Illustration/aramiyamintro.png";
 import blooddonation from "../../src/images/Events/Card Illustration/blooddonation.png";
