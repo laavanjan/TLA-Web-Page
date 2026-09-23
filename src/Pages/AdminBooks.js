@@ -10,7 +10,6 @@ import {
   getCachedConfig,
   isSubmissionOpen,
   DEFAULT_BOOK_CONFIG,
-  HAS_REMOTE_CONFIG,
 } from "../book/bookConfig";
 import "./Frame.css";
 import "./Admin.css";
@@ -103,7 +102,6 @@ function ContactsEditor({ items, onChange }) {
 
 export default function AdminBooks() {
   const [cfg, setCfg] = useState(getCachedConfig);
-  const [secret, setSecret] = useState("");
   const [msg, setMsg] = useState({ type: "", text: "" });
   const [busy, setBusy] = useState(false);
   const touched = useRef(false); // don't let the async fetch clobber edits
@@ -154,21 +152,16 @@ export default function AdminBooks() {
           maxDocMB: Math.max(1, Number(cfg.maxDocMB) || 1),
           maxPhotoMB: Math.max(1, Number(cfg.maxPhotoMB) || 1),
         };
-        const { synced } = await saveBookConfig(clean, secret);
+        await saveBookConfig(clean);
         setCfg(clean);
-        setMsg({
-          type: "ok",
-          text: synced
-            ? "Saved and published to everyone."
-            : "Saved on this device (preview). The site-wide open/close switch lives in code — see the note below.",
-        });
+        setMsg({ type: "ok", text: "Saved and published to everyone." });
       } catch (err) {
         setMsg({ type: "err", text: err.message || "Could not save." });
       } finally {
         setBusy(false);
       }
     },
-    [cfg, secret]
+    [cfg]
   );
 
   return (
@@ -203,8 +196,9 @@ export default function AdminBooks() {
               <span>
                 <strong>Accepting submissions</strong>
                 <small>
-                  Preview on this device only. To open/close for everyone, flip
-                  SUBMISSIONS_OPEN in src/book/bookConfig.js and redeploy.
+                  Published to everyone on save. A separate hard override
+                  (SUBMISSIONS_OPEN in src/book/bookConfig.js) can force this
+                  closed regardless of this switch.
                 </small>
               </span>
               <input
@@ -287,22 +281,6 @@ export default function AdminBooks() {
                 onChange={(contacts) => set({ contacts })}
               />
             </div>
-
-            {HAS_REMOTE_CONFIG && (
-              <>
-                <span className="admin-label" style={{ marginTop: 16 }}>
-                  Admin secret (to publish to everyone)
-                </span>
-                <input
-                  type="password"
-                  className="admin-input admin-field"
-                  value={secret}
-                  onChange={(e) => setSecret(e.target.value)}
-                  autoComplete="off"
-                  placeholder="Leave blank to save on this device only"
-                />
-              </>
-            )}
 
             {msg.text && (
               <p className={msg.type === "ok" ? "admin-ok" : "admin-error"}>
