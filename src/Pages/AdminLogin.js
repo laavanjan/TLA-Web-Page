@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import { useNavigate, useLocation, Navigate } from "react-router-dom";
 
@@ -16,6 +16,17 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [alreadyAuthed, setAlreadyAuthed] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    isAuthed().then((ok) => {
+      if (active && ok) setAlreadyAuthed(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const onSubmit = useCallback(
     async (e) => {
@@ -35,7 +46,7 @@ export default function AdminLogin() {
     [email, password, dest, navigate]
   );
 
-  if (isAuthed()) return <Navigate to={dest} replace />;
+  if (alreadyAuthed) return <Navigate to={dest} replace />;
 
   return (
     <div className="frame-page admin-page">
