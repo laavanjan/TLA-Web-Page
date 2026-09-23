@@ -63,15 +63,15 @@ const BooksContainer = () => {
                     {allBooks
                         .filter(book => book.isTlaBook && book.isAccept)
                         .sort((a, b) => a.year - b.year)
-                        .map((book) => {
+                        .map((book, index) => {
                             return (
-                                <>
-                                    <div className={loading ? "book-card fade-in" : "book-card"} onClick={() => handleOpen(book)}>
+                                <div key={`${book.bookName}-${index}`} className={loading ? "book-card fade-in" : "book-card"} onClick={() => handleOpen(book)}>
+                                    <div className="book-img-wrap">
                                         <img src={book.img} alt="book" className="book-img" />
-                                        <p className="book-name">{book.bookName}</p>
-                                        <p className="book-year">{book.year}</p>
                                     </div>
-                                </>
+                                    <p className="book-name">{book.bookName}</p>
+                                    <p className="book-year">{book.year}</p>
+                                </div>
                             )
                         })
                     }
@@ -84,15 +84,15 @@ const BooksContainer = () => {
                     {books
                         .filter(book => !book.isTlaBook && book.isAccept)
                         .sort((a, b) => a.year - b.year)
-                        .map((book) => {
+                        .map((book, index) => {
                             return (
-                                <>
-                                    <div className={loading ? "book-card fade-in" : "book-card"} onClick={() => handleOpen(book)}>
+                                <div key={`${book.bookName}-${index}`} className={loading ? "book-card fade-in" : "book-card"} onClick={() => handleOpen(book)}>
+                                    <div className="book-img-wrap">
                                         <img src={book.img} alt="book" className="book-img" />
-                                        <p className="book-name">{book.bookName}</p>
-                                        <p className="book-author">{book.author}</p>
                                     </div>
-                                </>
+                                    <p className="book-name">{book.bookName}</p>
+                                    <p className="book-author">{book.author}</p>
+                                </div>
                             )
                         })
                     }
