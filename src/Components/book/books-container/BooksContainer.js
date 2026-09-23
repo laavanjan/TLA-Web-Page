@@ -8,7 +8,7 @@ import thamilaruvi26Cover from "../../../images/Books/thamilaruvi26-cover.webp";
 // viewer page — see src/Pages/booksData.js and src/Pages/BookViewer.js.
 const LOCAL_BOOKS = [
     {
-        bookName: "தமிழருவி'26",
+        bookName: "தமிழருவி'26 இதழ்",
         year: 2026,
         img: thamilaruvi26Cover,
         isTlaBook: true,
