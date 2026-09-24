@@ -171,20 +171,26 @@
 }
 
 /* -------------------------------------------------------------- */
-/* Dashboard tile grid                                            */
+/* Dashboard tile grid. Grouping lives IN the tile (icon tint + a  */
+/* small category tag) rather than in separate sectioned rows.    */
 /* -------------------------------------------------------------- */
 .admin-dash {
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
   width: 100%;
-  max-width: 400px;
+  max-width: 960px;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 640px) {
   .admin-dash {
     grid-template-columns: repeat(2, 1fr);
-    max-width: 680px;
+  }
+}
+
+@media (min-width: 1000px) {
+  .admin-dash {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -209,6 +215,18 @@
   background: rgba(255, 255, 255, 0.07);
 }
 
+.admin-tile-tag {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
 .admin-tile-ic {
   width: 52px;
   height: 52px;
@@ -222,10 +240,35 @@
   margin-bottom: 4px;
 }
 
+/* Category tints — content (gold), tools (teal), account (violet) */
+.admin-tile.cat-tools .admin-tile-ic {
+  background: linear-gradient(135deg, #7dd3c8, #14b8a6);
+  color: #04241f;
+}
+.admin-tile.cat-tools .admin-tile-tag {
+  background: rgba(20, 184, 166, 0.16);
+  color: #5eead4;
+}
+
+.admin-tile.cat-content .admin-tile-tag {
+  background: rgba(230, 180, 34, 0.16);
+  color: #ffd76e;
+}
+
+.admin-tile.cat-account .admin-tile-ic {
+  background: linear-gradient(135deg, #c4b5fd, #8b5cf6);
+  color: #1e1533;
+}
+.admin-tile.cat-account .admin-tile-tag {
+  background: rgba(139, 92, 246, 0.18);
+  color: #c4b5fd;
+}
+
 .admin-tile-title {
   font-size: 17px;
   font-weight: 800;
   color: #f4f6fb;
+  padding-right: 60px;
 }
 
 .admin-tile-desc {

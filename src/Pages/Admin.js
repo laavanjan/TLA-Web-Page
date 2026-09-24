@@ -19,6 +19,53 @@ function QrIcon() {
   );
 }
 
+// Each tile carries its own category (content/tools/account) — grouping is
+// expressed through the tile's own tint + tag rather than separate sections,
+// so it stays tidy no matter how many tiles land in any one category.
+const TILES = [
+  {
+    to: "/admin/books",
+    icon: "📖",
+    title: "Book Submissions",
+    desc: "Open/close submissions, set the deadline, dropdowns and limits.",
+    category: "content",
+  },
+  {
+    to: "/admin/contact",
+    icon: "☎️",
+    title: "Contact Info",
+    desc: "Edit the email, phone and social media links shown on the Contact section.",
+    category: "content",
+  },
+  {
+    to: "/admin/qr",
+    icon: <QrIcon />,
+    title: "QR Code Generator",
+    desc: "Create a QR that opens the photo-frame editor ready to print or share.",
+    category: "tools",
+  },
+  {
+    to: "/admin/stickers",
+    icon: "🎨",
+    title: "Stickers",
+    desc: "Choose which sticker designs appear in the editor.",
+    category: "tools",
+  },
+  {
+    to: "/admin/account",
+    icon: "🔑",
+    title: "Account & Password",
+    desc: "Change your admin email or reset your password.",
+    category: "account",
+  },
+];
+
+const CATEGORY_LABEL = {
+  content: "Content",
+  tools: "Tools",
+  account: "Account",
+};
+
 // Admin dashboard: a grid of tools. Each tile links to its own page.
 export default function Admin() {
   return (
@@ -34,54 +81,19 @@ export default function Admin() {
       </header>
 
       <div className="admin-dash">
-        <Link className="admin-tile" to="/admin/qr">
-          <span className="admin-tile-ic">
-            <QrIcon />
-          </span>
-          <span className="admin-tile-title">QR Code Generator</span>
-          <span className="admin-tile-desc">
-            Create a QR that opens the photo-frame editor ready to print or
-            share.
-          </span>
-          <span className="admin-tile-go">Open →</span>
-        </Link>
-
-        <Link className="admin-tile" to="/admin/stickers">
-          <span className="admin-tile-ic">🎨</span>
-          <span className="admin-tile-title">Stickers</span>
-          <span className="admin-tile-desc">
-            Choose which sticker designs appear in the editor.
-          </span>
-          <span className="admin-tile-go">Open →</span>
-        </Link>
-
-        <Link className="admin-tile" to="/admin/books">
-          <span className="admin-tile-ic">📖</span>
-          <span className="admin-tile-title">Book Submissions</span>
-          <span className="admin-tile-desc">
-            Open/close submissions, set the deadline, dropdowns and limits.
-          </span>
-          <span className="admin-tile-go">Open →</span>
-        </Link>
-
-        <Link className="admin-tile" to="/admin/contact">
-          <span className="admin-tile-ic">☎️</span>
-          <span className="admin-tile-title">Contact Info</span>
-          <span className="admin-tile-desc">
-            Edit the email, phone and social media links shown on the
-            Contact section.
-          </span>
-          <span className="admin-tile-go">Open →</span>
-        </Link>
-
-        <Link className="admin-tile" to="/admin/account">
-          <span className="admin-tile-ic">🔑</span>
-          <span className="admin-tile-title">Account & Password</span>
-          <span className="admin-tile-desc">
-            Change your admin email or reset your password.
-          </span>
-          <span className="admin-tile-go">Open →</span>
-        </Link>
+        {TILES.map((tile) => (
+          <Link
+            key={tile.to}
+            className={`admin-tile cat-${tile.category}`}
+            to={tile.to}
+          >
+            <span className="admin-tile-tag">{CATEGORY_LABEL[tile.category]}</span>
+            <span className="admin-tile-ic">{tile.icon}</span>
+            <span className="admin-tile-title">{tile.title}</span>
+            <span className="admin-tile-desc">{tile.desc}</span>
+            <span className="admin-tile-go">Open →</span>
+          </Link>
+        ))}
       </div>
     </div>
   );
