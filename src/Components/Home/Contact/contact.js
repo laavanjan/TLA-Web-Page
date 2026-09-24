@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./contact.css";
 import { FaEnvelope, FaFacebook, FaYoutube, FaPhoneAlt, FaUser, FaPaperPlane, FaTag, FaCommentDots, FaInstagram } from "react-icons/fa";
 import emailjs from "@emailjs/browser";
+import { fetchContactConfig, getCachedContactConfig } from "../../../shared/contactConfig";
 
 function Contact() {
     const [formData, setFormData] = useState({
@@ -14,6 +15,19 @@ function Contact() {
     const [buttonClicked, setButtonClicked] = useState(false);
     const [responseMessage, setResponseMessage] = useState("");
     const [responseType, setResponseType] = useState("");
+    const [contactCfg, setContactCfg] = useState(getCachedContactConfig);
+
+    useEffect(() => {
+        let alive = true;
+        fetchContactConfig()
+            .then((c) => {
+                if (alive) setContactCfg(c);
+            })
+            .catch(() => {});
+        return () => {
+            alive = false;
+        };
+    }, []);
 
     const validateName     = (v) => v.length > 0;
     const validatePhone    = (v) => v.length > 0;
@@ -142,11 +156,11 @@ function Contact() {
                         <div className="contact-info-card">
                             <p className="contact-info-card-title">தொடர்பு விவரங்கள்</p>
 
-                            <a className="contact-info-item" href="mailto:thamizhiyam@gmail.com">
+                            <a className="contact-info-item" href={`mailto:${contactCfg.email}`}>
                                 <div className="contact-info-icon"><FaEnvelope /></div>
                                 <div className="contact-info-text">
                                     <span className="contact-info-label">மின்னஞ்சல்</span>
-                                    <span className="contact-info-value">thamizhiyam@gmail.com</span>
+                                    <span className="contact-info-value">{contactCfg.email}</span>
                                 </div>
                             </a>
 
@@ -154,7 +168,10 @@ function Contact() {
                                 <div className="contact-info-icon"><FaPhoneAlt /></div>
                                 <div className="contact-info-text">
                                     <span className="contact-info-label">தொலைபேசி</span>
-                                    <span className="contact-info-value">அபினேஷ் - 076 843 2752</span>
+                                    <span className="contact-info-value">
+                                        {contactCfg.phoneName ? `${contactCfg.phoneName} - ` : ""}
+                                        {contactCfg.phoneNumber}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -162,15 +179,15 @@ function Contact() {
                         <div className="contact-social-card">
                             <p className="contact-social-title">சமூக ஊடகங்கள்</p>
                             <div className="contact-social-row">
-                                <button className="contact-social-btn" onClick={() => goSocial("https://web.facebook.com/TLAuom")}>
+                                <button className="contact-social-btn" onClick={() => goSocial(contactCfg.facebookUrl)}>
                                     <FaFacebook />
                                     முகப்புத்தகம்
                                 </button>
-                                <button className="contact-social-btn" onClick={() => goSocial("https://www.youtube.com/@TLAUOM")}>
+                                <button className="contact-social-btn" onClick={() => goSocial(contactCfg.youtubeUrl)}>
                                     <FaYoutube />
                                     வலைஒளி
                                 </button>
-                                <button className="contact-social-btn" onClick={() => goSocial("https://www.instagram.com/tla_uom/")}>
+                                <button className="contact-social-btn" onClick={() => goSocial(contactCfg.instagramUrl)}>
                                     <FaInstagram />
                                     இன்ஸ்டாகிராம்
                                 </button>
