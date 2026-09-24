@@ -40,6 +40,7 @@ import AdminQr from "./Pages/AdminQr";
 import AdminStickers from "./Pages/AdminStickers";
 import AdminAccount from "./Pages/AdminAccount";
 import AdminBooks from "./Pages/AdminBooks";
+import AdminContact from "./Pages/AdminContact";
 import AdminLogin from "./Pages/AdminLogin";
 import RequireAdmin from "./Pages/RequireAdmin";
 
@@ -223,6 +224,14 @@ function Router() {
       element: (
         <RequireAdmin>
           <AdminBooks />
+        </RequireAdmin>
+      ),
+    },
+    {
+      path: "admin/contact",
+      element: (
+        <RequireAdmin>
+          <AdminContact />
         </RequireAdmin>
       ),
     },

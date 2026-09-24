@@ -64,6 +64,16 @@ export default function Admin() {
           <span className="admin-tile-go">Open →</span>
         </Link>
 
+        <Link className="admin-tile" to="/admin/contact">
+          <span className="admin-tile-ic">☎️</span>
+          <span className="admin-tile-title">Contact Info</span>
+          <span className="admin-tile-desc">
+            Edit the email, phone and social media links shown on the
+            Contact section.
+          </span>
+          <span className="admin-tile-go">Open →</span>
+        </Link>
+
         <Link className="admin-tile" to="/admin/account">
           <span className="admin-tile-ic">🔑</span>
           <span className="admin-tile-title">Account & Password</span>
