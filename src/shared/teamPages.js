@@ -5,7 +5,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../helpers/supabaseClient";
 import { TeamsData } from "../Components/teams/teamsData";
-import { safeUrl } from "./mediaLinks";
+import { safeUrl, safeSocialUrl } from "./mediaLinks";
 
 const LS_KEY = "tla_team_pages";
 
@@ -169,6 +169,9 @@ function defaultPage(team) {
     tagline: team.tagline || "",
     summary: str(team.description, 20000),
     cover: "",
+    logo: "",
+    banner: "",
+    socials: [],
     sections: sections.map(sanitizeSection).filter(Boolean),
   };
 }
@@ -182,6 +185,9 @@ export function sanitizePage(raw, team) {
     tagline: str(raw.tagline, 400),
     summary: str(raw.summary, 20000),
     cover: safeUrl(raw.cover),
+    logo: safeUrl(raw.logo),
+    banner: safeUrl(raw.banner),
+    socials: [...new Set(list(raw.socials, (u) => safeSocialUrl(u) || null))],
     sections: raw.sections.map(sanitizeSection).filter(Boolean),
   };
 }

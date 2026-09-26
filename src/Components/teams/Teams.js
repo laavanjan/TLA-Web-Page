@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { FaArrowRight, FaTrophy, FaCalendarAlt } from "react-icons/fa";
 import "./teams.css";
 import { useTeamPages, upcomingCompetitions, daysUntil } from "../../shared/teamPages";
+import { SmartImage } from "./team-detail/media";
 import {
     fetchTeamJoinConfig,
     getCachedTeamJoinConfig,
@@ -81,7 +82,17 @@ const Teams = () => {
                         key={team.id}
                         className="teams-card"
                     >
-                        <p className="teams-card-title">{team.title}</p>
+                        <div className="teams-card-head">
+                            {team.logo && (
+                                <SmartImage
+                                    src={team.logo}
+                                    width={160}
+                                    alt=""
+                                    className="teams-card-logo"
+                                />
+                            )}
+                            <p className="teams-card-title">{team.title}</p>
+                        </div>
                         <p className="teams-card-description">{team.summary}</p>
                         <span className="teams-card-more">
                             மேலும் அறிய <FaArrowRight />

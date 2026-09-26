@@ -15,7 +15,7 @@ import {
 } from "react-icons/fa";
 import "./teamDetail.css";
 import { SECTION_META } from "../sectionMeta";
-import { SmartImage, LiteYouTube, InstagramEmbed } from "./media";
+import { SmartImage, LiteYouTube, InstagramEmbed, SocialIcons } from "./media";
 import { youTubeId, instagramPost } from "../../../shared/mediaLinks";
 import { competitionStatus, daysUntil } from "../../../shared/teamPages";
 
@@ -368,7 +368,13 @@ const TeamDetail = ({ page, preview = false }) => {
 
   return (
     <div className="team-detail-page">
-      <div className="team-hero">
+      <div className={`team-hero${page.banner ? " has-banner" : ""}`}>
+        {page.banner && (
+          <>
+            <SmartImage src={page.banner} width={2000} alt="" className="team-hero-banner" />
+            <div className="team-hero-shade" aria-hidden="true" />
+          </>
+        )}
         {preview ? (
           <span className="team-hero-back">
             <FaArrowLeft /> அணிகளுக்குத் திரும்ப
@@ -378,8 +384,19 @@ const TeamDetail = ({ page, preview = false }) => {
             <FaArrowLeft /> அணிகளுக்குத் திரும்ப
           </Link>
         )}
+        {page.logo && (
+          <div className="team-hero-logo">
+            <SmartImage
+              src={page.logo}
+              width={320}
+              alt={`${page.title} logo`}
+              fallback={<span>{page.title.charAt(0)}</span>}
+            />
+          </div>
+        )}
         <h1 className="team-hero-title">{page.title}</h1>
         {page.tagline && <p className="team-hero-tagline">{page.tagline}</p>}
+        <SocialIcons links={page.socials || []} />
       </div>
 
       <div className="team-detail-body">

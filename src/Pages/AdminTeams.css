@@ -82,10 +82,6 @@
   }
 }
 
-.ts-header-card {
-  position: sticky;
-  top: 14px;
-}
 
 .ts-header-card .tj-control,
 .ts-item .tj-control,
@@ -506,4 +502,110 @@
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
   font-size: 13.5px;
   border-bottom: 1px solid #f1dc98;
+}
+
+/* Profile & header */
+.ts-team-logo {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: white;
+  object-fit: contain;
+}
+
+.ts-field-note {
+  display: block;
+  margin: -4px 0 18px;
+}
+
+.ts-social-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: white;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ts-link-thumb-social {
+  flex-basis: 58px;
+  background: transparent;
+}
+
+.ts-hero-mini {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #022345 0%, #0a3a6b 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ts-hero-mini-banner {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ts-hero-mini.has-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(2, 35, 69, 0.55), rgba(2, 35, 69, 0.8));
+}
+
+.ts-hero-mini-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 20px 14px;
+  text-align: center;
+  color: white;
+}
+
+.ts-hero-mini-inner strong {
+  font-size: 17px;
+}
+
+.ts-hero-mini-tagline {
+  font-size: 12.5px;
+  opacity: 0.85;
+}
+
+.ts-hero-mini-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: white;
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c0392b;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+.ts-hero-mini-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.ts-hero-mini .ts-hero-mini-socials {
+  margin-top: 6px;
+  gap: 6px;
+}
+
+.ts-hero-mini .team-social {
+  width: 28px;
+  height: 28px;
+  font-size: 12px;
 }
