@@ -28,6 +28,7 @@ import Ideathon from "./Pages/Ideathon";
 import MemorySharing from "./Pages/Memory-Sharing";
 import TeamsPage from "./Pages/Teams-Page";
 import TeamDetailPage from "./Pages/TeamDetailPage";
+import TeamJoinForm from "./Pages/TeamJoinForm";
 
 import Login from "./Components/Login";
 import Signup from "./Components/Signup";
@@ -41,6 +42,7 @@ import AdminStickers from "./Pages/AdminStickers";
 import AdminAccount from "./Pages/AdminAccount";
 import AdminBooks from "./Pages/AdminBooks";
 import AdminContact from "./Pages/AdminContact";
+import AdminTeamJoin from "./Pages/AdminTeamJoin";
 import AdminLogin from "./Pages/AdminLogin";
 import RequireAdmin from "./Pages/RequireAdmin";
 
@@ -152,6 +154,10 @@ function Router() {
       element: <TeamsPage />,
     },
     {
+      path: "teams/join",
+      element: <TeamJoinForm />,
+    },
+    {
       path: "teams/:teamId",
       element: <TeamDetailPage />,
     },
@@ -232,6 +238,14 @@ function Router() {
       element: (
         <RequireAdmin>
           <AdminContact />
+        </RequireAdmin>
+      ),
+    },
+    {
+      path: "admin/team-join",
+      element: (
+        <RequireAdmin>
+          <AdminTeamJoin />
         </RequireAdmin>
       ),
     },

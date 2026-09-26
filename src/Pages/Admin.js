@@ -38,6 +38,13 @@ const TILES = [
     category: "content",
   },
   {
+    to: "/admin/team-join",
+    icon: "🤝",
+    title: "Team Join Requests",
+    desc: "Open/close applications, choose form fields, set WhatsApp links, view applicants.",
+    category: "content",
+  },
+  {
     to: "/admin/qr",
     icon: <QrIcon />,
     title: "QR Code Generator",
