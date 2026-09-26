@@ -83,6 +83,18 @@
 }
 
 
+/* Right column: preview, text, images and socials as separate stacked panels. */
+.ts-side {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+.ts-side .ts-hero-mini {
+  margin-bottom: 0;
+}
+
 .ts-header-card .tj-control,
 .ts-item .tj-control,
 .tj-field-body .tj-control {

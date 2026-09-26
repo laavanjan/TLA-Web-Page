@@ -841,17 +841,27 @@ export default function AdminTeams() {
                 )}
               </section>
 
+              <div className="ts-side">
               <section className="tj-section ts-header-card">
                 <header className="tj-section-head">
                   <div>
-                    <h3 className="tj-h3">Profile &amp; header</h3>
-                    <p className="tj-muted">Logo, banner and social links at the top of the page.</p>
+                    <h3 className="tj-h3">Header preview</h3>
+                    <p className="tj-muted">How the top of the team page looks - updates as you type.</p>
                   </div>
                   <Link to={`/teams/${draft.id}`} target="_blank" className="tj-btn tj-btn-ghost">
                     <FaExternalLinkAlt /> Live page
                   </Link>
                 </header>
                 <HeroMini page={draft} />
+              </section>
+
+              <section className="tj-section ts-header-card">
+                <header className="tj-section-head">
+                  <div>
+                    <h3 className="tj-h3">Name &amp; text</h3>
+                    <p className="tj-muted">Team name, tagline and the summary on the /teams card.</p>
+                  </div>
+                </header>
                 <Field label="Team name">
                   <input className="tj-input" value={draft.title} onChange={(e) => setHeader({ title: e.target.value })} />
                 </Field>
@@ -866,18 +876,32 @@ export default function AdminTeams() {
                     onChange={(e) => setHeader({ summary: e.target.value })}
                   />
                 </Field>
+              </section>
+
+              <section className="tj-section ts-header-card">
+                <header className="tj-section-head">
+                  <div>
+                    <h3 className="tj-h3">Images</h3>
+                    <p className="tj-muted">Team logo, banner and cover photo.</p>
+                  </div>
+                </header>
                 <ImageField label="Team logo" value={draft.logo} onChange={(v) => setHeader({ logo: v })} />
                 <small className="tj-muted ts-field-note">Square PNG with a transparent or white background looks best.</small>
                 <ImageField label="Banner image (optional)" value={draft.banner} onChange={(v) => setHeader({ banner: v })} />
                 <small className="tj-muted ts-field-note">Leave empty to keep the default blue background.</small>
                 <ImageField label="Cover photo" value={draft.cover} onChange={(v) => setHeader({ cover: v })} />
-                <div className="tj-control">
-                  <span className="tj-control-label">
-                    Social links <em className="tj-muted">— icons are picked automatically</em>
-                  </span>
-                  <LinkList kind="social" links={draft.socials} onChange={(socials) => setHeader({ socials })} />
-                </div>
               </section>
+
+              <section className="tj-section ts-header-card">
+                <header className="tj-section-head">
+                  <div>
+                    <h3 className="tj-h3">Social links</h3>
+                    <p className="tj-muted">Icons are picked automatically from each link.</p>
+                  </div>
+                </header>
+                <LinkList kind="social" links={draft.socials} onChange={(socials) => setHeader({ socials })} />
+              </section>
+              </div>
             </div>
 
             <div className={`tj-savebar${dirty ? " is-dirty" : ""}`}>
