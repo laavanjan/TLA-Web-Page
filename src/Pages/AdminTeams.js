@@ -110,7 +110,7 @@ function ImageField({ label, value, onChange }) {
               width={400}
               alt=""
               fallback={
-                <span className="ts-thumb-err" title="Couldn't load — for Drive, share as 'Anyone with the link'">
+                <span className="ts-thumb-err" title="Couldn't load - for Drive, share as 'Anyone with the link'">
                   <FaExclamationTriangle />
                 </span>
               }
@@ -143,13 +143,13 @@ const LINK_KINDS = {
     check: youTubeId,
     noun: "video",
     bad: "Not a YouTube video link",
-    placeholder: "Paste YouTube links — youtube.com/watch?v=…, youtu.be/…, /shorts/… (several at once is fine)",
+    placeholder: "Paste YouTube links - youtube.com/watch?v=…, youtu.be/…, /shorts/… (several at once is fine)",
   },
   instagram: {
     check: instagramPost,
     noun: "post",
     bad: "Not an Instagram post or reel link",
-    placeholder: "Paste Instagram post or reel links — instagram.com/p/… or /reel/… (several at once is fine)",
+    placeholder: "Paste Instagram post or reel links - instagram.com/p/… or /reel/… (several at once is fine)",
   },
   gallery: {
     check: imageSource,
@@ -162,7 +162,7 @@ const LINK_KINDS = {
     clean: safeSocialUrl,
     noun: "link",
     bad: "Not a valid https:// link or email",
-    placeholder: "Paste profile links — Facebook, Instagram, YouTube, LinkedIn, TikTok, X, WhatsApp, a website or an email",
+    placeholder: "Paste profile links - Facebook, Instagram, YouTube, LinkedIn, TikTok, X, WhatsApp, a website or an email",
   },
 };
 
@@ -215,7 +215,7 @@ function LinkList({ kind, links, onChange }) {
   const add = (text) => {
     const found = splitLinks(text, k.clean);
     if (!found.length) {
-      setNote("No links found — they must start with https://");
+      setNote("No links found - they must start with https://");
       return;
     }
     const fresh = found.filter((u, i) => !links.includes(u) && found.indexOf(u) === i);
@@ -837,7 +837,7 @@ export default function AdminTeams() {
                 ))}
 
                 {draft.sections.length === 0 && (
-                  <p className="tj-empty">This page has no sections yet — use “Add section” to start.</p>
+                  <p className="tj-empty">This page has no sections yet - use “Add section” to start.</p>
                 )}
               </section>
 
