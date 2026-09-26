@@ -603,22 +603,22 @@
 /* Book submissions — wider card, icon buttons, status badge      */
 /* -------------------------------------------------------------- */
 .admin-hub-wide {
-  max-width: 860px;
+  max-width: 1100px;
 }
 
 .admin-books {
-  max-width: 820px;
+  max-width: 1040px;
 }
 
 @media (min-width: 768px) {
   .admin-books {
-    max-width: 820px;
+    max-width: 1040px;
     padding: 30px 32px;
   }
 }
 
 .admin-books .admin-back {
-  max-width: 820px;
+  max-width: 1040px;
 }
 
 .admin-books-head {
@@ -717,8 +717,195 @@
   width: auto;
   min-width: 0;
 }
+
+/* -------------------------------------------------------------- */
+/* Simple tab switcher (e.g. Team Join: Settings / Applications)  */
+/* -------------------------------------------------------------- */
+.admin-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.admin-tab-btn {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #b3bccd;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-tab-btn.is-active {
+  background: linear-gradient(135deg, #ffd76e, #e6b422);
+  color: #1a1400;
+  border-color: transparent;
+}
+
 .admin-contact-phone {
   flex: 1 1 0;
   width: auto;
   min-width: 0;
+}
+
+/* -------------------------------------------------------------- */
+/* Team-join field builder — each field is its own editable card. */
+/* -------------------------------------------------------------- */
+.tj-field-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.tj-field-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.tj-field-card-head .admin-input {
+  margin: 0;
+}
+
+.tj-field-label-input {
+  flex: 2 1 200px;
+}
+
+.tj-field-type-select {
+  flex: 1 1 130px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.03);
+  color: #f4f6fb;
+  font-size: 14px;
+}
+
+.tj-field-required {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #b3bccd;
+  white-space: nowrap;
+}
+
+.tj-options-editor {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.12);
+}
+
+.tj-options-label {
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #7c8598;
+  margin: 0 0 10px;
+}
+
+.tj-option-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.tj-add-field-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+/* -------------------------------------------------------------- */
+/* Applications — styled like a spreadsheet.                      */
+/* -------------------------------------------------------------- */
+.tj-sheet-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid #d7dbe0;
+}
+
+.tj-sheet {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  color: #1f2430;
+  font-size: 13px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.tj-sheet th {
+  background: #f8f9fb;
+  border: 1px solid #d7dbe0;
+  padding: 8px 14px;
+  text-align: left;
+  font-weight: 700;
+  color: #3c4149;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+}
+
+.tj-sheet td {
+  border: 1px solid #e4e7eb;
+  padding: 7px 14px;
+  white-space: nowrap;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tj-sheet tbody tr:nth-child(even) td {
+  background: #f8fbff;
+}
+
+.tj-sheet tbody tr:hover td {
+  background: #eaf3ff;
+}
+
+.tj-row-num {
+  background: #f8f9fb !important;
+  color: #8a919c;
+  text-align: center;
+  font-weight: 700;
+  width: 40px;
+}
+
+.tj-sheet-del-btn {
+  border: none;
+  background: none;
+  color: #c0392b;
+  cursor: pointer;
+  padding: 4px;
+  display: inline-flex;
+}
+
+.tj-sheet-del-btn:hover {
+  color: #922b21;
+}
+
+/* Team Join gets its own (wider) width so it doesn't affect the Book
+   Submissions page, which shares .admin-books/.admin-hub-wide. */
+.admin-hub-xwide {
+  max-width: 1300px;
+}
+
+.admin-hub-xwide .admin-back {
+  max-width: 1300px;
+}
+
+.admin-team-join {
+  max-width: 1300px;
+}
+
+@media (min-width: 768px) {
+  .admin-team-join {
+    padding: 30px 32px;
+  }
 }
