@@ -63,3 +63,48 @@ p {
     font-family: "Para" !important;
     /* color: #022345 !important; */
 }
+
+.teams-join-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background-color: #022345;
+    color: #fff;
+    border-radius: 5px;
+    padding: 4% 5%;
+    margin-bottom: 5%;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.teams-join-banner:hover {
+    transform: translateY(-4px);
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 8px 20px;
+}
+
+.teams-join-title {
+    font-size: 26px;
+    margin: 0;
+    font-family: "Heading" !important;
+    color: #e6b422 !important;
+}
+
+.teams-join-text {
+    font-size: 18px;
+    font-family: "Para" !important;
+    color: #fff;
+    margin: 8px 0 0;
+}
+
+.teams-join-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: "Para" !important;
+    font-size: 18px;
+    font-weight: bold;
+    color: #e6b422;
+    white-space: nowrap;
+}
