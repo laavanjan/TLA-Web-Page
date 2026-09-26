@@ -809,6 +809,7 @@ export default function AdminTeams() {
             </div>
 
             <div className="tj-columns ts-columns">
+              <div className="ts-side">
               <section className="tj-section">
                 <header className="tj-section-head">
                   <div>
@@ -840,6 +841,31 @@ export default function AdminTeams() {
                   <p className="tj-empty">This page has no sections yet - use “Add section” to start.</p>
                 )}
               </section>
+
+              <section className="tj-section ts-header-card">
+                <header className="tj-section-head">
+                  <div>
+                    <h3 className="tj-h3">Images</h3>
+                    <p className="tj-muted">Team logo, banner and cover photo.</p>
+                  </div>
+                </header>
+                <ImageField label="Team logo" value={draft.logo} onChange={(v) => setHeader({ logo: v })} />
+                <small className="tj-muted ts-field-note">Square PNG with a transparent or white background looks best.</small>
+                <ImageField label="Banner image (optional)" value={draft.banner} onChange={(v) => setHeader({ banner: v })} />
+                <small className="tj-muted ts-field-note">Leave empty to keep the default blue background.</small>
+                <ImageField label="Cover photo" value={draft.cover} onChange={(v) => setHeader({ cover: v })} />
+              </section>
+
+              <section className="tj-section ts-header-card">
+                <header className="tj-section-head">
+                  <div>
+                    <h3 className="tj-h3">Social links</h3>
+                    <p className="tj-muted">Icons are picked automatically from each link.</p>
+                  </div>
+                </header>
+                <LinkList kind="social" links={draft.socials} onChange={(socials) => setHeader({ socials })} />
+              </section>
+              </div>
 
               <div className="ts-side">
               <section className="tj-section ts-header-card">
@@ -876,30 +902,6 @@ export default function AdminTeams() {
                     onChange={(e) => setHeader({ summary: e.target.value })}
                   />
                 </Field>
-              </section>
-
-              <section className="tj-section ts-header-card">
-                <header className="tj-section-head">
-                  <div>
-                    <h3 className="tj-h3">Images</h3>
-                    <p className="tj-muted">Team logo, banner and cover photo.</p>
-                  </div>
-                </header>
-                <ImageField label="Team logo" value={draft.logo} onChange={(v) => setHeader({ logo: v })} />
-                <small className="tj-muted ts-field-note">Square PNG with a transparent or white background looks best.</small>
-                <ImageField label="Banner image (optional)" value={draft.banner} onChange={(v) => setHeader({ banner: v })} />
-                <small className="tj-muted ts-field-note">Leave empty to keep the default blue background.</small>
-                <ImageField label="Cover photo" value={draft.cover} onChange={(v) => setHeader({ cover: v })} />
-              </section>
-
-              <section className="tj-section ts-header-card">
-                <header className="tj-section-head">
-                  <div>
-                    <h3 className="tj-h3">Social links</h3>
-                    <p className="tj-muted">Icons are picked automatically from each link.</p>
-                  </div>
-                </header>
-                <LinkList kind="social" links={draft.socials} onChange={(socials) => setHeader({ socials })} />
               </section>
               </div>
             </div>
