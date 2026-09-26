@@ -390,7 +390,7 @@ function TimelineEditor({ s, set }) {
 function MembersEditor({ s, set }) {
   const count = s.names.filter((n) => n.trim()).length;
   return (
-    <Field label={`Members — one per line (${count})`}>
+    <Field label={`Members - one per line (${count})`}>
       <textarea
         className="tj-input tj-choices"
         rows={Math.min(14, Math.max(5, s.names.length + 1))}
@@ -732,7 +732,7 @@ export default function AdminTeams() {
       setDraft(saved);
       setSavedJson(JSON.stringify(saved));
       touched.current = false;
-      setMsg({ type: "ok", text: "Published — the team page is live with your changes." });
+      setMsg({ type: "ok", text: "Published the team page is live with your changes." });
     } catch (err) {
       setMsg({ type: "err", text: err.message || "Could not save." });
     } finally {
@@ -803,7 +803,7 @@ export default function AdminTeams() {
               <FaLightbulb />
               <span>
                 <b>Images:</b> paste a Google Drive link (share it as <i>“Anyone with the link”</i>) or a
-                Cloudinary image URL — Cloudinary images are resized and compressed automatically.{" "}
+                Cloudinary image URL - Cloudinary images are resized and compressed automatically.{" "}
                 <b>YouTube &amp; Instagram:</b> just paste the post/video links; you can paste several at once.
               </span>
             </div>

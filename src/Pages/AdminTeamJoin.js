@@ -241,7 +241,7 @@ function SettingsTab() {
         const clean = getCachedTeamJoinConfig();
         setCfg(clean);
         setSavedJson(JSON.stringify(clean));
-        setMsg({ type: "ok", text: "Saved — changes are live for everyone." });
+        setMsg({ type: "ok", text: "Saved - changes are live for everyone." });
       } catch (err) {
         setMsg({ type: "err", text: err.message || "Could not save." });
       } finally {
@@ -315,7 +315,7 @@ function SettingsTab() {
           ))}
 
           {cfg.fields.length === 0 && (
-            <p className="tj-empty">No extra questions — applicants only enter their name.</p>
+            <p className="tj-empty">No extra questions - applicants only enter their name.</p>
           )}
         </section>
 
