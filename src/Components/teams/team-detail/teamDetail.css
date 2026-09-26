@@ -67,6 +67,7 @@
     line-height: 1.8;
     max-width: 700px;
     margin: 0 auto;
+    text-align: center;
     opacity: 0.9;
     position: relative;
     z-index: 1;
@@ -912,5 +913,108 @@
         top: auto;
         bottom: 12px;
         transform: none;
+    }
+}
+
+/* ---- Hero: banner, logo, socials ---- */
+.team-hero-back,
+.team-hero-title,
+.team-hero-tagline,
+.team-hero-logo,
+.team-socials {
+    position: relative;
+    z-index: 2;
+}
+
+.team-hero-banner {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+}
+
+.team-hero-shade {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(180deg, rgba(2, 35, 69, 0.55) 0%, rgba(2, 35, 69, 0.8) 100%);
+}
+
+.team-hero.has-banner::after {
+    display: none;
+}
+
+.team-hero-logo {
+    width: 116px;
+    height: 116px;
+    margin: 0 auto 18px;
+    border-radius: 28px;
+    background: white;
+    padding: 6px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35), 0 0 0 4px rgba(255, 255, 255, 0.18);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.team-hero-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 22px;
+}
+
+.team-hero-logo span {
+    font-family: "Heading" !important;
+    font-size: 52px;
+    color: var(--navy);
+}
+
+.team-socials {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 22px;
+}
+
+.team-social {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: white;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(6px);
+    transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.team-social:hover,
+.team-social:focus-visible {
+    color: white;
+    background: var(--brand);
+    border-color: var(--brand);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
+}
+
+@media only screen and (max-width: 800px) {
+    .team-hero-logo {
+        width: 88px;
+        height: 88px;
+        border-radius: 22px;
+    }
+
+    .team-social {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
     }
 }

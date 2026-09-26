@@ -181,3 +181,20 @@ p {
     font-size: 14px;
     color: #666;
 }
+
+.teams-card-head {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.teams-card .teams-card-logo {
+    width: 58px;
+    height: 58px;
+    padding: 4px;
+    border-radius: 14px;
+    background: white;
+    object-fit: contain;
+    box-shadow: rgba(2, 35, 69, 0.18) 0px 3px 10px;
+    flex-shrink: 0;
+}

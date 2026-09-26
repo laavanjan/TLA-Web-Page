@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { FaPlay } from "react-icons/fa";
-import { imageCandidates, youTubeThumb } from "../../../shared/mediaLinks";
+import { imageCandidates, youTubeThumb, socialPlatform } from "../../../shared/mediaLinks";
+import { SOCIAL_META } from "../socialMeta";
 
 // An <img> for Drive/Cloudinary/plain links that tries each candidate URL in
 // turn and renders `fallback` once all of them fail.
@@ -51,6 +52,36 @@ export function InstagramEmbed({ post }) {
   return (
     <div className="ig-embed">
       <iframe src={post.embedUrl} title={`Instagram ${post.kind}`} loading="lazy" scrolling="no" />
+    </div>
+  );
+}
+
+// Brand icons for a team's profile links; unrecognised sites get a globe.
+export function SocialIcons({ links, className = "team-socials" }) {
+  const items = links
+    .map((url) => ({ url, key: socialPlatform(url) }))
+    .filter((x) => x.key);
+  if (!items.length) return null;
+  return (
+    <div className={className}>
+      {items.map(({ url, key }) => {
+        const m = SOCIAL_META[key];
+        const Icon = m.icon;
+        const external = key !== "email";
+        return (
+          <a
+            key={url}
+            href={url}
+            className="team-social"
+            style={{ "--brand": m.color }}
+            aria-label={m.label}
+            title={m.label}
+            {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+          >
+            <Icon />
+          </a>
+        );
+      })}
     </div>
   );
 }

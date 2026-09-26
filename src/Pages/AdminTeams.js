@@ -20,8 +20,9 @@ import {
 
 import LotusDivider from "./LotusDivider";
 import TeamDetail from "../Components/teams/team-detail/TeamDetail";
-import { SmartImage } from "../Components/teams/team-detail/media";
+import { SmartImage, SocialIcons } from "../Components/teams/team-detail/media";
 import { SECTION_META } from "../Components/teams/sectionMeta";
+import { SOCIAL_META } from "../Components/teams/socialMeta";
 import {
   getCachedTeamPages,
   fetchTeamPages,
@@ -40,6 +41,8 @@ import {
   instagramPost,
   imageSource,
   splitLinks,
+  safeSocialUrl,
+  socialPlatform,
 } from "../shared/mediaLinks";
 import "./Frame.css";
 import "./Admin.css";
@@ -154,9 +157,26 @@ const LINK_KINDS = {
     bad: "Must be an https:// image link",
     placeholder: "Paste Google Drive or Cloudinary image links (several at once is fine)",
   },
+  social: {
+    check: socialPlatform,
+    clean: safeSocialUrl,
+    noun: "link",
+    bad: "Not a valid https:// link or email",
+    placeholder: "Paste profile links — Facebook, Instagram, YouTube, LinkedIn, TikTok, X, WhatsApp, a website or an email",
+  },
 };
 
 function LinkPreview({ kind, url }) {
+  if (kind === "social") {
+    const key = socialPlatform(url);
+    if (!key) return <FaExclamationTriangle className="ts-bad-icon" />;
+    const Icon = SOCIAL_META[key].icon;
+    return (
+      <span className="ts-social-badge" style={{ background: SOCIAL_META[key].color }}>
+        <Icon />
+      </span>
+    );
+  }
   if (kind === "youtube") {
     const id = youTubeId(url);
     return id ? <img src={youTubeThumb(id)} alt="" /> : <FaExclamationTriangle className="ts-bad-icon" />;
@@ -183,6 +203,7 @@ function linkStatus(kind, url) {
   if (!ok) return { ok: false, text: k.bad };
   if (kind === "youtube") return { ok: true, text: `YouTube video · ${ok}` };
   if (kind === "instagram") return { ok: true, text: `Instagram ${ok.kind} · ${ok.code}` };
+  if (kind === "social") return { ok: true, text: SOCIAL_META[ok].label };
   return { ok: true, text: SOURCE_LABEL[ok] };
 }
 
@@ -192,7 +213,7 @@ function LinkList({ kind, links, onChange }) {
   const k = LINK_KINDS[kind];
 
   const add = (text) => {
-    const found = splitLinks(text);
+    const found = splitLinks(text, k.clean);
     if (!found.length) {
       setNote("No links found — they must start with https://");
       return;
@@ -249,7 +270,7 @@ function LinkList({ kind, links, onChange }) {
           }}
           onPaste={(e) => {
             const text = e.clipboardData.getData("text");
-            if (splitLinks(text).length) {
+            if (splitLinks(text, k.clean).length) {
               e.preventDefault();
               add(text);
             }
@@ -600,6 +621,25 @@ function SectionPicker({ onPick, onClose }) {
   );
 }
 
+function HeroMini({ page }) {
+  const socials = [...new Set(page.socials.map(safeSocialUrl).filter(Boolean))];
+  return (
+    <div className={`ts-hero-mini${page.banner ? " has-banner" : ""}`}>
+      {page.banner && <SmartImage src={page.banner} width={900} alt="" className="ts-hero-mini-banner" />}
+      <div className="ts-hero-mini-inner">
+        {page.logo && (
+          <div className="ts-hero-mini-logo">
+            <SmartImage src={page.logo} width={200} alt="" fallback={<FaExclamationTriangle />} />
+          </div>
+        )}
+        <strong>{page.title || "Team name"}</strong>
+        {page.tagline && <span className="ts-hero-mini-tagline">{page.tagline}</span>}
+        <SocialIcons links={socials} className="team-socials ts-hero-mini-socials" />
+      </div>
+    </div>
+  );
+}
+
 // ---- Page -----------------------------------------------------------------
 
 export default function AdminTeams() {
@@ -744,6 +784,7 @@ export default function AdminTeams() {
                 onClick={() => selectTeam(p.id)}
               >
                 <span className="ts-team-title">
+                  {shown.logo && <SmartImage src={shown.logo} width={80} alt="" className="ts-team-logo" />}
                   {shown.title}
                   {active && dirty && <span className="ts-dirty-dot" title="Unpublished changes" />}
                 </span>
@@ -803,13 +844,14 @@ export default function AdminTeams() {
               <section className="tj-section ts-header-card">
                 <header className="tj-section-head">
                   <div>
-                    <h3 className="tj-h3">Page header</h3>
-                    <p className="tj-muted">The banner at the top of the team page.</p>
+                    <h3 className="tj-h3">Profile &amp; header</h3>
+                    <p className="tj-muted">Logo, banner and social links at the top of the page.</p>
                   </div>
                   <Link to={`/teams/${draft.id}`} target="_blank" className="tj-btn tj-btn-ghost">
                     <FaExternalLinkAlt /> Live page
                   </Link>
                 </header>
+                <HeroMini page={draft} />
                 <Field label="Team name">
                   <input className="tj-input" value={draft.title} onChange={(e) => setHeader({ title: e.target.value })} />
                 </Field>
@@ -824,7 +866,17 @@ export default function AdminTeams() {
                     onChange={(e) => setHeader({ summary: e.target.value })}
                   />
                 </Field>
+                <ImageField label="Team logo" value={draft.logo} onChange={(v) => setHeader({ logo: v })} />
+                <small className="tj-muted ts-field-note">Square PNG with a transparent or white background looks best.</small>
+                <ImageField label="Banner image (optional)" value={draft.banner} onChange={(v) => setHeader({ banner: v })} />
+                <small className="tj-muted ts-field-note">Leave empty to keep the default blue background.</small>
                 <ImageField label="Cover photo" value={draft.cover} onChange={(v) => setHeader({ cover: v })} />
+                <div className="tj-control">
+                  <span className="tj-control-label">
+                    Social links <em className="tj-muted">— icons are picked automatically</em>
+                  </span>
+                  <LinkList kind="social" links={draft.socials} onChange={(socials) => setHeader({ socials })} />
+                </div>
               </section>
             </div>
 

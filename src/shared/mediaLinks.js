@@ -100,10 +100,51 @@ export function imageCandidates(url, width = 1600) {
   return [s];
 }
 
-// Splits pasted text into individual http(s) links (newlines, spaces, commas).
-export function splitLinks(text) {
+// Splits pasted text into individual links (newlines, spaces, commas).
+export function splitLinks(text, clean = safeUrl) {
   return String(text || "")
     .split(/[\s,]+/)
-    .map(safeUrl)
+    .map(clean)
     .filter(Boolean);
+}
+
+// ---- Social profiles ------------------------------------------------------
+
+const EMAIL_RE = /^[^\s@:/]+@[^\s@/]+\.[^\s@/]+$/;
+
+// Like safeUrl, but also accepts an email (bare or mailto:) for a contact icon.
+export function safeSocialUrl(url) {
+  const s = String(url || "").trim();
+  if (/^mailto:/i.test(s)) return EMAIL_RE.test(s.slice(7)) ? `mailto:${s.slice(7)}` : "";
+  if (EMAIL_RE.test(s)) return `mailto:${s}`;
+  return safeUrl(s);
+}
+
+const SOCIAL_HOSTS = [
+  ["facebook", ["facebook.com", "fb.com", "fb.me"]],
+  ["instagram", ["instagram.com"]],
+  ["youtube", ["youtube.com", "youtu.be"]],
+  ["linkedin", ["linkedin.com", "lnkd.in"]],
+  ["tiktok", ["tiktok.com"]],
+  ["x", ["x.com", "twitter.com"]],
+  ["threads", ["threads.net", "threads.com"]],
+  ["whatsapp", ["wa.me", "whatsapp.com"]],
+  ["telegram", ["t.me", "telegram.me"]],
+  ["github", ["github.com"]],
+  ["discord", ["discord.gg", "discord.com"]],
+  ["medium", ["medium.com"]],
+  ["spotify", ["spotify.com"]],
+];
+
+// Which network a profile link belongs to — "website" for anything else.
+export function socialPlatform(url) {
+  const s = safeSocialUrl(url);
+  if (!s) return null;
+  if (s.startsWith("mailto:")) return "email";
+  const p = parse(s);
+  if (!p) return null;
+  const hit = SOCIAL_HOSTS.find(([, hosts]) =>
+    hosts.some((h) => p.host === h || p.host.endsWith(`.${h}`))
+  );
+  return hit ? hit[0] : "website";
 }
