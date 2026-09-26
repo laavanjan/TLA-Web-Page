@@ -2,22 +2,23 @@ import React from "react";
 import { Helmet } from "react-helmet";
 import { useParams } from "react-router-dom";
 import TeamDetail from "../Components/teams/team-detail/TeamDetail";
-import { TeamsData } from "../Components/teams/teamsData";
+import { useTeamPages } from "../shared/teamPages";
 
 function TeamDetailPage() {
   const { teamId } = useParams();
-  const team = TeamsData.find((t) => String(t.id) === teamId);
+  const pages = useTeamPages();
+  const page = pages.find((p) => String(p.id) === teamId);
 
   return (
     <>
       <Helmet>
         <title>
-          {team ? `${team.title} | தமிழ் இலக்கிய மன்றம்` : "அணி | தமிழ் இலக்கிய மன்றம்"}
+          {page ? `${page.title} | தமிழ் இலக்கிய மன்றம்` : "அணி | தமிழ் இலக்கிய மன்றம்"}
         </title>
-        <meta name="description" content={team ? team.tagline : "அணி விபரங்கள்"} />
+        <meta name="description" content={page ? page.tagline : "அணி விபரங்கள்"} />
         <meta name="keywords" content="TLA, Tamil Literary Association, Team" />
       </Helmet>
-      <TeamDetail />
+      <TeamDetail page={page} />
     </>
   );
 }

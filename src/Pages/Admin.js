@@ -38,6 +38,13 @@ const TILES = [
     category: "content",
   },
   {
+    to: "/admin/teams",
+    icon: "🧩",
+    title: "Team Pages",
+    desc: "Edit each team's page — sections, YouTube & Instagram posts, competitions, photos.",
+    category: "content",
+  },
+  {
     to: "/admin/team-join",
     icon: "🤝",
     title: "Team Join Requests",

@@ -108,3 +108,76 @@ p {
     color: #e6b422;
     white-space: nowrap;
 }
+
+.teams-upcoming {
+    margin-bottom: 5%;
+}
+
+.teams-upcoming-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: "Heading" !important;
+    font-size: 26px;
+    color: #022345;
+    margin: 0 0 14px 0;
+}
+
+.teams-upcoming-title svg {
+    color: #c8932f;
+}
+
+.teams-upcoming-row {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    padding: 4px 4px 12px;
+    scroll-snap-type: x mandatory;
+}
+
+.teams-upcoming-card {
+    flex: 0 0 260px;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 18px 20px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #fffaf0 0%, #fff 70%);
+    border: 1px solid rgba(200, 147, 47, 0.5);
+    text-decoration: none;
+    color: #022345;
+    box-shadow: rgba(0, 0, 0, 0.12) 0px 3px 8px;
+    transition: transform 0.2s ease;
+}
+
+.teams-upcoming-card:hover {
+    transform: translateY(-3px);
+    color: #022345;
+}
+
+.teams-upcoming-days {
+    align-self: flex-start;
+    background: #022345;
+    color: #e6b422;
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-family: "Para" !important;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.teams-upcoming-name {
+    font-family: "Heading" !important;
+    font-size: 20px;
+    line-height: 1.4;
+}
+
+.teams-upcoming-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: "Para" !important;
+    font-size: 14px;
+    color: #666;
+}

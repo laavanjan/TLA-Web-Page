@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { FaArrowRight } from "react-icons/fa";
+import { FaArrowRight, FaTrophy, FaCalendarAlt } from "react-icons/fa";
 import "./teams.css";
-import { TeamsData } from "./teamsData";
+import { useTeamPages, upcomingCompetitions, daysUntil } from "../../shared/teamPages";
 import {
     fetchTeamJoinConfig,
     getCachedTeamJoinConfig,
@@ -10,6 +10,8 @@ import {
 
 const Teams = () => {
     const [joinCfg, setJoinCfg] = useState(getCachedTeamJoinConfig);
+    const pages = useTeamPages();
+    const upcoming = upcomingCompetitions(pages);
 
     useEffect(() => {
         let alive = true;
@@ -44,15 +46,43 @@ const Teams = () => {
                 </Link>
             )}
 
-            {TeamsData.map((teamsData) => {
+            {upcoming.length > 0 && (
+                <section className="teams-upcoming">
+                    <p className="teams-upcoming-title">
+                        <FaTrophy /> வரவிருக்கும் போட்டிகள்
+                    </p>
+                    <div className="teams-upcoming-row">
+                        {upcoming.map((c) => {
+                            const days = daysUntil(c.date);
+                            return (
+                                <Link
+                                    to={`/teams/${c.teamId}`}
+                                    key={`${c.teamId}-${c.id}`}
+                                    className="teams-upcoming-card"
+                                >
+                                    <span className="teams-upcoming-days">
+                                        {days === 0 ? "இன்று!" : `${days} நாட்களில்`}
+                                    </span>
+                                    <span className="teams-upcoming-name">{c.name}</span>
+                                    <span className="teams-upcoming-meta">
+                                        <FaCalendarAlt /> {c.date} · {c.teamTitle}
+                                    </span>
+                                </Link>
+                            );
+                        })}
+                    </div>
+                </section>
+            )}
+
+            {pages.map((team) => {
                 return (
                     <Link
-                        to={`/teams/${teamsData.id}`}
-                        key={teamsData.id}
+                        to={`/teams/${team.id}`}
+                        key={team.id}
                         className="teams-card"
                     >
-                        <p className="teams-card-title">{teamsData.title}</p>
-                        <p className="teams-card-description">{teamsData.description}</p>
+                        <p className="teams-card-title">{team.title}</p>
+                        <p className="teams-card-description">{team.summary}</p>
                         <span className="teams-card-more">
                             மேலும் அறிய <FaArrowRight />
                         </span>
