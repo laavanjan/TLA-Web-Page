@@ -43,6 +43,7 @@ import AdminAccount from "./Pages/AdminAccount";
 import AdminBooks from "./Pages/AdminBooks";
 import AdminContact from "./Pages/AdminContact";
 import AdminTeamJoin from "./Pages/AdminTeamJoin";
+import AdminTeams from "./Pages/AdminTeams";
 import AdminLogin from "./Pages/AdminLogin";
 import RequireAdmin from "./Pages/RequireAdmin";
 
@@ -238,6 +239,14 @@ function Router() {
       element: (
         <RequireAdmin>
           <AdminContact />
+        </RequireAdmin>
+      ),
+    },
+    {
+      path: "admin/teams",
+      element: (
+        <RequireAdmin>
+          <AdminTeams />
         </RequireAdmin>
       ),
     },
