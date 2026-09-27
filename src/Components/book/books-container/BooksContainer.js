@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./booksContainer.css";
 import { Container } from "@material-ui/core";
-import thamilaruvi26Cover from "../../../images/Books/thamilaruvi26-cover.webp";
+import thamilaruvi26Cover from "../../../images/Books/tla-book-cover.webp";
 
 // Books added locally (no backend record) that open their own /books/:slug
 // viewer page — see src/Pages/booksData.js and src/Pages/BookViewer.js.
