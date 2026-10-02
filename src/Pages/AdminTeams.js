@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet";
 import { Link } from "react-router-dom";
 import {
@@ -19,6 +19,7 @@ import {
 } from "react-icons/fa";
 
 import LotusDivider from "./LotusDivider";
+import GalleryEditor from "./AdminTeamsGallery";
 import TeamDetail from "../Components/teams/team-detail/TeamDetail";
 import { SmartImage, SocialIcons } from "../Components/teams/team-detail/media";
 import { SECTION_META } from "../Components/teams/sectionMeta";
@@ -35,6 +36,7 @@ import {
   cleanPage,
   SECTION_TYPES,
 } from "../shared/teamPages";
+import { UploadContext } from "../shared/useImageUploads";
 import {
   youTubeId,
   youTubeThumb,
@@ -136,7 +138,7 @@ function ImageField({ label, value, onChange }) {
   );
 }
 
-// ---- Link lists (YouTube / Instagram / gallery) ---------------------------
+// ---- Link lists (YouTube / Instagram / social) ----------------------------
 
 const LINK_KINDS = {
   youtube: {
@@ -150,12 +152,6 @@ const LINK_KINDS = {
     noun: "post",
     bad: "Not an Instagram post or reel link",
     placeholder: "Paste Instagram post or reel links - instagram.com/p/… or /reel/… (several at once is fine)",
-  },
-  gallery: {
-    check: imageSource,
-    noun: "photo",
-    bad: "Must be an https:// image link",
-    placeholder: "Paste Google Drive or Cloudinary image links (several at once is fine)",
   },
   social: {
     check: socialPlatform,
@@ -495,7 +491,7 @@ function CompetitionsEditor({ s, set }) {
   );
 }
 
-function SectionBody({ s, set }) {
+function SectionBody({ s, set, onUpdate }) {
   switch (s.type) {
     case "text":
       return <TextEditor s={s} set={set} />;
@@ -508,7 +504,7 @@ function SectionBody({ s, set }) {
     case "competitions":
       return <CompetitionsEditor s={s} set={set} />;
     case "gallery":
-      return <LinkList kind="gallery" links={s.images} onChange={(images) => set({ ...s, images })} />;
+      return <GalleryEditor s={s} onUpdate={onUpdate} />;
     default:
       return <LinkList kind={s.type} links={s.links} onChange={(links) => set({ ...s, links })} />;
   }
@@ -536,10 +532,14 @@ function countLabel(s) {
   }
 }
 
-function SectionCard({ s, index, total, open, onToggle, onChange, onDelete, onMove }) {
+function SectionCard({ s, index, total, open, onToggle, onChange, onUpdate, onDelete, onMove }) {
   const meta = SECTION_META[s.type];
   const Icon = meta.icon;
   const count = countLabel(s);
+  // Once opened, the editor stays mounted while collapsed so an upload in
+  // progress isn't cancelled by folding the section away.
+  const opened = useRef(false);
+  if (open) opened.current = true;
 
   return (
     <div className={`tj-field ts-section-card ts-type-${s.type}${open ? " is-open" : ""}${s.hidden ? " is-hidden" : ""}`}>
@@ -576,8 +576,8 @@ function SectionCard({ s, index, total, open, onToggle, onChange, onDelete, onMo
         </div>
       </div>
 
-      {open && (
-        <div className="tj-field-body">
+      {opened.current && (
+        <div className="tj-field-body" style={open ? undefined : { display: "none" }}>
           <Field label="Section heading (shown on the page)">
             <input
               className="tj-input"
@@ -586,7 +586,7 @@ function SectionCard({ s, index, total, open, onToggle, onChange, onDelete, onMo
               placeholder={meta.label}
             />
           </Field>
-          <SectionBody s={s} set={onChange} />
+          <SectionBody s={s} set={onChange} onUpdate={onUpdate} />
         </div>
       )}
     </div>
@@ -653,8 +653,12 @@ export default function AdminTeams() {
   const [picker, setPicker] = useState(false);
   const [msg, setMsg] = useState({ type: "", text: "" });
   const [busy, setBusy] = useState(false);
+  const [uploads, setUploads] = useState(0); // editors with uploads in flight
   const touched = useRef(false);
   const activeRef = useRef(activeId);
+
+  const onBusy = useCallback((d) => setUploads((n) => Math.max(0, n + d)), []);
+  const uploadCtx = useMemo(() => ({ teamId: activeId, onBusy }), [activeId, onBusy]);
 
   useEffect(() => {
     fetchTeamPages()
@@ -672,14 +676,14 @@ export default function AdminTeams() {
   const dirty = JSON.stringify(draft) !== savedJson;
 
   useEffect(() => {
-    if (!dirty) return undefined;
+    if (!dirty && !uploads) return undefined;
     const warn = (e) => {
       e.preventDefault();
       e.returnValue = "";
     };
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
-  }, [dirty]);
+  }, [dirty, uploads]);
 
   const update = (fn) => {
     touched.current = true;
@@ -688,6 +692,10 @@ export default function AdminTeams() {
   };
 
   const setSection = (i, next) => update((d) => ({ ...d, sections: setAt(d.sections, i, next) }));
+  // By id, from the latest state — uploads finish asynchronously, possibly
+  // after the section was moved, and must never land in the wrong section.
+  const updateSection = (id, fn) =>
+    update((d) => ({ ...d, sections: d.sections.map((x) => (x.id === id ? fn(x) : x)) }));
   const moveSection = (i, dir) => update((d) => ({ ...d, sections: move(d.sections, i, dir) }));
   const removeSection = (i) => {
     const s = draft.sections[i];
@@ -703,6 +711,7 @@ export default function AdminTeams() {
 
   const selectTeam = (id) => {
     if (id === activeId) return;
+    if (uploads && !window.confirm("Photos are still uploading for this team. Cancel the uploads and switch?")) return;
     if (dirty && !window.confirm("You have unpublished changes for this team. Discard them?")) return;
     const p = pages.find((x) => x.id === id);
     activeRef.current = id;
@@ -724,6 +733,7 @@ export default function AdminTeams() {
 
   const onSave = async (e) => {
     e.preventDefault();
+    if (uploads > 0) return;
     setBusy(true);
     setMsg({ type: "", text: "" });
     try {
@@ -732,7 +742,7 @@ export default function AdminTeams() {
       setDraft(saved);
       setSavedJson(JSON.stringify(saved));
       touched.current = false;
-      setMsg({ type: "ok", text: "Published the team page is live with your changes." });
+      setMsg({ type: "ok", text: "Published - the team page is live with your changes." });
     } catch (err) {
       setMsg({ type: "err", text: err.message || "Could not save." });
     } finally {
@@ -797,8 +807,10 @@ export default function AdminTeams() {
           })}
         </div>
 
-        {view === "edit" && (
-          <form className="tj-settings" onSubmit={onSave}>
+        {/* Hidden rather than unmounted in Preview, so uploads keep going. Keyed
+            by team so in-flight uploads can never land in another team. */}
+        <UploadContext.Provider value={uploadCtx}>
+          <form key={activeId} className="tj-settings" onSubmit={onSave} style={view === "edit" ? undefined : { display: "none" }}>
             <div className="ts-tip">
               <FaLightbulb />
               <span>
@@ -832,6 +844,7 @@ export default function AdminTeams() {
                     open={openKey === s.id}
                     onToggle={() => setOpenKey((k) => (k === s.id ? null : s.id))}
                     onChange={(next) => setSection(i, next)}
+                    onUpdate={(fn) => updateSection(s.id, fn)}
                     onDelete={() => removeSection(i)}
                     onMove={(dir) => moveSection(i, dir)}
                   />
@@ -908,21 +921,26 @@ export default function AdminTeams() {
 
             <div className={`tj-savebar${dirty ? " is-dirty" : ""}`}>
               <span className={`tj-savebar-msg${msg.type === "ok" ? " is-ok" : msg.type === "err" ? " is-err" : ""}`}>
-                {msg.text || (dirty ? "You have unpublished changes" : "Everything is published")}
+                {msg.text ||
+                  (uploads > 0
+                    ? "Uploading photos - Publish unlocks when they finish"
+                    : dirty
+                    ? "You have unpublished changes"
+                    : "Everything is published")}
               </span>
               <span className="ts-savebar-actions">
                 {dirty && (
-                  <button type="button" className="tj-btn tj-btn-ghost" onClick={discard} disabled={busy}>
+                  <button type="button" className="tj-btn tj-btn-ghost" onClick={discard} disabled={busy || uploads > 0}>
                     Discard
                   </button>
                 )}
-                <button type="submit" className="frame-btn frame-btn-primary tj-save-btn" disabled={busy || !dirty}>
-                  {busy ? "Publishing…" : "Publish"}
+                <button type="submit" className="frame-btn frame-btn-primary tj-save-btn" disabled={busy || !dirty || uploads > 0}>
+                  {busy ? "Publishing…" : uploads > 0 ? "Uploading…" : "Publish"}
                 </button>
               </span>
             </div>
           </form>
-        )}
+        </UploadContext.Provider>
       </div>
 
       {view === "preview" && (
