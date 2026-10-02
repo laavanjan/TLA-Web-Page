@@ -42,6 +42,7 @@ import {
 } from "../shared/teamPages";
 import { deleteImages } from "../shared/cloudinaryUpload";
 import { UploadContext, useImageUploads } from "../shared/useImageUploads";
+import { useAdminRole, canEditTeam } from "../admin/adminRole";
 import {
   youTubeId,
   youTubeThumb,
@@ -700,8 +701,37 @@ function HeroMini({ page }) {
 
 // ---- Page -----------------------------------------------------------------
 
+// Team editors only ever see the teams they're assigned to (the database
+// enforces this too; see supabase/migrations/team_editors.sql).
+const pagesFor = (who, list) => list.filter((p) => canEditTeam(who, p.id));
+
 export default function AdminTeams() {
-  const [initial] = useState(getCachedTeamPages);
+  const who = useAdminRole();
+  if (!getCachedTeamPages().some((p) => canEditTeam(who, p.id))) {
+    return (
+      <div className="frame-page admin-page">
+        <Helmet>
+          <title>Team pages · Admin</title>
+        </Helmet>
+        <header className="frame-topbar">
+          <span className="frame-brand">தமிழ் இலக்கிய மன்றம்</span>
+          <LotusDivider />
+          <span className="frame-subtitle">Admin · Team pages</span>
+        </header>
+        <div className="admin-hub tj">
+          <Link to="/admin" className="tj-back">
+            ← Dashboard
+          </Link>
+          <p className="tj-empty">You're not assigned to a team yet. Ask a main admin to add you to one.</p>
+        </div>
+      </div>
+    );
+  }
+  return <TeamPagesStudio who={who} />;
+}
+
+function TeamPagesStudio({ who }) {
+  const [initial] = useState(() => pagesFor(who, getCachedTeamPages()));
   const [pages, setPages] = useState(initial);
   const [activeId, setActiveId] = useState(initial[0].id);
   const [draft, setDraft] = useState(initial[0]);
@@ -720,7 +750,9 @@ export default function AdminTeams() {
 
   useEffect(() => {
     fetchTeamPages()
-      .then((p) => {
+      .then((all) => {
+        const p = pagesFor(who, all);
+        if (!p.length) return;
         setPages(p);
         if (!touched.current) {
           const cur = p.find((x) => x.id === activeRef.current) || p[0];
@@ -729,7 +761,7 @@ export default function AdminTeams() {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [who]);
 
   const dirty = JSON.stringify(draft) !== savedJson;
 
