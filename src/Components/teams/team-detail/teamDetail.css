@@ -945,25 +945,49 @@
     }
 }
 
+/* Height left for the photo once the close button, counter and caption fit. */
+.team-lightbox {
+    --avail-h: calc(100vh - 140px);
+}
+
+@supports (height: 100dvh) {
+    .team-lightbox {
+        --avail-h: calc(100dvh - 140px);
+    }
+}
+
 .team-lightbox-figure {
     margin: 0;
-    max-width: 100%;
+    width: 100%;
     max-height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 12px;
     min-height: 0;
+    /* Clicking the empty space beside the photo still closes the lightbox. */
+    pointer-events: none;
+}
+
+.team-lightbox-figure > * {
+    pointer-events: auto;
 }
 
 .team-lightbox img {
     max-width: 100%;
-    max-height: calc(100vh - 140px);
-    max-height: calc(100dvh - 140px);
+    max-height: var(--avail-h);
     object-fit: contain;
     border-radius: 6px;
     cursor: default;
     animation: team-fade 0.25s ease;
+}
+
+/* Once the photo's real size is known: as big as the screen allows, but
+   small photos are only enlarged up to --max-w (2x their real width). */
+.team-lightbox img.is-sized {
+    width: min(100%, var(--max-w), calc(var(--avail-h) * var(--ratio)));
+    height: auto;
+    aspect-ratio: var(--ratio);
 }
 
 .team-lightbox figcaption {
@@ -1050,9 +1074,14 @@
         padding: 64px 8px 76px;
     }
 
-    .team-lightbox img {
-        max-height: calc(100vh - 190px);
-        max-height: calc(100dvh - 190px);
+    .team-lightbox {
+        --avail-h: calc(100vh - 190px);
+    }
+
+    @supports (height: 100dvh) {
+        .team-lightbox {
+            --avail-h: calc(100dvh - 190px);
+        }
     }
 
     .team-lightbox-nav {

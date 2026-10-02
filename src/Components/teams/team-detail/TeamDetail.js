@@ -246,6 +246,10 @@ const GALLERY_PAGE = 12;
 const THUMB_WIDTHS = [320, 480, 720, 960];
 // Square thumbnails cropped by Cloudinary around faces/subjects (g_auto).
 const THUMB_CROP = "c_fill,g_auto,ar_1:1";
+// Small photos may be enlarged in the lightbox, but only this much — beyond
+// that they turn to mush.
+const MAX_UPSCALE = 2;
+
 // One full-size URL per screen. A srcset can't be used here: its width
 // descriptors would claim e.g. 2000px for a 400px photo (Cloudinary never
 // upscales), and the browser would then draw that photo even smaller.
@@ -256,6 +260,9 @@ function Lightbox({ images, index, title, onIndex, onClose }) {
   const img = images[index];
   const closeRef = useRef(null);
   const touch = useRef(null);
+  // Real pixel size: saved at upload, or read from the file once it loads.
+  const [loaded, setLoaded] = useState({});
+  const dims = img.width && img.height ? { w: img.width, h: img.height } : loaded[img.id];
   // Tracks the index between renders so several quick key presses each move.
   const at = useRef(index);
   at.current = index;
@@ -344,6 +351,12 @@ function Lightbox({ images, index, title, onIndex, onClose }) {
           width={fullWidth()}
           loading="eager"
           alt={img.caption || `${title} ${index + 1}`}
+          className={dims ? "is-sized" : undefined}
+          style={dims ? { "--max-w": `${dims.w * MAX_UPSCALE}px`, "--ratio": dims.w / dims.h } : undefined}
+          onLoad={(e) => {
+            const { naturalWidth: w, naturalHeight: h } = e.currentTarget;
+            if (w && h && !loaded[img.id]) setLoaded((m) => ({ ...m, [img.id]: { w, h } }));
+          }}
         />
         {img.caption && <figcaption>{img.caption}</figcaption>}
       </figure>
