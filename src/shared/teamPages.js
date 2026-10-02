@@ -73,6 +73,27 @@ export const blankCompetition = () => ({
 
 const str = (v, max = 5000) => String(v == null ? "" : v).slice(0, max).trim();
 const list = (arr, fn) => (Array.isArray(arr) ? arr.map(fn).filter(Boolean) : []);
+const dim = (v) => {
+  const n = Math.round(Number(v));
+  return n > 0 && n <= 20000 ? n : 0;
+};
+
+export const blankImage = (url = "") => ({ id: newId("g"), url, caption: "", width: 0, height: 0 });
+
+// Gallery photos are { id, url, caption, width, height }. Galleries saved
+// before uploads existed hold plain URL strings; those still load.
+function sanitizeImage(raw) {
+  const r = typeof raw === "string" ? { url: raw } : raw || {};
+  const url = safeUrl(r.url);
+  if (!url) return null;
+  return {
+    id: str(r.id, 80) || newId("g"),
+    url,
+    caption: str(r.caption, 300),
+    width: dim(r.width),
+    height: dim(r.height),
+  };
+}
 
 function sanitizeSection(raw) {
   const r = raw || {};
@@ -141,7 +162,7 @@ function sanitizeSection(raw) {
         }),
       };
     case "gallery":
-      return { ...base, images: list(r.images, (u) => safeUrl(u) || null) };
+      return { ...base, images: list(r.images, sanitizeImage) };
     default:
       return { ...base, links: list(r.links, (u) => safeUrl(u) || null) };
   }
