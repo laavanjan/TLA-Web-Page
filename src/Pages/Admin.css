@@ -368,6 +368,14 @@
   text-align: left;
 }
 
+.admin-note {
+  color: #ffc98a;
+  font-size: 12.5px;
+  line-height: 1.5;
+  margin: 8px 0 0;
+  text-align: left;
+}
+
 .admin-account {
   margin-top: 20px;
 }
