@@ -2,32 +2,12 @@
 // secret: the `cloudinary-sign` Supabase Edge Function checks the admin's
 // login and hands back one-off signatures, then files go straight from the
 // browser to Cloudinary. See supabase/functions/cloudinary-sign/index.ts.
-import { supabase } from "../helpers/supabaseClient";
+import { callEdgeFunction } from "../helpers/edgeFunction";
 
 const FN = "cloudinary-sign";
 const SIGNATURE_TTL_MS = 50 * 60 * 1000; // Cloudinary accepts them for 1 hour
 
-async function callFn(body) {
-  const { data, error } = await supabase.functions.invoke(FN, { body });
-  if (!error) return data;
-  let msg = error.message || "Request failed.";
-  const res = error.context;
-  if (res && typeof res.json === "function") {
-    if (res.status === 404) {
-      msg = "Image uploads aren't set up yet - the cloudinary-sign function isn't deployed.";
-    } else {
-      try {
-        const j = await res.json();
-        if (j && j.error) msg = j.error;
-      } catch {
-        /* keep the generic message */
-      }
-    }
-  } else if (error.name === "FunctionsFetchError") {
-    msg = "Couldn't reach the upload service. Check your connection, or that the cloudinary-sign function is deployed.";
-  }
-  throw new Error(msg);
-}
+const callFn = (body) => callEdgeFunction(FN, body);
 
 // -> [{ cloudName, apiKey, signature, params, fetchedAt }]
 export async function signUploads(teamId, count) {
