@@ -26,6 +26,7 @@ import {
   fetchTeamJoinApplications,
   deleteTeamJoinApplication,
 } from "../shared/teamJoinApplications";
+import { useAdminRole } from "../admin/adminRole";
 import "./Frame.css";
 import "./Admin.css";
 
@@ -395,7 +396,9 @@ function csvCell(v) {
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
-function ApplicationsTab() {
+// Team editors only receive their own teams' applications (database rule), so
+// their team filter only lists teams that actually appear.
+function ApplicationsTab({ editor = false }) {
   const [cfg, setCfg] = useState(getCachedTeamJoinConfig);
   const [apps, setApps] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -507,7 +510,7 @@ function ApplicationsTab() {
               placeholder="Search name, district, faculty…"
             />
           </label>
-          {teamField && (
+          {teamField && (!editor || Object.keys(teamCounts).length > 1) && (
             <div className="tj-team-chips">
               <button
                 type="button"
@@ -516,7 +519,7 @@ function ApplicationsTab() {
               >
                 All <b>{apps.length}</b>
               </button>
-              {teamField.options.map((t) => (
+              {teamField.options.filter((t) => !editor || teamCounts[t]).map((t) => (
                 <button
                   key={t}
                   type="button"
@@ -599,7 +602,31 @@ function ApplicationsTab() {
 }
 
 export default function AdminTeamJoin() {
+  const editor = useAdminRole().role === "editor";
   const [tab, setTab] = useState("settings");
+
+  if (editor) {
+    return (
+      <div className="frame-page admin-page">
+        <Helmet>
+          <title>Join requests · Admin</title>
+        </Helmet>
+        <header className="frame-topbar">
+          <span className="frame-brand">தமிழ் இலக்கிய மன்றம்</span>
+          <LotusDivider />
+          <span className="frame-subtitle">Join requests</span>
+        </header>
+        <div className="admin-hub admin-hub-xwide tj">
+          <div className="tj-topnav">
+            <Link to="/admin" className="tj-back">
+              ← Dashboard
+            </Link>
+          </div>
+          <ApplicationsTab editor />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="frame-page admin-page">
