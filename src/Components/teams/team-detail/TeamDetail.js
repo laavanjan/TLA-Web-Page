@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   FaArrowLeft,
@@ -16,7 +16,7 @@ import {
 import "./teamDetail.css";
 import { SECTION_META } from "../sectionMeta";
 import { SmartImage, LiteYouTube, InstagramEmbed, SocialIcons } from "./media";
-import { youTubeId, instagramPost } from "../../../shared/mediaLinks";
+import { youTubeId, instagramPost, imageCandidates } from "../../../shared/mediaLinks";
 import { competitionStatus, daysUntil } from "../../../shared/teamPages";
 
 const formatDate = (date) => {
@@ -241,71 +241,188 @@ function CompetitionsSection({ s }) {
   );
 }
 
-function GallerySection({ s }) {
-  const [open, setOpen] = useState(-1);
-  const count = s.images.length;
+const GALLERY_PAGE = 12;
+const THUMB_WIDTHS = [320, 480, 720, 960];
+const FULL_WIDTHS = [800, 1200, 1600, 2000, 2560];
+// Square thumbnails cropped by Cloudinary around faces/subjects (g_auto).
+const THUMB_CROP = "c_fill,g_auto,ar_1:1";
+
+function Lightbox({ images, index, title, onIndex, onClose }) {
+  const count = images.length;
+  const img = images[index];
+  const closeRef = useRef(null);
+  const touch = useRef(null);
+  // Tracks the index between renders so several quick key presses each move.
+  const at = useRef(index);
+  at.current = index;
+  const go = (d) => {
+    at.current = (at.current + d + count) % count;
+    onIndex(at.current);
+  };
+  // Latest values for the window listener, which is attached once.
+  const live = useRef({});
+  live.current = { go, onClose };
 
   useEffect(() => {
-    if (open < 0) return undefined;
     const onKey = (e) => {
-      if (e.key === "Escape") setOpen(-1);
-      if (e.key === "ArrowRight") setOpen((i) => (i + 1) % count);
-      if (e.key === "ArrowLeft") setOpen((i) => (i - 1 + count) % count);
+      if (e.key === "Escape") live.current.onClose();
+      if (e.key === "ArrowRight") live.current.go(1);
+      if (e.key === "ArrowLeft") live.current.go(-1);
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, count]);
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    if (closeRef.current) closeRef.current.focus();
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = overflow;
+    };
+  }, []);
+
+  // Warm the cache for the neighbours so next/previous feels instant.
+  useEffect(() => {
+    if (count < 2) return;
+    [index + 1, index - 1].forEach((i) => {
+      const n = images[(i + count) % count];
+      const [url] = imageCandidates(n.url, Math.min(2000, window.innerWidth * (window.devicePixelRatio || 1)));
+      if (url) new Image().src = url;
+    });
+  }, [index, images, count]);
+
+  const onTouchStart = (e) => {
+    const t = e.touches[0];
+    touch.current = { x: t.clientX, y: t.clientY };
+  };
+  const onTouchEnd = (e) => {
+    if (!touch.current) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touch.current.x;
+    const dy = t.clientY - touch.current.y;
+    touch.current = null;
+    if (count > 1 && Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) go(dx < 0 ? 1 : -1);
+    else if (dy > 90 && Math.abs(dy) > Math.abs(dx) * 1.5) onClose(); // swipe down to close
+  };
+
+  const stop = (e) => e.stopPropagation();
+
+  return (
+    <div
+      className="team-lightbox"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${title} - ${index + 1} / ${count}`}
+      onClick={onClose}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+    >
+      <button type="button" ref={closeRef} className="team-lightbox-close" aria-label="Close" onClick={onClose}>
+        <FaTimes />
+      </button>
+      {count > 1 && (
+        <button
+          type="button"
+          className="team-lightbox-nav is-prev"
+          aria-label="Previous"
+          onClick={(e) => {
+            stop(e);
+            go(-1);
+          }}
+        >
+          <FaChevronLeft />
+        </button>
+      )}
+      <figure className="team-lightbox-figure" onClick={stop}>
+        <SmartImage
+          key={img.id}
+          src={img.url}
+          width={2000}
+          widths={FULL_WIDTHS}
+          sizes="100vw"
+          loading="eager"
+          alt={img.caption || `${title} ${index + 1}`}
+        />
+        {img.caption && <figcaption>{img.caption}</figcaption>}
+      </figure>
+      {count > 1 && (
+        <button
+          type="button"
+          className="team-lightbox-nav is-next"
+          aria-label="Next"
+          onClick={(e) => {
+            stop(e);
+            go(1);
+          }}
+        >
+          <FaChevronRight />
+        </button>
+      )}
+      {count > 1 && (
+        <span className="team-lightbox-count" aria-live="polite">
+          {index + 1} / {count}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function GallerySection({ s }) {
+  const [open, setOpen] = useState(-1);
+  const [shown, setShown] = useState(GALLERY_PAGE);
+  const tiles = useRef([]);
+  const count = s.images.length;
+  const visible = s.images.slice(0, shown);
+  const remaining = count - visible.length;
+  const featured = count >= 5;
+
+  const close = () => {
+    const el = tiles.current[open]; // hand focus back to the photo that was open
+    setOpen(-1);
+    if (el) setTimeout(() => el.focus(), 0);
+  };
+
+  const onIndex = (n) => {
+    setOpen(n);
+    // Browsing past the visible grid in the lightbox reveals those photos too,
+    // so closing lands on a tile that exists.
+    if (n >= shown) setShown(Math.ceil((n + 1) / GALLERY_PAGE) * GALLERY_PAGE);
+  };
 
   return (
     <>
-      <div className="team-gallery">
-        {s.images.map((src, i) => (
-          <button type="button" className="team-gallery-item" key={`${src}-${i}`} onClick={() => setOpen(i)}>
-            <SmartImage src={src} width={800} alt={`${s.title} ${i + 1}`} />
+      <div className={`team-gallery${featured ? " is-featured" : ""}`}>
+        {visible.map((img, i) => (
+          <button
+            type="button"
+            className="team-gallery-item"
+            key={img.id}
+            ref={(el) => {
+              tiles.current[i] = el;
+            }}
+            onClick={() => setOpen(i)}
+            aria-label={img.caption || `${s.title} ${i + 1}`}
+          >
+            <SmartImage
+              src={img.url}
+              width={featured && i === 0 ? 1200 : 720}
+              widths={THUMB_WIDTHS}
+              crop={THUMB_CROP}
+              sizes={featured && i === 0 ? "(max-width: 700px) 100vw, 640px" : "(max-width: 700px) 50vw, 320px"}
+              alt=""
+              onLoad={(e) => e.currentTarget.classList.add("is-loaded")}
+            />
+            {img.caption && <span className="team-gallery-caption">{img.caption}</span>}
           </button>
         ))}
       </div>
-      {open >= 0 && (
-        <div className="team-lightbox" role="dialog" aria-modal="true" onClick={() => setOpen(-1)}>
-          <button type="button" className="team-lightbox-close" aria-label="Close">
-            <FaTimes />
+      {remaining > 0 && (
+        <div className="team-gallery-more">
+          <button type="button" onClick={() => setShown((n) => n + GALLERY_PAGE)}>
+            மேலும் {Math.min(remaining, GALLERY_PAGE)} படங்கள் <span>({remaining})</span>
           </button>
-          {count > 1 && (
-            <button
-              type="button"
-              className="team-lightbox-nav is-prev"
-              aria-label="Previous"
-              onClick={(e) => {
-                e.stopPropagation();
-                setOpen((i) => (i - 1 + count) % count);
-              }}
-            >
-              <FaChevronLeft />
-            </button>
-          )}
-          <SmartImage
-            src={s.images[open]}
-            width={2000}
-            alt={`${s.title} ${open + 1}`}
-            onClick={(e) => e.stopPropagation()}
-          />
-          {count > 1 && (
-            <button
-              type="button"
-              className="team-lightbox-nav is-next"
-              aria-label="Next"
-              onClick={(e) => {
-                e.stopPropagation();
-                setOpen((i) => (i + 1) % count);
-              }}
-            >
-              <FaChevronRight />
-            </button>
-          )}
-          <span className="team-lightbox-count">
-            {open + 1} / {count}
-          </span>
         </div>
+      )}
+      {open >= 0 && open < count && (
+        <Lightbox images={s.images} index={open} title={s.title} onIndex={onIndex} onClose={close} />
       )}
     </>
   );
