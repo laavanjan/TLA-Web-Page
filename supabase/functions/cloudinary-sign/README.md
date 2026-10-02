@@ -37,7 +37,6 @@ Pick **one** of these.
    | `CLOUDINARY_CLOUD_NAME` | your cloud name |
    | `CLOUDINARY_API_KEY` | your API key |
    | `CLOUDINARY_API_SECRET` | your API secret |
-   | `ADMIN_EMAILS` *(optional)* | `you@example.com,other@example.com` — only these accounts may upload |
 
 ### Option B — Supabase CLI
 
@@ -59,8 +58,9 @@ size saving (e.g. `6.2 MB → 480 KB WebP −92%`). Publish, and they appear on
 
 ## How it behaves
 
-- **Who can upload:** any signed-in Supabase user (same rule as saving team
-  pages), or only `ADMIN_EMAILS` if you set it.
+- **Who can upload:** main admins, to any team; team editors, only to the
+  teams they're assigned to (see [`../admin-users/README.md`](../admin-users/README.md)).
+  Before `team_editors.sql` has been run, any signed-in account can.
 - **Where files go:** `tla/teams/<teamId>/<random id>`, tagged `tla-team-<teamId>`.
   In the Cloudinary Media Library, search for the tag or the public id to find them.
 - **Deleting:** removing a photo in the admin only changes the draft. When you

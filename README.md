@@ -210,6 +210,22 @@ Admins can upload team gallery photos, logos, banners, cover photos, people phot
 
 ---
 
+## Team editors & activity log (`/admin/editors`, `/admin/activity`)
+
+Main admins can give a person a login that only edits their own team's page (and sees that team's join requests). Main admins can reset, view, disable or remove those logins, and see everything everyone published at `/admin/activity`.
+
+**One-time setup:** see [`supabase/functions/admin-users/README.md`](supabase/functions/admin-users/README.md). It covers running one SQL script, adding the `PASSWORD_VAULT_KEY` secret, deploying the `admin-users` function and redeploying `cloudinary-sign`.
+
+| File | Purpose |
+|------|---------|
+| `supabase/migrations/team_editors.sql` | Roles, database permissions, activity log |
+| `supabase/functions/admin-users/index.ts` | Creates and manages accounts, encrypted password store |
+| `src/admin/adminRole.js` | Loads the signed-in person's role and teams |
+| `src/Pages/AdminEditors.js` | Team editors page |
+| `src/Pages/AdminActivity.js`, `src/shared/pageDiff.js` | Activity log and "what changed" summaries |
+
+---
+
 ## Hackathon event configuration
 
 Go to `src/Components/events/hackthon/agenda/eventList.js` and edit the `events` object to update the agenda.
