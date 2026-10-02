@@ -24,6 +24,9 @@ import { useImageUploads, isImageFile } from "../shared/useImageUploads";
 const ACCEPT = "image/*,.heic,.heif";
 const DRAG_TYPE = "application/x-tla-photo";
 const SOURCE_LABEL = { drive: "Drive", cloudinary: "Cloudinary", web: "Link" };
+// Narrower than this and a photo can't fill a laptop screen in the lightbox
+// (e.g. an image saved from a web search).
+const LOW_RES = 1000;
 
 const moveTo = (arr, from, to) => {
   if (from === to || from < 0 || to < 0 || from >= arr.length || to >= arr.length) return arr;
@@ -308,6 +311,14 @@ export default function GalleryEditor({ s, onUpdate }) {
                     </span>
                   )}
                   {src && src !== "cloudinary" && <span className={`tg-src ts-src-${src}`}>{SOURCE_LABEL[src]}</span>}
+                  {img.width > 0 && img.width < LOW_RES && (
+                    <span
+                      className="tg-lowres"
+                      title={`Only ${img.width}×${img.height}px - it will look small or blurry when opened. Use the original photo if you have it.`}
+                    >
+                      <FaExclamationTriangle /> Low-res
+                    </span>
+                  )}
                   <div className="tg-tools">
                     <button type="button" onClick={() => shift(i, -1)} disabled={i === 0} aria-label="Move earlier" title="Move earlier">
                       <FaArrowLeft />

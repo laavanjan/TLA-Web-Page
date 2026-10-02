@@ -887,6 +887,21 @@
   backdrop-filter: blur(4px);
 }
 
+.tg-lowres {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(255, 140, 60, 0.92);
+  color: #1b0d03;
+  font-size: 10.5px;
+  font-weight: 800;
+}
+
 .tg-tools {
   position: absolute;
   right: 6px;
