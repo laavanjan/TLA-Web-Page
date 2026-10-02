@@ -193,6 +193,23 @@ For production (Netlify / Vercel), set `REACT_APP_SUBMIT_URL` in the host's envi
 
 ---
 
+## Team photo uploads (`/admin/teams` → Cloudinary)
+
+Admins can upload team gallery photos, logos, banners, cover photos, people photos and competition posters. Each photo is resized and converted to WebP in the browser, then uploaded straight to [Cloudinary](https://cloudinary.com). A small Supabase Edge Function signs each upload so the Cloudinary secret never reaches the website.
+
+**One-time setup:** see [`supabase/functions/cloudinary-sign/README.md`](supabase/functions/cloudinary-sign/README.md). It covers creating the Cloudinary account, adding 3 secrets in Supabase and deploying the function. Nothing changes in Vercel.
+
+| File | Purpose |
+|------|---------|
+| `supabase/functions/cloudinary-sign/index.ts` | Edge Function: checks the admin login, signs uploads, deletes unused photos |
+| `src/shared/imageEncode.js` | Resize to 2560px + WebP encode (strips EXIF/GPS) |
+| `src/shared/imagePrep.js`, `imagePrep.worker.js` | Runs the encoder in a Web Worker |
+| `src/shared/cloudinaryUpload.js` | Signed upload with progress, delete |
+| `src/shared/useImageUploads.js` | Upload queue used by the admin editors |
+| `src/Pages/AdminTeamsGallery.js` | Gallery editor (drop/paste/pick, captions, reorder) |
+
+---
+
 ## Hackathon event configuration
 
 Go to `src/Components/events/hackthon/agenda/eventList.js` and edit the `events` object to update the agenda.
