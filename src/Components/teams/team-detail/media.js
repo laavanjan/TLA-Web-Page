@@ -1,12 +1,14 @@
 import React, { useMemo, useState } from "react";
 import { FaPlay } from "react-icons/fa";
-import { imageCandidates, youTubeThumb, socialPlatform } from "../../../shared/mediaLinks";
+import { imageCandidates, imageSrcSet, youTubeThumb, socialPlatform } from "../../../shared/mediaLinks";
 import { SOCIAL_META } from "../socialMeta";
 
 // An <img> for Drive/Cloudinary/plain links that tries each candidate URL in
-// turn and renders `fallback` once all of them fail.
-export function SmartImage({ src, width = 1600, alt = "", fallback = null, ...rest }) {
+// turn and renders `fallback` once all of them fail. For Cloudinary images,
+// `widths` + `sizes` add a srcset so phones download a phone-sized file.
+export function SmartImage({ src, width = 1600, widths, sizes, crop, alt = "", fallback = null, loading = "lazy", ...rest }) {
   const candidates = useMemo(() => imageCandidates(src, width), [src, width]);
+  const srcSet = useMemo(() => (widths ? imageSrcSet(src, widths, crop) : ""), [src, widths, crop]);
   const key = candidates.join("|");
   const [failed, setFailed] = useState({ key: "", n: 0 });
   const idx = failed.key === key ? failed.n : 0;
@@ -16,8 +18,9 @@ export function SmartImage({ src, width = 1600, alt = "", fallback = null, ...re
     <img
       {...rest}
       src={candidates[idx]}
+      {...(srcSet && idx === 0 ? { srcSet, sizes } : {})}
       alt={alt}
-      loading="lazy"
+      loading={loading}
       referrerPolicy="no-referrer"
       onError={() => setFailed({ key, n: idx + 1 })}
     />
