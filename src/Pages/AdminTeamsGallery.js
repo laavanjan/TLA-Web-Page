@@ -237,7 +237,7 @@ export default function GalleryEditor({ s, onUpdate }) {
         <div className="tg-drop-text">
           <strong>{over ? "Drop to upload" : "Drop photos here, paste, or click to choose"}</strong>
           <small>
-            JPG · PNG · WebP · HEIC — resized to 2560px and converted to WebP in your browser, then uploaded to
+            JPG · PNG · WebP · HEIC - resized to 2560px and converted to WebP in your browser, then uploaded to
             Cloudinary. Location data is removed.
           </small>
         </div>
