@@ -4,6 +4,7 @@ import { useNavigate, useLocation, Navigate } from "react-router-dom";
 
 import LotusDivider from "./LotusDivider";
 import { login, isAuthed } from "../admin/adminStore";
+import { fetchAdminRole } from "../admin/adminRole";
 import "./Frame.css";
 import "./Admin.css";
 
@@ -17,6 +18,14 @@ export default function AdminLogin() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [alreadyAuthed, setAlreadyAuthed] = useState(false);
+
+  // Team editors go straight to their team page unless they were heading
+  // somewhere specific.
+  const landing = useCallback(async () => {
+    if (dest !== "/admin") return dest;
+    const who = await fetchAdminRole().catch(() => null);
+    return who && who.role === "editor" ? "/admin/teams" : dest;
+  }, [dest]);
 
   useEffect(() => {
     let active = true;
@@ -35,7 +44,7 @@ export default function AdminLogin() {
       setBusy(true);
       try {
         const res = await login(email, password);
-        if (res.ok) navigate(dest, { replace: true });
+        if (res.ok) navigate(await landing(), { replace: true });
         else setError(res.message);
       } catch {
         setError("Something went wrong. Try again.");
@@ -43,7 +52,7 @@ export default function AdminLogin() {
         setBusy(false);
       }
     },
-    [email, password, dest, navigate]
+    [email, password, landing, navigate]
   );
 
   if (alreadyAuthed) return <Navigate to={dest} replace />;
