@@ -1,13 +1,19 @@
 // Admin auth, backed by Supabase Auth (see src/helpers/supabaseClient.js).
-// Admin accounts are created manually in the Supabase dashboard — there is no
-// public sign-up flow in this app.
+// Accounts (main admins and team editors) are created at /admin/editors —
+// there is no public sign-up flow in this app.
 import { supabase } from "../helpers/supabaseClient";
 
 const STICKERS_KEY = "tla_enabled_stickers";
 
+// -> { ok: true } or { ok: false, message }
 export async function login(email, password) {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  return !error;
+  if (!error) return { ok: true };
+  // Disabled accounts are banned in Supabase Auth.
+  if (/banned/i.test(error.message || "")) {
+    return { ok: false, message: "This account has been disabled. Ask a main admin to re-enable it." };
+  }
+  return { ok: false, message: "Wrong email or password." };
 }
 
 export async function logout() {

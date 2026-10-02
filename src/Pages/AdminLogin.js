@@ -34,9 +34,9 @@ export default function AdminLogin() {
       setError("");
       setBusy(true);
       try {
-        const ok = await login(email, password);
-        if (ok) navigate(dest, { replace: true });
-        else setError("Wrong email or password.");
+        const res = await login(email, password);
+        if (res.ok) navigate(dest, { replace: true });
+        else setError(res.message);
       } catch {
         setError("Something went wrong. Try again.");
       } finally {
