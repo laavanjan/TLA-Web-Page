@@ -244,9 +244,12 @@ function CompetitionsSection({ s }) {
 
 const GALLERY_PAGE = 12;
 const THUMB_WIDTHS = [320, 480, 720, 960];
-const FULL_WIDTHS = [800, 1200, 1600, 2000, 2560];
 // Square thumbnails cropped by Cloudinary around faces/subjects (g_auto).
 const THUMB_CROP = "c_fill,g_auto,ar_1:1";
+// One full-size URL per screen. A srcset can't be used here: its width
+// descriptors would claim e.g. 2000px for a 400px photo (Cloudinary never
+// upscales), and the browser would then draw that photo even smaller.
+const fullWidth = () => Math.min(2560, Math.round(window.innerWidth * (window.devicePixelRatio || 1)));
 
 function Lightbox({ images, index, title, onIndex, onClose }) {
   const count = images.length;
@@ -285,7 +288,7 @@ function Lightbox({ images, index, title, onIndex, onClose }) {
     if (count < 2) return;
     [index + 1, index - 1].forEach((i) => {
       const n = images[(i + count) % count];
-      const [url] = imageCandidates(n.url, Math.min(2000, window.innerWidth * (window.devicePixelRatio || 1)));
+      const [url] = imageCandidates(n.url, fullWidth());
       if (url) new Image().src = url;
     });
   }, [index, images, count]);
@@ -338,9 +341,7 @@ function Lightbox({ images, index, title, onIndex, onClose }) {
         <SmartImage
           key={img.id}
           src={img.url}
-          width={2000}
-          widths={FULL_WIDTHS}
-          sizes="100vw"
+          width={fullWidth()}
           loading="eager"
           alt={img.caption || `${title} ${index + 1}`}
         />
