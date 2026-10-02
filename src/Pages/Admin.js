@@ -3,6 +3,8 @@ import { Helmet } from "react-helmet";
 import { Link } from "react-router-dom";
 
 import LotusDivider from "./LotusDivider";
+import { useAdminRole } from "../admin/adminRole";
+import { getCachedTeamPages } from "../shared/teamPages";
 import "./Frame.css";
 import "./Admin.css";
 
@@ -66,6 +68,20 @@ const TILES = [
     category: "tools",
   },
   {
+    to: "/admin/editors",
+    icon: "👥",
+    title: "Team Editors",
+    desc: "Give people a login that can only edit their own team's page. Reset or view passwords.",
+    category: "account",
+  },
+  {
+    to: "/admin/activity",
+    icon: "🕑",
+    title: "Activity Log",
+    desc: "See who published what and when, plus account changes.",
+    category: "account",
+  },
+  {
     to: "/admin/account",
     icon: "🔑",
     title: "Account & Password",
@@ -73,6 +89,34 @@ const TILES = [
     category: "account",
   },
 ];
+
+// What a team editor sees: just their team(s), its join requests and their
+// own password.
+function editorTiles(teamNames) {
+  return [
+    {
+      to: "/admin/teams",
+      icon: "🧩",
+      title: teamNames.length > 1 ? "Your Team Pages" : "Your Team Page",
+      desc: `Edit ${teamNames.join(", ")} - sections, photos, competitions and more.`,
+      category: "content",
+    },
+    {
+      to: "/admin/team-join",
+      icon: "🤝",
+      title: "Join Requests",
+      desc: "People who applied to join your team.",
+      category: "content",
+    },
+    {
+      to: "/admin/account",
+      icon: "🔑",
+      title: "Change Password",
+      desc: "Update the password you sign in with.",
+      category: "account",
+    },
+  ];
+}
 
 const CATEGORY_LABEL = {
   content: "Content",
@@ -82,6 +126,15 @@ const CATEGORY_LABEL = {
 
 // Admin dashboard: a grid of tools. Each tile links to its own page.
 export default function Admin() {
+  const who = useAdminRole();
+  const editor = who.role === "editor";
+  const teamNames = editor
+    ? getCachedTeamPages()
+        .filter((p) => who.teams.includes(p.id))
+        .map((p) => p.title)
+    : [];
+  const tiles = editor ? editorTiles(teamNames) : TILES;
+
   return (
     <div className="frame-page admin-page">
       <Helmet>
@@ -91,11 +144,17 @@ export default function Admin() {
       <header className="frame-topbar">
         <span className="frame-brand">தமிழ் இலக்கிய மன்றம்</span>
         <LotusDivider />
-        <span className="frame-subtitle">Admin Dashboard</span>
+        <span className="frame-subtitle">{editor ? "Team Editor" : "Admin Dashboard"}</span>
       </header>
 
+      {editor && (
+        <p className="admin-dash-hello">
+          Signed in as <b>{who.name || who.email}</b> · editor of {teamNames.join(", ") || "no teams yet"}
+        </p>
+      )}
+
       <div className="admin-dash">
-        {TILES.map((tile) => (
+        {tiles.map((tile) => (
           <Link
             key={tile.to}
             className={`admin-tile cat-${tile.category}`}
