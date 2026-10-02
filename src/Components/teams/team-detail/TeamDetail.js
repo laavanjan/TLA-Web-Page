@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import {
   FaArrowLeft,
@@ -305,7 +306,9 @@ function Lightbox({ images, index, title, onIndex, onClose }) {
 
   const stop = (e) => e.stopPropagation();
 
-  return (
+  // Portalled to <body>: .team-detail-body is its own stacking context, which
+  // would otherwise leave the site's fixed navbar drawn on top of the overlay.
+  return createPortal(
     <div
       className="team-lightbox"
       role="dialog"
@@ -361,7 +364,8 @@ function Lightbox({ images, index, title, onIndex, onClose }) {
           {index + 1} / {count}
         </span>
       )}
-    </div>
+    </div>,
+    document.body
   );
 }
 

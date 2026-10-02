@@ -929,7 +929,7 @@
 .team-lightbox {
     position: fixed;
     inset: 0;
-    z-index: 1000;
+    z-index: 1400; /* above the MUI navbar (1100) */
     background: rgba(5, 10, 20, 0.94);
     display: flex;
     align-items: center;
