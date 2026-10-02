@@ -36,8 +36,11 @@ import {
   blankCompetition,
   competitionStatus,
   cleanPage,
+  pagePublicIds,
+  missingFrom,
   SECTION_TYPES,
 } from "../shared/teamPages";
+import { deleteImages } from "../shared/cloudinaryUpload";
 import { UploadContext, useImageUploads } from "../shared/useImageUploads";
 import {
   youTubeId,
@@ -751,6 +754,13 @@ export default function AdminTeams() {
   // after the section was moved, and must never land in the wrong section.
   const updateSection = (id, fn) =>
     update((d) => ({ ...d, sections: d.sections.map((x) => (x.id === id ? fn(x) : x)) }));
+
+  // Photos uploaded into a draft that's being thrown away were never
+  // published anywhere, so remove them from Cloudinary too.
+  const dropUnpublishedUploads = (page, saved) => {
+    const orphans = missingFrom(pagePublicIds(page), pagePublicIds(saved));
+    if (orphans.length) deleteImages(orphans).catch(() => {});
+  };
   const moveSection = (i, dir) => update((d) => ({ ...d, sections: move(d.sections, i, dir) }));
   const removeSection = (i) => {
     const s = draft.sections[i];
@@ -768,6 +778,7 @@ export default function AdminTeams() {
     if (id === activeId) return;
     if (uploads && !window.confirm("Photos are still uploading for this team. Cancel the uploads and switch?")) return;
     if (dirty && !window.confirm("You have unpublished changes for this team. Discard them?")) return;
+    if (dirty) dropUnpublishedUploads(draft, JSON.parse(savedJson));
     const p = pages.find((x) => x.id === id);
     activeRef.current = id;
     touched.current = false;
@@ -782,6 +793,7 @@ export default function AdminTeams() {
   const discard = () => {
     if (!window.confirm("Discard all unpublished changes for this team?")) return;
     touched.current = false;
+    dropUnpublishedUploads(draft, JSON.parse(savedJson));
     setDraft(JSON.parse(savedJson));
     setMsg({ type: "", text: "" });
   };
@@ -792,12 +804,22 @@ export default function AdminTeams() {
     setBusy(true);
     setMsg({ type: "", text: "" });
     try {
+      const before = JSON.parse(savedJson);
       const saved = await saveTeamPage(draft.id, draft);
       setPages((ps) => ps.map((p) => (p.id === saved.id ? saved : p)));
       setDraft(saved);
       setSavedJson(JSON.stringify(saved));
       touched.current = false;
-      setMsg({ type: "ok", text: "Published - the team page is live with your changes." });
+      let text = "Published - the team page is live with your changes.";
+      // Uploaded photos the page no longer uses (removed, replaced, or in a
+      // deleted section) are deleted from Cloudinary now that it's live.
+      const unused = missingFrom(pagePublicIds(before), pagePublicIds(saved));
+      if (unused.length) {
+        const r = await deleteImages(unused);
+        if (r.deleted.length) text += ` Removed ${r.deleted.length} unused photo${r.deleted.length === 1 ? "" : "s"} from Cloudinary.`;
+        if (r.failed.length) text += ` (Couldn't remove ${r.failed.length} old photo${r.failed.length === 1 ? "" : "s"} - they're unused but still stored.)`;
+      }
+      setMsg({ type: "ok", text });
     } catch (err) {
       setMsg({ type: "err", text: err.message || "Could not save." });
     } finally {

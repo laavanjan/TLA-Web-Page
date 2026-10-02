@@ -5,7 +5,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../helpers/supabaseClient";
 import { TeamsData } from "../Components/teams/teamsData";
-import { safeUrl, safeSocialUrl } from "./mediaLinks";
+import { safeUrl, safeSocialUrl, uploadedImage } from "./mediaLinks";
 
 const LS_KEY = "tla_team_pages";
 
@@ -282,6 +282,29 @@ export async function saveTeamPage(teamId, page) {
   writeLocal(rows);
   return { id: teamId, updatedAt: updated_at, fallbackPhoto: team.photo, ...clean };
 }
+
+// Cloudinary public ids of every image this team uploaded that the page still
+// uses — logo, banner, cover, people photos, posters and gallery photos.
+// Comparing this before/after a publish tells us which files to delete.
+// Only ids under this team's own folder count, so removing a photo here can
+// never delete a file another team's page points at.
+export function pagePublicIds(page) {
+  if (!page) return new Set();
+  const urls = [page.logo, page.banner, page.cover];
+  (page.sections || []).forEach((s) => {
+    if (s.type === "people") s.people.forEach((p) => urls.push(p.photo));
+    if (s.type === "competitions") s.items.forEach((c) => urls.push(c.poster));
+    if (s.type === "gallery") s.images.forEach((img) => urls.push(img.url));
+  });
+  const ids = new Set();
+  urls.forEach((u) => {
+    const hit = uploadedImage(u);
+    if (hit && hit.teamId === page.id) ids.add(hit.publicId);
+  });
+  return ids;
+}
+
+export const missingFrom = (a, b) => [...a].filter((x) => !b.has(x));
 
 export function useTeamPages() {
   const [pages, setPages] = useState(getCachedTeamPages);
