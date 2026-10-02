@@ -17,5 +17,5 @@ export const SECTION_META = {
   youtube: { icon: FaYoutube, label: "YouTube videos", hint: "Paste video links — they play on the page" },
   instagram: { icon: FaInstagram, label: "Instagram posts", hint: "Paste post or reel links to embed them" },
   competitions: { icon: FaTrophy, label: "Competitions", hint: "Countdown, register button, winners, recording" },
-  gallery: { icon: FaImages, label: "Photo gallery", hint: "Google Drive or Cloudinary image links" },
+  gallery: { icon: FaImages, label: "Photo gallery", hint: "Upload photos, or paste Drive/Cloudinary links" },
 };
