@@ -46,6 +46,8 @@ import AdminTeamJoin from "./Pages/AdminTeamJoin";
 import AdminTeams from "./Pages/AdminTeams";
 import AdminLogin from "./Pages/AdminLogin";
 import RequireAdmin from "./Pages/RequireAdmin";
+import AdminEditors from "./Pages/AdminEditors";
+import AdminActivity from "./Pages/AdminActivity";
 
 function Router() {
   return useRoutes([
@@ -197,7 +199,7 @@ function Router() {
     {
       path: "admin",
       element: (
-        <RequireAdmin>
+        <RequireAdmin allow="any">
           <Admin />
         </RequireAdmin>
       ),
@@ -221,7 +223,7 @@ function Router() {
     {
       path: "admin/account",
       element: (
-        <RequireAdmin>
+        <RequireAdmin allow="any">
           <AdminAccount />
         </RequireAdmin>
       ),
@@ -245,7 +247,7 @@ function Router() {
     {
       path: "admin/teams",
       element: (
-        <RequireAdmin>
+        <RequireAdmin allow="any">
           <AdminTeams />
         </RequireAdmin>
       ),
@@ -253,8 +255,24 @@ function Router() {
     {
       path: "admin/team-join",
       element: (
-        <RequireAdmin>
+        <RequireAdmin allow="any">
           <AdminTeamJoin />
+        </RequireAdmin>
+      ),
+    },
+    {
+      path: "admin/editors",
+      element: (
+        <RequireAdmin>
+          <AdminEditors />
+        </RequireAdmin>
+      ),
+    },
+    {
+      path: "admin/activity",
+      element: (
+        <RequireAdmin>
+          <AdminActivity />
         </RequireAdmin>
       ),
     },
