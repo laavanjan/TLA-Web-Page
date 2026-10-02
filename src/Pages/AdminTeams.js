@@ -16,6 +16,8 @@ import {
   FaImage,
   FaLightbulb,
   FaTimes,
+  FaCloudUploadAlt,
+  FaRedo,
 } from "react-icons/fa";
 
 import LotusDivider from "./LotusDivider";
@@ -36,7 +38,7 @@ import {
   cleanPage,
   SECTION_TYPES,
 } from "../shared/teamPages";
-import { UploadContext } from "../shared/useImageUploads";
+import { UploadContext, useImageUploads } from "../shared/useImageUploads";
 import {
   youTubeId,
   youTubeThumb,
@@ -45,6 +47,7 @@ import {
   splitLinks,
   safeSocialUrl,
   socialPlatform,
+  uploadedImage,
 } from "../shared/mediaLinks";
 import "./Frame.css";
 import "./Admin.css";
@@ -101,12 +104,25 @@ const SOURCE_LABEL = { drive: "Google Drive", cloudinary: "Cloudinary", web: "We
 function ImageField({ label, value, onChange }) {
   const src = imageSource(value);
   const bad = value.trim() && !src;
+  const fileRef = useRef(null);
+  const up = useImageUploads({ concurrency: 1, onDone: (r) => onChange(r.url) });
+  const item = up.items[0];
+  const busy = item && item.status !== "error";
+
   return (
     <div className="tj-control">
       {label && <span className="tj-control-label">{label}</span>}
       <div className="ts-image-field">
-        <div className="ts-thumb">
-          {src ? (
+        <div className={`ts-thumb${busy ? " is-uploading" : ""}`}>
+          {busy && (
+            <span className="ts-thumb-progress">
+              {item.status === "uploading" ? `${Math.round(item.progress * 100)}%` : "…"}
+              <i style={{ width: `${Math.round(item.progress * 100)}%` }} />
+            </span>
+          )}
+          {busy && item.preview ? (
+            <img src={item.preview} alt="" />
+          ) : src ? (
             <SmartImage
               src={value}
               width={400}
@@ -124,14 +140,53 @@ function ImageField({ label, value, onChange }) {
           )}
         </div>
         <div className="ts-image-input">
-          <input
-            className="tj-input"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder="Paste a Google Drive or Cloudinary image link"
-          />
-          {src && <span className={`ts-src ts-src-${src}`}>{SOURCE_LABEL[src]}</span>}
+          <div className="ts-image-row">
+            <input
+              className="tj-input"
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder="Upload, or paste a Google Drive / Cloudinary link"
+            />
+            <button
+              type="button"
+              className="tj-btn tj-btn-ghost ts-upload-btn"
+              onClick={() => fileRef.current && fileRef.current.click()}
+              disabled={!!busy}
+              title="Upload an image"
+            >
+              <FaCloudUploadAlt /> {busy ? (item.status === "preparing" ? "Optimising…" : "Uploading…") : "Upload"}
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*,.heic,.heif"
+              hidden
+              onChange={(e) => {
+                const f = e.target.files && e.target.files[0];
+                e.target.value = "";
+                if (!f) return;
+                up.clearFailed();
+                up.add([f]);
+              }}
+            />
+          </div>
+          {src && (
+            <span className={`ts-src ts-src-${src}`}>{uploadedImage(value) ? "Uploaded to Cloudinary" : SOURCE_LABEL[src]}</span>
+          )}
           {bad && <span className="tj-warn">Links must start with https://</span>}
+          {item && item.status === "error" && (
+            <span className="tj-warn ts-upload-err">
+              <FaExclamationTriangle /> {item.error}
+              {item.stage !== "type" && (
+                <button type="button" className="tg-mini" onClick={() => up.retry(item.key)}>
+                  <FaRedo /> Retry
+                </button>
+              )}
+              <button type="button" className="tg-mini" onClick={() => up.dismiss(item.key)}>
+                Dismiss
+              </button>
+            </span>
+          )}
         </div>
       </div>
     </div>
@@ -814,8 +869,9 @@ export default function AdminTeams() {
             <div className="ts-tip">
               <FaLightbulb />
               <span>
-                <b>Images:</b> paste a Google Drive link (share it as <i>“Anyone with the link”</i>) or a
-                Cloudinary image URL - Cloudinary images are resized and compressed automatically.{" "}
+                <b>Images:</b> click <i>Upload</i> (or drop photos on a gallery) - they're optimised in your
+                browser and stored on Cloudinary. You can still paste a Google Drive link (shared as{" "}
+                <i>“Anyone with the link”</i>) or a Cloudinary URL.{" "}
                 <b>YouTube &amp; Instagram:</b> just paste the post/video links; you can paste several at once.
               </span>
             </div>

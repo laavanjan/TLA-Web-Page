@@ -622,6 +622,55 @@
   font-size: 12px;
 }
 
+/* ---- Image field: upload button + progress ---- */
+.ts-image-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.ts-image-row .tj-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ts-upload-btn {
+  flex: 0 0 auto;
+}
+
+.ts-thumb {
+  position: relative;
+}
+
+.ts-thumb-progress {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(5, 10, 20, 0.6);
+}
+
+.ts-thumb-progress i {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  background: #e6b422;
+  transition: width 0.2s ease;
+}
+
+.ts-upload-err {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
 /* ---- Gallery editor ---- */
 .tg {
   display: flex;
