@@ -9,23 +9,21 @@
 //   POST { action: "delete", publicIds: ["tla/teams/1/abc…", …] }
 //     -> { deleted: [...], failed: [...] }
 //
-// Every request must carry a signed-in admin's Supabase access token
-// (supabase.functions.invoke() attaches it automatically).
+// Every request must carry a signed-in panel user's Supabase access token
+// (supabase.functions.invoke() attaches it automatically). Main admins may
+// work on any team; team editors only on the teams they're assigned to (see
+// supabase/migrations/team_editors.sql).
 //
 // Secrets (supabase secrets set NAME=value):
 //   CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET
-//   ADMIN_EMAILS (optional) — comma-separated; when set, only these accounts
-//   may upload or delete. Otherwise any signed-in Supabase user may, which
-//   matches the team_pages RLS policy.
+// SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY are provided
+// automatically.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const CLOUD_NAME = Deno.env.get("CLOUDINARY_CLOUD_NAME") ?? "";
 const API_KEY = Deno.env.get("CLOUDINARY_API_KEY") ?? "";
 const API_SECRET = Deno.env.get("CLOUDINARY_API_SECRET") ?? "";
-const ADMIN_EMAILS = (Deno.env.get("ADMIN_EMAILS") ?? "")
-  .split(",")
-  .map((e) => e.trim().toLowerCase())
-  .filter(Boolean);
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 
 const ROOT = "tla/teams";
 const MAX_SIGN = 30; // signatures per request
@@ -65,20 +63,40 @@ function sign(params: Record<string, string | number>) {
 const randomId = () => crypto.randomUUID().replace(/-/g, "").slice(0, 20);
 const now = () => Math.floor(Date.now() / 1000);
 
-async function requireAdmin(req: Request) {
+type Access = { canEdit: (teamId: number) => boolean };
+
+// Which teams the caller may upload to / delete from, or null for no access.
+async function access(req: Request): Promise<Access | null> {
   const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
   if (!token) return null;
-  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!);
-  const { data, error } = await supabase.auth.getUser(token);
+  const { data, error } = await createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY")!).auth.getUser(token);
   const user = data?.user;
   if (error || !user) return null;
-  if (ADMIN_EMAILS.length && !ADMIN_EMAILS.includes((user.email ?? "").toLowerCase())) return null;
-  return user;
+
+  const service = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const { data: row, error: roleErr } = await service
+    .from("admin_users")
+    .select("role, disabled, admin_user_teams(team_id)")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (roleErr) {
+    // Roles table not created yet (team_editors.sql not run): any signed-in
+    // user, as before team editors existed.
+    if (roleErr.code === "42P01" || roleErr.code === "PGRST205") return { canEdit: () => true };
+    throw roleErr;
+  }
+  if (!row || row.disabled) return null;
+  if (row.role === "admin") return { canEdit: () => true };
+  const teams = new Set((row.admin_user_teams ?? []).map((t: { team_id: number }) => t.team_id));
+  return { canEdit: (teamId) => teams.has(teamId) };
 }
 
-async function signUploads(teamId: unknown, count: unknown) {
+async function signUploads(who: Access, teamId: unknown, count: unknown) {
   const id = Number(teamId);
   if (!Number.isInteger(id) || id < 1 || id > 999) return json({ error: "Invalid team." }, 400);
+  if (!who.canEdit(id)) return json({ error: "You can only upload photos to your own team's page." }, 403);
   const n = Math.min(MAX_SIGN, Math.max(1, Math.floor(Number(count) || 1)));
   const timestamp = now();
 
@@ -113,11 +131,13 @@ async function destroy(publicId: string) {
   return res.ok && (body.result === "ok" || body.result === "not found");
 }
 
-async function deleteImages(publicIds: unknown) {
+async function deleteImages(who: Access, publicIds: unknown) {
   if (!Array.isArray(publicIds) || publicIds.length === 0) return json({ deleted: [], failed: [] });
   if (publicIds.length > MAX_DELETE) return json({ error: `At most ${MAX_DELETE} images per request.` }, 400);
   const bad = publicIds.filter((p) => typeof p !== "string" || !PUBLIC_ID_RE.test(p));
   if (bad.length) return json({ error: "Refusing to delete images outside tla/teams/.", bad }, 400);
+  const notYours = publicIds.filter((p) => !who.canEdit(Number((p as string).split("/")[2])));
+  if (notYours.length) return json({ error: "You can only delete your own team's photos.", bad: notYours }, 403);
 
   const ids = [...new Set(publicIds as string[])];
   const results = await Promise.all(ids.map((p) => destroy(p).catch(() => false)));
@@ -134,8 +154,13 @@ Deno.serve(async (req) => {
     return json({ error: "Cloudinary is not configured on the server." }, 500);
   }
 
-  const user = await requireAdmin(req);
-  if (!user) return json({ error: "Not signed in as an admin." }, 401);
+  let who: Access | null;
+  try {
+    who = await access(req);
+  } catch {
+    return json({ error: "Couldn't check your permissions. Try again." }, 500);
+  }
+  if (!who) return json({ error: "Not signed in as an admin." }, 401);
 
   let body: Record<string, unknown>;
   try {
@@ -146,9 +171,9 @@ Deno.serve(async (req) => {
 
   switch (body.action) {
     case "sign":
-      return signUploads(body.teamId, body.count);
+      return signUploads(who, body.teamId, body.count);
     case "delete":
-      return deleteImages(body.publicIds);
+      return deleteImages(who, body.publicIds);
     default:
       return json({ error: "Unknown action." }, 400);
   }
