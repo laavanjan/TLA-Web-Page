@@ -69,12 +69,43 @@ export function driveFileId(url) {
 }
 
 const CLOUDINARY_RE = /^(https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/i;
+// Files uploaded from /admin/teams: tla/teams/<teamId>/<random id>.<ext>
+const UPLOADED_RE = /\/image\/upload\/(?:[^?#]*\/)?(tla\/teams\/(\d{1,3})\/[A-Za-z0-9_-]{8,64})\.[A-Za-z0-9]+(?:[?#].*)?$/;
 
 export function imageSource(url) {
   if (!safeUrl(url)) return "";
   if (driveFileId(url)) return "drive";
   if (CLOUDINARY_RE.test(url.trim())) return "cloudinary";
   return "web";
+}
+
+// { publicId, teamId } for an image uploaded through the admin, else null.
+// Derived from the URL so there's a single source of truth for what to delete.
+export function uploadedImage(url) {
+  const s = safeUrl(url);
+  const m = s && CLOUDINARY_RE.test(s) && s.match(UPLOADED_RE);
+  return m ? { publicId: m[1], teamId: Number(m[2]) } : null;
+}
+
+// A Cloudinary URL with a delivery transformation inserted, e.g.
+// cloudinaryUrl(url, "c_fill,w_600,h_600"). Other URLs come back unchanged.
+// URLs that already carry a transformation are left alone.
+export function cloudinaryUrl(url, transform) {
+  const s = safeUrl(url);
+  const c = s.match(CLOUDINARY_RE);
+  if (!c) return s;
+  const [, base, rest] = c;
+  if (/^[a-z]{1,3}_/.test(rest.split("/")[0])) return s;
+  return `${base}f_auto,q_auto,${transform}/${rest}`;
+}
+
+// srcset for responsive Cloudinary images ("" for anything else). `crop` is
+// the transformation applied at each width, e.g. "c_fill,g_auto,ar_1:1" for
+// square thumbnails cropped around the interesting part (faces, subjects).
+export function imageSrcSet(url, widths, crop = "c_limit") {
+  if (imageSource(url) !== "cloudinary") return "";
+  if (cloudinaryUrl(url, "w_1") === safeUrl(url)) return ""; // already transformed
+  return widths.map((w) => `${cloudinaryUrl(url, `${crop},w_${w}`)} ${w}w`).join(", ");
 }
 
 // Ordered list of URLs to try for an image; the <SmartImage> component falls
@@ -89,13 +120,10 @@ export function imageCandidates(url, width = 1600) {
       `https://drive.google.com/thumbnail?id=${driveId}&sz=w${width}`,
     ];
   }
-  const c = s.match(CLOUDINARY_RE);
-  if (c) {
-    const [, base, rest] = c;
-    // Leave URLs that already carry transformations (e.g. "c_fill,w_400/…").
-    const first = rest.split("/")[0];
-    const hasTransform = /^[a-z]{1,3}_/.test(first);
-    return hasTransform ? [s] : [`${base}f_auto,q_auto,w_${width}/${rest}`, s];
+  if (imageSource(s) === "cloudinary") {
+    // c_limit: never upscale a photo smaller than the requested width.
+    const sized = cloudinaryUrl(s, `c_limit,w_${width}`);
+    return sized === s ? [s] : [sized, s];
   }
   return [s];
 }
