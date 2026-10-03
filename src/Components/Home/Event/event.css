@@ -119,3 +119,9 @@
     }
     
 }
+/* The shaded stripes now hold whatever the admin lists, so they size to their
+   cards instead of the fixed heights above. */
+.event-container-div.event-band {
+    min-height: 0 !important;
+    padding-bottom: 3em;
+}
