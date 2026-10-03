@@ -17,6 +17,7 @@ import {
   FaPenNib,
   FaRegLightbulb,
   FaCalendarAlt,
+  FaTools,
 } from "react-icons/fa";
 
 import LotusDivider from "./LotusDivider";
@@ -30,6 +31,7 @@ import { getCachedEventPages, fetchEventPages, eventTitle as eventTitleIn } from
 import { fetchTeamJoinApplications } from "../shared/teamJoinApplications";
 import { fetchTeamJoinConfig } from "../shared/teamJoinConfig";
 import { fetchContactConfig } from "../shared/contactConfig";
+import { fetchSiteStatus, isMaintenanceOn, formatReopen } from "../shared/siteStatus";
 import { fetchBookConfig, isSubmissionOpen } from "../book/bookConfig";
 import { DESIGNS } from "../assets/frame/designs";
 import { supabase } from "../helpers/supabaseClient";
@@ -81,6 +83,9 @@ function useDashboardData(admin) {
       fetchContactConfig()
         .then((c) => set("contact", c))
         .catch(() => set("contact", null));
+      fetchSiteStatus()
+        .then((s) => set("maintenance", s))
+        .catch(() => set("maintenance", null));
       supabase
         .from("admin_users")
         .select("role, disabled")
@@ -142,6 +147,16 @@ function contactStatus(contact) {
   if (contact === undefined) return LOADING;
   if (!contact) return null;
   return { tone: "info", text: contact.email };
+}
+
+function maintenanceStatus(site) {
+  if (site === undefined) return LOADING;
+  if (!site) return null;
+  if (!isMaintenanceOn(site)) return { tone: "ok", text: "Site is open" };
+  return {
+    tone: "warn",
+    text: site.reopensAt ? `ON · reopens ${formatReopen(site.reopensAt, "en-GB")}` : "ON · visitors see the maintenance page",
+  };
 }
 
 function activityStatus(activity) {
@@ -591,6 +606,15 @@ export default function Admin() {
                       title="Stickers"
                       desc="Choose the designs in the frame editor."
                       status={stickersStatus()}
+                      index={n++}
+                    />
+                    <Card
+                      to="/admin/maintenance"
+                      icon={FaTools}
+                      tone="rose"
+                      title="Maintenance mode"
+                      desc="Show visitors a maintenance page while you work."
+                      status={maintenanceStatus(data.maintenance)}
                       index={n++}
                     />
                   </div>
