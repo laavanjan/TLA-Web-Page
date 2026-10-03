@@ -438,3 +438,29 @@
     flex-wrap: wrap;
   }
 }
+
+/* Event pickers (events are many, so they are grouped like the home page) */
+.ae-events {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ae-event-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ae-event-group-name {
+  font-size: 11.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #8f99ad;
+  font-weight: 700;
+}
+
+.ae-event-tag {
+  background: rgba(120, 170, 255, 0.14);
+  color: #bcd2ff;
+}
