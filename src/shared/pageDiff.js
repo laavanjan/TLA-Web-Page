@@ -1,6 +1,7 @@
 // Turns two versions of a team page (as stored in team_pages.data) into a
 // short, plain-English list of what changed - used by the Activity log.
 import { SECTION_META } from "../Components/teams/sectionMeta";
+import { upgradeSections } from "./teamPages";
 
 const plural = (k, word, many = `${word}s`) => `${k} ${k === 1 ? word : many}`;
 const sectionName = (s) => `"${s.title || (SECTION_META[s.type] || {}).label || s.type}"`;
@@ -40,6 +41,22 @@ function sectionChanges(b, a) {
         out.push("changed the button");
       }
       break;
+    case "years": {
+      const m = match(b.years, a.years, (y) => y.year);
+      if (m.added.length) out.push(`added ${m.added.map((y) => y.year).join(", ")}`);
+      if (m.removed.length) out.push(`removed ${m.removed.map((y) => y.year).join(", ")}`);
+      m.both.forEach(([x, y]) => {
+        const parts = [];
+        const p = match(x.people, y.people, (q) => q.id);
+        if (p.added.length) parts.push(`added ${quoteList(p.added.map((q) => q.name))}`);
+        if (p.removed.length) parts.push(`removed ${quoteList(p.removed.map((q) => q.name))}`);
+        const edited = p.both.filter(([u, v]) => !same(u, v)).map(([, v]) => v.name);
+        if (edited.length) parts.push(`updated ${quoteList(edited)}`);
+        parts.push(...countChange(match(x.members, y.members, (n) => n), "member"));
+        if (parts.length) out.push(`${y.year} (${parts.join(", ")})`);
+      });
+      break;
+    }
     case "people": {
       const m = match(b.people, a.people, (p) => p.id);
       if (m.added.length) out.push(`added ${quoteList(m.added.map((p) => p.name))}`);
@@ -98,7 +115,12 @@ const IMAGE_FIELDS = [
   ["cover", "cover photo"],
 ];
 
-export function summarizePageChange(before, after) {
+// Older saved pages are upgraded first, so they compare like for like.
+const upgraded = (page) => page && { ...page, sections: upgradeSections(page.sections || []) };
+
+export function summarizePageChange(rawBefore, rawAfter) {
+  const before = upgraded(rawBefore);
+  const after = upgraded(rawAfter);
   if (!after) return [];
   if (!before) return ["Published the page for the first time"];
   const out = [];
