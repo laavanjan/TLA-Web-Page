@@ -639,6 +639,9 @@ function GallerySection({ s }) {
   );
 }
 
+// The event pages (Components/events/EventDetail.js) reuse these.
+export { TextSection, TimelineSection, YouTubeSection, InstagramSection, CompetitionsSection, GallerySection };
+
 const RENDERERS = {
   text: TextSection,
   years: YearsSection,
