@@ -23,7 +23,7 @@ import { useImageUploads, isImageFile } from "../shared/useImageUploads";
 
 const ACCEPT = "image/*,.heic,.heif";
 const DRAG_TYPE = "application/x-tla-photo";
-const SOURCE_LABEL = { drive: "Drive", cloudinary: "Cloudinary", web: "Link" };
+const SOURCE_LABEL = { drive: "Drive", cloudinary: "Cloudinary", web: "Link", bundled: "Built-in" };
 // Narrower than this and a photo can't fill a laptop screen in the lightbox
 // (e.g. an image saved from a web search).
 const LOW_RES = 1000;
