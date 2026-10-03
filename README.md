@@ -255,6 +255,33 @@ Run the tests for this with `npx react-scripts test --watchAll=false src/shared/
 
 ---
 
+## Maintenance mode (`/admin/maintenance`)
+
+A main admin can switch the whole site to an "under maintenance" page for visitors, with a heading and message of their choosing (a Tamil and English default is built in) and an optional time the site **reopens by itself**, so it can't be left closed by accident.
+
+- **Visitors** see the maintenance page on every address except `/admin`. People already on the site get it within about a minute, or on their next page load.
+- **Signed-in admins and editors** keep seeing the normal site, with a small banner saying maintenance mode is on, so changes can be checked while it is closed.
+- **`/admin` is never blocked**, so it can always be switched off. The dashboard card shows whether it is on.
+- **If the setting can't be read** (database down, offline) the site opens normally rather than showing a maintenance page nobody can switch off.
+- It is a page the browser shows, not a security lock, and it can't send search engines a proper "503". Fine for short jobs; use hosting-level maintenance for a long outage. The maintenance page asks search engines not to index it.
+- Turning it on or off, and changing its text or reopening time, is recorded in the activity log.
+
+**One-time setup:** Supabase → SQL Editor → run [`supabase/migrations/site_status.sql`](supabase/migrations/site_status.sql) (after `team_editors.sql`). Until then the site simply stays open and `/admin/maintenance` can't save.
+
+**Picture:** the maintenance page shows `public/images/maintenance.webp` (an engraved palm-leaf manuscript with an oil lamp and gears). Its white background blends into the page. To change it, replace that file with another square picture on a white background; if the file is missing a built-in gear icon is shown instead.
+
+| File | Purpose |
+|------|---------|
+| `supabase/migrations/site_status.sql` | The `site_status` row, who can change it, activity log |
+| `src/shared/siteStatus.js` | Reading / saving the setting, "is it on right now", what the gate shows |
+| `src/Components/maintenance/MaintenanceGate.js` | Wraps the site in `App.js`: maintenance page, staff banner, splash |
+| `src/Components/maintenance/MaintenancePage.js` | The page visitors see |
+| `src/Pages/AdminMaintenance.js` | The admin screen |
+
+Run the tests with `npx react-scripts test --watchAll=false src/shared/siteStatus.test.js`.
+
+---
+
 ## Hackathon event configuration
 
 Go to `src/Components/events/hackthon/agenda/eventList.js` and edit the `events` object to update the agenda.
