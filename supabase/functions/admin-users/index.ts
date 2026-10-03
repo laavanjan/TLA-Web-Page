@@ -1,5 +1,5 @@
-// Manages admin panel accounts for /admin/editors: main admins and team
-// editors (people who may only edit the team pages they're assigned to).
+// Manages admin panel accounts for /admin/editors: main admins and editors
+// (people who may only edit the team pages and event pages they're assigned to).
 // Creating logins and setting other people's passwords needs the
 // service-role key, which only exists here, never in the browser.
 //
@@ -8,8 +8,8 @@
 //
 //   Main admins only:
 //     list                                   -> { users: [...] }
-//     create   { name, email, password, role, teams }
-//     update   { userId, name?, email?, role?, teams? }
+//     create   { name, email, password, role, teams, events }
+//     update   { userId, name?, email?, role?, teams?, events? }
 //     reset_password  { userId, password }
 //     reveal_password { userId }             -> { password }   (logged)
 //     set_disabled    { userId, disabled }
@@ -30,6 +30,9 @@ const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const VAULT_KEY = Deno.env.get("PASSWORD_VAULT_KEY") ?? "";
 
 const TEAM_IDS = [1, 2, 3, 4]; // src/Components/teams/teamsData.js
+// Event addresses: the built-in ones (src/Components/events/eventsRegistry.js)
+// and any made in /admin/events, so only the shape is checked.
+const EVENT_ID_RE = /^[a-z0-9][a-z0-9-]{1,48}$/;
 const MIN_PASSWORD = 8;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -116,6 +119,9 @@ async function log(me: Me, action: string, target: { id?: string; email?: string
 const cleanTeams = (teams: unknown) =>
   [...new Set((Array.isArray(teams) ? teams : []).map(Number).filter((t) => TEAM_IDS.includes(t)))].sort();
 
+const cleanEvents = (events: unknown) =>
+  [...new Set((Array.isArray(events) ? events : []).filter((e): e is string => typeof e === "string" && EVENT_ID_RE.test(e)))].sort();
+
 function checkPassword(p: unknown) {
   if (typeof p !== "string" || p.length < MIN_PASSWORD) {
     throw new HttpError(400, `Password must be at least ${MIN_PASSWORD} characters.`);
@@ -144,12 +150,27 @@ async function setTeams(userId: string, teams: number[]) {
   }
 }
 
+async function setEvents(userId: string, events: string[]) {
+  const { error: delErr } = await admin.from("admin_user_events").delete().eq("user_id", userId);
+  // event_pages.sql not run yet: nothing to clear, and nothing can be assigned.
+  if (delErr) {
+    if (events.length) throw new HttpError(500, "Run supabase/migrations/event_pages.sql first - events can't be assigned yet.");
+    return;
+  }
+  if (events.length) {
+    const { error } = await admin.from("admin_user_events").insert(events.map((event_id) => ({ user_id: userId, event_id })));
+    if (error) throw new HttpError(500, error.message);
+  }
+}
+
 // ---- Actions -------------------------------------------------------------------
 
 async function list() {
-  const [{ data: rows, error }, { data: teams }, { data: authData }, { data: vault }] = await Promise.all([
+  const [{ data: rows, error }, { data: teams }, { data: events }, { data: authData }, { data: vault }] = await Promise.all([
     admin.from("admin_users").select("*").order("created_at"),
     admin.from("admin_user_teams").select("user_id, team_id"),
+    admin.from("admin_user_events").select("user_id, event_id"), // null until event_pages.sql is run
+
     admin.auth.admin.listUsers({ page: 1, perPage: 1000 }),
     admin.from("admin_password_vault").select("user_id"),
   ]);
@@ -166,6 +187,7 @@ async function list() {
         role: r.role,
         disabled: r.disabled,
         teams: (teams ?? []).filter((t) => t.user_id === r.user_id).map((t) => t.team_id).sort(),
+        events: (events ?? []).filter((e) => e.user_id === r.user_id).map((e) => e.event_id).sort(),
         createdAt: r.created_at,
         lastSignInAt: u?.last_sign_in_at ?? null,
         passwordChangedAt: r.password_changed_at,
@@ -180,10 +202,11 @@ async function create(me: Me, b: Record<string, unknown>) {
   const email = String(b.email ?? "").trim().toLowerCase();
   const role = b.role === "admin" ? "admin" : "editor";
   const teams = role === "editor" ? cleanTeams(b.teams) : [];
+  const events = role === "editor" ? cleanEvents(b.events) : [];
   const password = checkPassword(b.password);
   if (!name) throw new HttpError(400, "Enter a name.");
   if (!EMAIL_RE.test(email)) throw new HttpError(400, "Enter a valid email.");
-  if (role === "editor" && !teams.length) throw new HttpError(400, "Pick at least one team.");
+  if (role === "editor" && !teams.length && !events.length) throw new HttpError(400, "Pick at least one team or event.");
 
   const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true, user_metadata: { name } });
   if (error || !data.user) throw new HttpError(400, error?.message ?? "Couldn't create the account.");
@@ -195,8 +218,9 @@ async function create(me: Me, b: Record<string, unknown>) {
     throw new HttpError(500, rowErr.message);
   }
   await setTeams(userId, teams);
+  await setEvents(userId, events);
   if (role === "editor") await storePassword(userId, password);
-  await log(me, "account_created", { id: userId, email }, { name, role, teams });
+  await log(me, "account_created", { id: userId, email }, { name, role, teams, events });
   return { userId };
 }
 
@@ -229,17 +253,25 @@ async function update(me: Me, b: Record<string, unknown>) {
     if (error) throw new HttpError(500, error.message);
   }
 
-  if (role === "editor" && b.teams !== undefined) {
-    const { data: cur } = await admin.from("admin_user_teams").select("team_id").eq("user_id", t.user_id);
-    const before = (cur ?? []).map((x) => x.team_id).sort();
-    const after = cleanTeams(b.teams);
-    if (!after.length) throw new HttpError(400, "Pick at least one team.");
-    if (before.join() !== after.join()) {
-      await setTeams(t.user_id, after);
-      changes.teams = { from: before, to: after };
+  if (role === "editor" && (b.teams !== undefined || b.events !== undefined)) {
+    const { data: curTeams } = await admin.from("admin_user_teams").select("team_id").eq("user_id", t.user_id);
+    const { data: curEvents } = await admin.from("admin_user_events").select("event_id").eq("user_id", t.user_id);
+    const teamsBefore = (curTeams ?? []).map((x) => x.team_id).sort();
+    const eventsBefore = (curEvents ?? []).map((x) => x.event_id).sort();
+    const teamsAfter = b.teams !== undefined ? cleanTeams(b.teams) : teamsBefore;
+    const eventsAfter = b.events !== undefined ? cleanEvents(b.events) : eventsBefore;
+    if (!teamsAfter.length && !eventsAfter.length) throw new HttpError(400, "Pick at least one team or event.");
+    if (teamsBefore.join() !== teamsAfter.join()) {
+      await setTeams(t.user_id, teamsAfter);
+      changes.teams = { from: teamsBefore, to: teamsAfter };
+    }
+    if (eventsBefore.join() !== eventsAfter.join()) {
+      await setEvents(t.user_id, eventsAfter);
+      changes.events = { from: eventsBefore, to: eventsAfter };
     }
   } else if (role === "admin") {
     await setTeams(t.user_id, []);
+    await setEvents(t.user_id, []);
   }
 
   if (Object.keys(changes).length) await log(me, "account_updated", { id: t.user_id, email: patch.email as string ?? t.email }, changes);
