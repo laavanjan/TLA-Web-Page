@@ -47,10 +47,12 @@ function TextSection({ s }) {
   );
 }
 
-function PeopleSection({ s }) {
+// Phone numbers only show for the current year's coordinators; people from
+// past years keep their name, role, photo and LinkedIn.
+function PeopleGrid({ people, showPhone }) {
   return (
     <div className="team-coordinator-grid">
-      {s.people.map((c) => (
+      {people.map((c) => (
         <div className="team-coordinator-card" key={c.id}>
           <div className="team-person-head">
             <SmartImage
@@ -66,7 +68,7 @@ function PeopleSection({ s }) {
             </div>
           </div>
           <div className="team-person-links">
-            {c.phone && (
+            {showPhone && c.phone && (
               <a className="team-coordinator-phone" href={`tel:${c.phone.replace(/\s+/g, "")}`}>
                 <FaPhoneAlt /> {c.phone}
               </a>
@@ -102,15 +104,99 @@ function TimelineSection({ s }) {
   );
 }
 
-function MembersSection({ s }) {
+function MembersGrid({ names }) {
   return (
     <div className="team-member-grid">
-      {s.names.map((name, i) => (
+      {names.map((name, i) => (
         <div className="team-member-chip" key={`${name}-${i}`}>
           <span className="team-member-avatar">{name.charAt(0)}</span>
           <span>{name}</span>
         </div>
       ))}
+    </div>
+  );
+}
+
+const hasTeam = (y) => y.people.length > 0 || y.members.length > 0;
+
+// "Team by year": year pills (newest = current), that year's coordinators and
+// members, then a list of every earlier year's coordinators that also works
+// as a shortcut to that year.
+function YearsSection({ s }) {
+  const years = s.years.filter(hasTeam);
+  const [sel, setSel] = useState(0);
+  const top = useRef(null);
+  const idx = Math.min(sel, years.length - 1);
+  const year = years[idx];
+  const past = years.slice(1).filter((y) => y.people.length);
+
+  const pick = (i) => {
+    setSel(i);
+    if (top.current && top.current.getBoundingClientRect().top < 0) {
+      top.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  return (
+    <div className="team-years" ref={top}>
+      {years.length > 1 && (
+        <div className="team-year-pills" role="tablist" aria-label="Year">
+          {years.map((y, i) => (
+            <button
+              type="button"
+              role="tab"
+              key={y.id}
+              aria-selected={i === idx}
+              className={`team-year-pill${i === idx ? " is-active" : ""}`}
+              onClick={() => pick(i)}
+            >
+              {y.year}
+              {i === 0 && <span className="team-year-now">தற்போது</span>}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="team-year" key={year.id} role="tabpanel" aria-label={year.year}>
+        {years.length === 1 && <p className="team-year-label">{year.year}</p>}
+        {year.people.length > 0 && (
+          <>
+            <h3 className="team-year-sub">ஒருங்கிணைப்பாளர்கள்</h3>
+            <PeopleGrid people={year.people} showPhone={idx === 0} />
+          </>
+        )}
+        {year.members.length > 0 && (
+          <>
+            <h3 className="team-year-sub">
+              உறுப்பினர்கள் <span>{year.members.length}</span>
+            </h3>
+            <MembersGrid names={year.members} />
+          </>
+        )}
+      </div>
+
+      {past.length > 0 && (
+        <div className="team-past">
+          <h3 className="team-year-sub">முன்னாள் ஒருங்கிணைப்பாளர்கள்</h3>
+          <div className="team-timeline">
+            {past.map((y) => {
+              const i = years.indexOf(y);
+              return (
+                <button
+                  type="button"
+                  key={y.id}
+                  className={`team-timeline-item team-past-item${i === idx ? " is-active" : ""}`}
+                  onClick={() => pick(i)}
+                  aria-label={`${y.year}: show that year's team`}
+                >
+                  <span className="team-timeline-year">{y.year}</span>
+                  <span className="team-timeline-name">{y.people.map((p) => p.name).join(" · ")}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -448,9 +534,8 @@ function GallerySection({ s }) {
 
 const RENDERERS = {
   text: TextSection,
-  people: PeopleSection,
+  years: YearsSection,
   timeline: TimelineSection,
-  members: MembersSection,
   youtube: YouTubeSection,
   instagram: InstagramSection,
   competitions: CompetitionsSection,
@@ -462,13 +547,11 @@ function hasContent(s) {
   switch (s.type) {
     case "text":
       return !!(s.text || s.buttonUrl);
-    case "people":
-      return s.people.length > 0;
+    case "years":
+      return s.years.some(hasTeam);
     case "timeline":
     case "competitions":
       return s.items.length > 0;
-    case "members":
-      return s.names.length > 0;
     case "youtube":
       return s.links.some(youTubeId);
     case "instagram":
