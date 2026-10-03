@@ -1,7 +1,8 @@
-# Team gallery uploads — Cloudinary setup
+# Team and event photo uploads — Cloudinary setup
 
-`/admin/teams` lets admins upload photos (gallery sections, team logo, banner,
-cover, people photos, competition posters). Photos are resized to 2560px and
+`/admin/teams` and `/admin/events` let admins upload photos (gallery sections,
+team logo, banner, cover, people photos, competition posters, event
+illustrations, winners' pictures, sponsor logos…). Photos are resized to 2560px and
 converted to WebP **in the admin's browser**, then uploaded straight to
 Cloudinary. This Edge Function is the only place that knows the Cloudinary
 **API secret** — it checks that the request comes from a signed-in admin and
@@ -9,7 +10,7 @@ hands back a one-off upload signature.
 
 ```
 browser ──(admin login token)──► cloudinary-sign ──► signature
-browser ──(file + signature)───────────────────────► Cloudinary  (tla/teams/<teamId>/…)
+browser ──(file + signature)───────────────────────► Cloudinary  (tla/teams/<teamId>/… or tla/events/<eventId>/…)
 ```
 
 Nothing needs adding to `.env` or Vercel — the website gets the cloud name and
@@ -58,20 +59,21 @@ size saving (e.g. `6.2 MB → 480 KB WebP −92%`). Publish, and they appear on
 
 ## How it behaves
 
-- **Who can upload:** main admins, to any team; team editors, only to the
-  teams they're assigned to (see [`../admin-users/README.md`](../admin-users/README.md)).
+- **Who can upload:** main admins, to any team or event; editors, only to the
+  teams and events they're assigned to (see [`../admin-users/README.md`](../admin-users/README.md)).
   Before `team_editors.sql` has been run, any signed-in account can.
-- **Where files go:** `tla/teams/<teamId>/<random id>`, tagged `tla-team-<teamId>`.
+- **Where files go:** `tla/teams/<teamId>/<random id>`, tagged `tla-team-<teamId>`;
+  event photos in `tla/events/<eventId>/<random id>`, tagged `tla-event-<eventId>`.
   In the Cloudinary Media Library, search for the tag or the public id to find them.
 - **Deleting:** removing a photo in the admin only changes the draft. When you
   **Publish**, photos the page no longer uses are deleted from Cloudinary.
   **Discard** deletes photos that were uploaded to that draft but never
-  published. A file is only ever deleted if it lives in that team's own folder.
+  published. A file is only ever deleted if it lives in that team's or event's own folder.
 - **Pasted links still work:** Google Drive / Cloudinary URLs pasted by hand are
   shown as before and are never deleted by the site.
 - **Leftovers:** if a browser tab is closed mid-edit, photos uploaded to that
   unpublished draft stay in Cloudinary. They're harmless; to tidy up, delete
-  files under `tla/teams/` that no page uses.
+  files under `tla/teams/` and `tla/events/` that no page uses.
 
 ## Limits worth knowing (free plan)
 
