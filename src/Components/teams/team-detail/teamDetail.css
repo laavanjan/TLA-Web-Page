@@ -209,6 +209,135 @@
     color: #333;
 }
 
+/* Team by year */
+.team-years {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    scroll-margin-top: 90px;
+}
+
+.team-year-pills {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 2px 2px 6px;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+}
+
+.team-year-pill {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: 1.5px solid #d6dde6;
+    background: white;
+    color: var(--navy);
+    font-family: "Heading" !important;
+    font-size: 17px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.team-year-pill:hover {
+    border-color: var(--navy);
+}
+
+.team-year-pill.is-active {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: white;
+}
+
+.team-year-pill:focus-visible,
+.team-past-item:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.team-year-now {
+    font-family: "Para" !important;
+    font-size: 12px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: white;
+}
+
+.team-year {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    animation: team-year-in 0.35s ease;
+}
+
+@keyframes team-year-in {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+}
+
+.team-year-label {
+    margin: 0;
+    font-family: "Heading" !important;
+    font-size: 18px;
+    color: var(--accent);
+}
+
+.team-year-sub {
+    margin: 6px 0 0;
+    font-family: "Heading" !important;
+    font-size: 19px;
+    color: var(--navy);
+}
+
+.team-year-sub span {
+    font-family: "Para" !important;
+    font-size: 14px;
+    padding: 1px 9px;
+    border-radius: 999px;
+    background: var(--bg-soft);
+    color: #555;
+    vertical-align: middle;
+}
+
+.team-past {
+    margin-top: 6px;
+    padding-top: 14px;
+    border-top: 1px dashed #d6dde6;
+}
+
+button.team-past-item {
+    all: unset;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--bg-soft);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+button.team-past-item:hover,
+button.team-past-item.is-active {
+    background: var(--bg-soft);
+}
+
+button.team-past-item.is-active .team-timeline-year {
+    background: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .team-year {
+        animation: none;
+    }
+}
+
 /* Members */
 .team-member-grid {
     display: flex;
