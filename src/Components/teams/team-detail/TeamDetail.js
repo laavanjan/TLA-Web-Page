@@ -201,14 +201,45 @@ function YearsSection({ s }) {
   );
 }
 
+const YT_ROWS = 2;
+
+// Two rows of videos, then "show more" reveals two more rows at a time. How
+// many fit in a row depends on the screen, so it's read from the grid itself.
 function YouTubeSection({ s }) {
   const ids = s.links.map(youTubeId).filter(Boolean);
+  const grid = useRef(null);
+  const [cols, setCols] = useState(3);
+  const [rows, setRows] = useState(YT_ROWS);
+
+  useEffect(() => {
+    const el = grid.current;
+    if (!el) return undefined;
+    const measure = () => setCols(getComputedStyle(el).gridTemplateColumns.split(" ").filter(Boolean).length || 1);
+    measure();
+    if (typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const visible = ids.slice(0, cols * rows);
+  const remaining = ids.length - visible.length;
+
   return (
-    <div className={`team-yt-grid${ids.length === 1 ? " is-single" : ""}`}>
-      {ids.map((id, i) => (
-        <LiteYouTube key={`${id}-${i}`} id={id} title={`${s.title} ${i + 1}`} />
-      ))}
-    </div>
+    <>
+      <div ref={grid} className={`team-yt-grid${ids.length === 1 ? " is-single" : ""}`}>
+        {visible.map((id, i) => (
+          <LiteYouTube key={`${id}-${i}`} id={id} title={`${s.title} ${i + 1}`} />
+        ))}
+      </div>
+      {remaining > 0 && (
+        <div className="team-gallery-more">
+          <button type="button" onClick={() => setRows((r) => r + YT_ROWS)}>
+            மேலும் காணொளிகள் <span>({remaining})</span>
+          </button>
+        </div>
+      )}
+    </>
   );
 }
 
