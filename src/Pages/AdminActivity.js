@@ -1,5 +1,5 @@
-// /admin/activity — who did what in the admin panel: every team page
-// publish (with a summary of what changed), account changes, and deleted
+// /admin/activity — who did what in the admin panel: every team and event
+// page publish (with a summary of what changed), account changes, and deleted
 // join applications. Recorded by the database (team_editors.sql) and the
 // admin-users function, so it can't be skipped from a browser.
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -10,7 +10,10 @@ import { FaSyncAlt, FaUsers, FaChevronDown } from "react-icons/fa";
 import LotusDivider from "./LotusDivider";
 import { fetchActivity } from "../admin/adminUsers";
 import { getCachedTeamPages } from "../shared/teamPages";
+import { getCachedEventPages, eventTitle as eventTitleIn } from "../shared/eventPages";
+import { isBuiltIn } from "../Components/events/eventsRegistry";
 import { summarizePageChange } from "../shared/pageDiff";
+import { summarizeEventChange, summarizeLayoutChange } from "../shared/eventPageDiff";
 import { ACTIONS, actionMeta, actorName, activityObject, when } from "../admin/activityText";
 import "./Frame.css";
 import "./Admin.css";
@@ -26,18 +29,31 @@ const GROUPS = [
 ];
 
 const teamsLabel = (ids, teamTitle) => (ids && ids.length ? ids.map(teamTitle).join(", ") : "no teams");
+const eventsLabel = (ids, eventTitle) => (ids && ids.length ? ids.map(eventTitle).join(", ") : "no events");
 
 // Bullet points shown under an entry.
-function detailLines(e, teamTitle) {
+function detailLines(e, teamTitle, eventTitle) {
   const d = e.details || {};
   switch (e.action) {
     case "publish":
       return summarizePageChange(d.before, d.after);
-    case "account_created":
-      return [d.role === "admin" ? "Main admin" : `Team editor for ${teamsLabel(d.teams, teamTitle)}`];
+    case "event_publish":
+      return summarizeEventChange(d.before, d.after);
+    case "event_layout":
+      return summarizeLayoutChange(d.before, d.after, eventTitle);
+    case "event_removed":
+      return [isBuiltIn(d.event_id) ? "Went back to the built-in content" : "Deleted the event and its page"];
+    case "account_created": {
+      if (d.role === "admin") return ["Main admin"];
+      const parts = [];
+      if (!d.teams || d.teams.length || !d.events || !d.events.length) parts.push(`teams: ${teamsLabel(d.teams, teamTitle)}`);
+      if (d.events && d.events.length) parts.push(`events: ${eventsLabel(d.events, eventTitle)}`);
+      return [`Editor for ${parts.join(" · ")}`];
+    }
     case "account_updated":
       return Object.entries(d).map(([k, v]) => {
         if (k === "teams") return `Teams: ${teamsLabel(v.from, teamTitle)} → ${teamsLabel(v.to, teamTitle)}`;
+        if (k === "events") return `Events: ${eventsLabel(v.from, eventTitle)} → ${eventsLabel(v.to, eventTitle)}`;
         if (k === "role") return `Role: ${v.from === "admin" ? "main admin" : "team editor"} → ${v.to === "admin" ? "main admin" : "team editor"}`;
         return `${k[0].toUpperCase()}${k.slice(1)}: ${v.from || "(empty)"} → ${v.to}`;
       });
@@ -48,15 +64,15 @@ function detailLines(e, teamTitle) {
   }
 }
 
-function Entry({ e, teamTitle }) {
+function Entry({ e, teamTitle, eventTitle }) {
   const [open, setOpen] = useState(false);
   const meta = actionMeta(e.action);
   const Icon = meta.icon;
   const actor = actorName(e);
-  const lines = detailLines(e, teamTitle);
+  const lines = detailLines(e, teamTitle, eventTitle);
   const many = lines.length > 3;
   const shown = open || !many ? lines : lines.slice(0, 3);
-  const target = activityObject(e, teamTitle);
+  const target = activityObject(e, teamTitle, eventTitle);
   const object = target ? <b>{target}</b> : null;
 
   return (
@@ -99,10 +115,13 @@ export default function AdminActivity() {
   const [more, setMore] = useState(false);
   const [person, setPerson] = useState("");
   const [team, setTeam] = useState("");
+  const [event, setEvent] = useState("");
   const [group, setGroup] = useState("");
 
   const teams = useMemo(() => getCachedTeamPages().map((p) => ({ id: p.id, title: p.title })), []);
   const teamTitle = useCallback((id) => (teams.find((t) => t.id === id) || {}).title || `Team ${id}`, [teams]);
+  const events = useMemo(() => getCachedEventPages().pages.map((p) => ({ id: p.id, title: p.title })), []);
+  const eventTitle = useCallback((id) => eventTitleIn(events, id), [events]);
 
   const load = useCallback((before) => {
     setLoading(true);
@@ -132,6 +151,7 @@ export default function AdminActivity() {
     (e) =>
       (!person || e.actor_id === person) &&
       (!team || String(e.team_id) === team) &&
+      (!event || (e.details || {}).event_id === event) &&
       (!group || (ACTIONS[e.action] || {}).group === group)
   );
 
@@ -186,6 +206,17 @@ export default function AdminActivity() {
               </select>
             </label>
             <label className="tj-control">
+              <span className="tj-control-label">Event</span>
+              <select className="tj-input" value={event} onChange={(e) => setEvent(e.target.value)}>
+                <option value="">All events</option>
+                {events.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.title}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="tj-control">
               <span className="tj-control-label">Type</span>
               <select className="tj-input" value={group} onChange={(e) => setGroup(e.target.value)}>
                 {GROUPS.map(([v, l]) => (
@@ -204,7 +235,7 @@ export default function AdminActivity() {
 
           <ul className="ae-timeline">
             {visible.map((e) => (
-              <Entry key={e.id} e={e} teamTitle={teamTitle} />
+              <Entry key={e.id} e={e} teamTitle={teamTitle} eventTitle={eventTitle} />
             ))}
           </ul>
 
