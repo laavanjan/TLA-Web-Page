@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import {
@@ -17,7 +17,7 @@ import {
 import "./teamDetail.css";
 import { SECTION_META } from "../sectionMeta";
 import { SmartImage, LiteYouTube, InstagramEmbed, SocialIcons } from "./media";
-import { youTubeId, instagramPost, imageCandidates } from "../../../shared/mediaLinks";
+import { youTubeId, instagramPost, imageCandidates, socialPlatform } from "../../../shared/mediaLinks";
 import { competitionStatus, daysUntil } from "../../../shared/teamPages";
 
 const formatDate = (date) => {
@@ -212,18 +212,94 @@ function YouTubeSection({ s }) {
   );
 }
 
-function InstagramSection({ s }) {
+// Posts sit side by side in one row: swipe on phones (the next post peeks in),
+// arrows on desktop. Each post snaps into place.
+function InstagramSection({ s, page }) {
   const posts = s.links.map(instagramPost).filter(Boolean);
+  const track = useRef(null);
+  const [state, setState] = useState({ first: 1, last: 1, prev: false, next: false });
+  const follow = ((page && page.socials) || []).find((u) => socialPlatform(u) === "instagram");
+
+  // Which posts are (mostly) on screen, for the "2-3 / 5" counter.
+  const update = useCallback(() => {
+    const el = track.current;
+    if (!el || !el.firstElementChild) return;
+    const box = el.getBoundingClientRect();
+    const shown = [];
+    [...el.children].forEach((c, i) => {
+      const r = c.getBoundingClientRect();
+      const seen = Math.min(r.right, box.right) - Math.max(r.left, box.left);
+      if (seen >= r.width * 0.6) shown.push(i + 1);
+    });
+    const next = {
+      first: shown[0] || 1,
+      last: shown[shown.length - 1] || 1,
+      prev: el.scrollLeft > 4,
+      next: el.scrollLeft + el.clientWidth < el.scrollWidth - 4,
+    };
+    setState((cur) =>
+      cur.first === next.first && cur.last === next.last && cur.prev === next.prev && cur.next === next.next ? cur : next
+    );
+  }, []);
+
+  useEffect(() => {
+    const el = track.current;
+    update();
+    if (!el) return undefined;
+    el.addEventListener("scrollend", update);
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(update) : null;
+    if (ro) ro.observe(el);
+    return () => {
+      el.removeEventListener("scrollend", update);
+      if (ro) ro.disconnect();
+    };
+  }, [update, posts.length]);
+
+  const slide = (dir) => {
+    const el = track.current;
+    const card = el && el.firstElementChild;
+    if (!card) return;
+    el.scrollBy({ left: dir * (card.getBoundingClientRect().width + parseFloat(getComputedStyle(el).columnGap || 0)), behavior: "smooth" });
+    setTimeout(update, 500); // in case the browser skips the final scroll event
+  };
+
+  const scrollable = state.prev || state.next;
+
   return (
-    <div className="team-ig-grid">
-      {posts.map((p, i) => (
-        <div className="team-ig-item" key={`${p.code}-${i}`}>
-          <InstagramEmbed post={p} />
-          <a className="team-ig-open" href={p.url} target="_blank" rel="noopener noreferrer">
-            <FaInstagram /> Instagram-இல் பார்க்க
-          </a>
+    <div className="team-ig">
+      {(scrollable || follow) && (
+        <div className="team-ig-bar">
+          {scrollable && (
+            <span className="team-ig-count" aria-live="polite">
+              {state.first === state.last ? state.first : `${state.first}-${state.last}`} / {posts.length}
+            </span>
+          )}
+          {follow && (
+            <a className="team-ig-follow" href={follow} target="_blank" rel="noopener noreferrer">
+              <FaInstagram /> Instagram-இல் பின்தொடர
+            </a>
+          )}
         </div>
-      ))}
+      )}
+      <div className="team-ig-viewport">
+        {state.prev && (
+          <button type="button" className="team-ig-arrow is-prev" onClick={() => slide(-1)} aria-label="Previous posts">
+            <FaChevronLeft />
+          </button>
+        )}
+        <div className="team-ig-track" ref={track} onScroll={update}>
+          {posts.map((p, i) => (
+            <div className="team-ig-item" key={`${p.code}-${i}`}>
+              <InstagramEmbed post={p} />
+            </div>
+          ))}
+        </div>
+        {state.next && (
+          <button type="button" className="team-ig-arrow is-next" onClick={() => slide(1)} aria-label="Next posts">
+            <FaChevronRight />
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -651,7 +727,7 @@ const TeamDetail = ({ page, preview = false }) => {
                   <Icon className="team-section-icon" /> {s.title}
                 </h2>
               )}
-              <Body s={s} />
+              <Body s={s} page={page} />
             </section>
           );
         })}
