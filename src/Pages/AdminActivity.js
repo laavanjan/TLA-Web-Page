@@ -5,43 +5,18 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet";
 import { Link } from "react-router-dom";
-import {
-  FaUpload,
-  FaUserPlus,
-  FaUserEdit,
-  FaKey,
-  FaEye,
-  FaBan,
-  FaCheckCircle,
-  FaTrash,
-  FaUserMinus,
-  FaSyncAlt,
-  FaUsers,
-  FaChevronDown,
-} from "react-icons/fa";
+import { FaSyncAlt, FaUsers, FaChevronDown } from "react-icons/fa";
 
 import LotusDivider from "./LotusDivider";
 import { fetchActivity } from "../admin/adminUsers";
 import { getCachedTeamPages } from "../shared/teamPages";
 import { summarizePageChange } from "../shared/pageDiff";
+import { ACTIONS, actionMeta, actorName, activityObject, when } from "../admin/activityText";
 import "./Frame.css";
 import "./Admin.css";
 import "./AdminEditors.css";
 
 const PAGE = 50;
-
-const ACTIONS = {
-  publish: { icon: FaUpload, verb: "published", group: "pages" },
-  application_deleted: { icon: FaTrash, verb: "deleted a join application", group: "applications" },
-  account_created: { icon: FaUserPlus, verb: "created an account for", group: "accounts" },
-  account_updated: { icon: FaUserEdit, verb: "updated the account of", group: "accounts" },
-  account_removed: { icon: FaUserMinus, verb: "removed the account of", group: "accounts" },
-  account_disabled: { icon: FaBan, verb: "disabled", group: "accounts" },
-  account_enabled: { icon: FaCheckCircle, verb: "re-enabled", group: "accounts" },
-  password_reset: { icon: FaKey, verb: "reset the password of", group: "accounts" },
-  password_viewed: { icon: FaEye, verb: "viewed the password of", group: "accounts" },
-  password_changed: { icon: FaKey, verb: "changed their own password", group: "accounts" },
-};
 
 const GROUPS = [
   ["", "Everything"],
@@ -49,16 +24,6 @@ const GROUPS = [
   ["accounts", "Accounts & passwords"],
   ["applications", "Join applications"],
 ];
-
-function when(iso) {
-  const d = new Date(iso);
-  const s = (Date.now() - d.getTime()) / 1000;
-  const time = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  if (s < 60) return "just now";
-  if (s < 3600) return `${Math.floor(s / 60)} min ago`;
-  if (s < 86400 && d.getDate() === new Date().getDate()) return `today ${time}`;
-  return `${d.toLocaleDateString()} ${time}`;
-}
 
 const teamsLabel = (ids, teamTitle) => (ids && ids.length ? ids.map(teamTitle).join(", ") : "no teams");
 
@@ -85,16 +50,14 @@ function detailLines(e, teamTitle) {
 
 function Entry({ e, teamTitle }) {
   const [open, setOpen] = useState(false);
-  const meta = ACTIONS[e.action] || { icon: FaUserEdit, verb: e.action };
+  const meta = actionMeta(e.action);
   const Icon = meta.icon;
-  const actor = e.actor_name || e.actor_email || "Someone";
+  const actor = actorName(e);
   const lines = detailLines(e, teamTitle);
   const many = lines.length > 3;
   const shown = open || !many ? lines : lines.slice(0, 3);
-
-  let object = null;
-  if (e.action === "publish") object = <b>{teamTitle(e.team_id)}</b>;
-  else if (e.target_email && e.action !== "password_changed") object = <b>{e.target_email}</b>;
+  const target = activityObject(e, teamTitle);
+  const object = target ? <b>{target}</b> : null;
 
   return (
     <li className={`ae-entry ae-act-${meta.group || "other"}`}>
