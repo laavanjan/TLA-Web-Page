@@ -1007,6 +1007,18 @@
   box-shadow: 0 0 0 3px rgba(230, 180, 34, 0.15);
 }
 
+/* Native dropdowns: ask for a dark list so the white option text stays
+   readable (Windows otherwise draws a light grey list underneath it). */
+.tj select.tj-input {
+  color-scheme: dark;
+  cursor: pointer;
+}
+
+.tj select.tj-input option {
+  background: #151b28;
+  color: #f4f6fb;
+}
+
 .tj-choices {
   resize: vertical;
   line-height: 1.6;
