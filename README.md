@@ -226,6 +226,35 @@ Main admins can give a person a login that only edits their own team's page (and
 
 ---
 
+## Event pages (`/admin/events`)
+
+Every event page - the 13 events, the four Brammam competition pages and any event added later - is edited at `/admin/events`, the same way team pages are edited at `/admin/teams`: pick an event, change its sections, check the **Preview** tab, then **Publish**. Main admins also create events, arrange the cards on the home page (**Home page** tab) and can send an event back to its built-in content. Editors only see the events they are assigned; one editor can be given as many events as you like at `/admin/editors`.
+
+A page is a list of sections: introduction, programme, photo gallery, winners & prizes, rules, cards, competitions, sponsors, contacts, key details, past years, milestones, YouTube, Instagram and "built-in blocks" (the parts that still load from the server - Sotkanai districts, Aramiyam seminars, the Ideathon timeline and rules, each Brammam competition). An event nobody has edited keeps showing the content built into the site (`src/Components/events/eventsRegistry.js`), so nothing changes until something is published.
+
+**One-time setup** (after the team editors setup above):
+
+1. Supabase → **SQL Editor** → run [`supabase/migrations/event_pages.sql`](supabase/migrations/event_pages.sql).
+2. Redeploy the `admin-users` and `cloudinary-sign` functions (the new versions know about events: assigning them to editors, and uploading to `tla/events/<event>/`). Same steps as in their READMEs.
+
+Until step 1 is done the public site works as before (it shows the built-in pages) and `/admin/events` can't publish.
+
+| File | Purpose |
+|------|---------|
+| `supabase/migrations/event_pages.sql` | `event_pages` and `admin_user_events` tables, permissions, activity log |
+| `src/Components/events/eventsRegistry.js` | The built-in events and their default sections |
+| `src/Components/events/eventsAssets.js` | Images that ship with the site, referenced as `asset:<key>` |
+| `src/shared/eventSections.js` | Section types, blank rows, cleaning of saved pages |
+| `src/shared/eventPages.js` | Fetch / publish / delete event pages, the home page layout |
+| `src/Components/events/EventDetail.js`, `EventSections.js` | How a page is drawn |
+| `src/Pages/AdminEvents.js`, `src/admin/eventEditors.js`, `itemsEditor.js` | The admin screen and its section editors |
+| `src/admin/editorKit.js` | Editing pieces shared with `/admin/teams` |
+| `src/shared/eventPageDiff.js` | "What changed" summaries for the activity log |
+
+Run the tests for this with `npx react-scripts test --watchAll=false src/shared/eventPages.test.js`.
+
+---
+
 ## Hackathon event configuration
 
 Go to `src/Components/events/hackthon/agenda/eventList.js` and edit the `events` object to update the agenda.
