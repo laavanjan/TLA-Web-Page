@@ -1,0 +1,287 @@
+/* The maintenance page (MaintenancePage.js) and the staff banner / splash
+   around it (MaintenanceGate.js). */
+
+.mt-page {
+    --navy: #022345;
+    --navy-soft: #0a3a6b;
+    --accent: #c8932f;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 18px;
+    box-sizing: border-box;
+    background: radial-gradient(circle at 20% 0%, #eaf0f8 0%, #f6f8fa 45%, #ffffff 100%);
+    color: var(--navy);
+    text-align: center;
+}
+
+.mt-page.is-preview {
+    min-height: 0;
+    padding: 28px 14px;
+}
+
+.mt-card {
+    width: 100%;
+    max-width: 720px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
+.mt-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-family: "Heading" !important;
+    font-size: 22px;
+}
+
+.mt-brand img {
+    height: 44px;
+    width: auto;
+}
+
+/* The picture has empty margin above and below its artwork; this window shows
+   just the artwork. White in the picture melts into the page. */
+.mt-art {
+    width: min(480px, 86vw, 66vh);
+    aspect-ratio: 1 / 0.8;
+    overflow: hidden;
+    mix-blend-mode: multiply;
+}
+
+.mt-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-top: -13.5%;
+}
+
+.mt-icon {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: #e9eef5;
+    color: var(--navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 6px 0;
+}
+
+.mt-icon-gear {
+    width: 90px;
+    height: 90px;
+    animation: mt-spin 14s linear infinite;
+}
+
+.mt-icon-tools {
+    position: absolute;
+    width: 46px;
+    height: 46px;
+    right: 14px;
+    bottom: 14px;
+    padding: 8px;
+    border-radius: 50%;
+    background: white;
+    color: var(--accent);
+    box-shadow: rgba(2, 35, 69, 0.2) 0 2px 8px 0;
+}
+
+@keyframes mt-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mt-icon-gear {
+        animation: none;
+    }
+}
+
+.mt-title {
+    font-family: "Heading" !important;
+    font-size: 44px;
+    line-height: 1.35;
+    margin: 6px 0 0 0;
+    color: var(--navy);
+}
+
+.mt-subtitle {
+    margin: -6px 0 0 0;
+    font-family: "Para" !important;
+    font-size: 22px;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+}
+
+.mt-message {
+    margin: 4px 0 0 0;
+    max-width: 600px;
+    font-family: "Para" !important;
+    font-size: 21px;
+    line-height: 1.8;
+    color: #444;
+    white-space: pre-line;
+}
+
+.mt-message-en {
+    margin-top: 0;
+    font-size: 17px;
+    color: #717274;
+}
+
+.mt-reopen {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 10px;
+    padding: 14px 24px;
+    border-radius: 16px;
+    background: white;
+    box-shadow: rgba(99, 99, 99, 0.2) 0 2px 12px 0;
+    text-align: left;
+    font-family: "Para" !important;
+}
+
+.mt-reopen > svg {
+    flex: 0 0 auto;
+    font-size: 26px;
+    color: var(--accent);
+}
+
+.mt-reopen > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mt-reopen-label {
+    font-size: 14px;
+    color: #717274;
+}
+
+.mt-reopen strong {
+    font-size: 21px;
+    font-weight: 600;
+}
+
+.mt-reopen small {
+    font-size: 15px;
+    color: #717274;
+}
+
+.mt-links {
+    list-style: none;
+    margin: 14px 0 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 22px;
+}
+
+.mt-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: "Para" !important;
+    font-size: 18px;
+    color: var(--navy);
+    text-decoration: none;
+    border-bottom: 2px solid rgba(2, 35, 69, 0.18);
+    word-break: break-all;
+}
+
+.mt-links a:hover {
+    color: var(--navy);
+    border-color: var(--accent);
+}
+
+.mt-links svg {
+    color: var(--accent);
+}
+
+@media only screen and (max-width: 600px) {
+    .mt-title {
+        font-size: 32px;
+    }
+
+    .mt-message {
+        font-size: 18px;
+    }
+
+    .mt-brand {
+        font-size: 18px;
+    }
+
+    .mt-reopen {
+        padding: 12px 16px;
+    }
+
+    .mt-reopen strong {
+        font-size: 18px;
+    }
+}
+
+/* ---- Splash while the setting is being read ---------------------------------------- */
+
+.mt-splash {
+    position: fixed;
+    inset: 0;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mt-splash img {
+    height: 72px;
+    width: auto;
+    animation: mt-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes mt-pulse {
+    50% {
+        opacity: 0.45;
+    }
+}
+
+/* ---- Banner for signed-in staff, who see the site while it is closed ------------------- */
+
+.mt-banner {
+    position: fixed;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px 12px;
+    max-width: calc(100vw - 24px);
+    padding: 9px 16px;
+    border-radius: 14px;
+    background: #3a2a00;
+    color: #ffe9a8;
+    border: 1px solid rgba(255, 215, 110, 0.55);
+    box-shadow: rgba(0, 0, 0, 0.35) 0 8px 24px 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 13.5px;
+    line-height: 1.4;
+}
+
+.mt-banner b {
+    color: #fff;
+}
+
+.mt-banner a {
+    color: #ffd76e;
+    font-weight: 700;
+    text-decoration: underline;
+}
