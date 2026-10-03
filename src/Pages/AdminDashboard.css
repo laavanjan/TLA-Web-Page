@@ -881,3 +881,8 @@
     transform: none;
   }
 }
+
+/* Event pages list: a dozen short rows, so it flows into columns */
+.ad-teams.ad-events {
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+}

@@ -16,15 +16,17 @@ import {
   FaUserCog,
   FaPenNib,
   FaRegLightbulb,
+  FaCalendarAlt,
 } from "react-icons/fa";
 
 import LotusDivider from "./LotusDivider";
 import { SmartImage } from "../Components/teams/team-detail/media";
-import { useAdminRole } from "../admin/adminRole";
+import { useAdminRole, canEditEvent } from "../admin/adminRole";
 import { logout, getEnabledStickerIds } from "../admin/adminStore";
 import { fetchActivity } from "../admin/adminUsers";
 import { actionMeta, actorName, activityObject, ago } from "../admin/activityText";
 import { getCachedTeamPages, fetchTeamPages } from "../shared/teamPages";
+import { getCachedEventPages, fetchEventPages, eventTitle as eventTitleIn } from "../shared/eventPages";
 import { fetchTeamJoinApplications } from "../shared/teamJoinApplications";
 import { fetchTeamJoinConfig } from "../shared/teamJoinConfig";
 import { fetchContactConfig } from "../shared/contactConfig";
@@ -52,7 +54,7 @@ const shortDate = (ymd) => {
 // Everything the cards report on, loaded in parallel. Each key stays
 // undefined while loading, so its card shows a shimmer instead of a guess.
 function useDashboardData(admin) {
-  const [d, setD] = useState({ pages: getCachedTeamPages() });
+  const [d, setD] = useState({ pages: getCachedTeamPages(), events: getCachedEventPages().pages });
 
   useEffect(() => {
     let alive = true;
@@ -61,6 +63,9 @@ function useDashboardData(admin) {
 
     fetchTeamPages()
       .then((pages) => set("pages", pages))
+      .catch(() => {});
+    fetchEventPages()
+      .then((snap) => set("events", snap.pages))
       .catch(() => {});
     fetchTeamJoinApplications()
       .then((apps) => set("apps", { total: apps.length, week: apps.filter((a) => new Date(a.created_at) > since).length }))
@@ -213,6 +218,54 @@ function TeamPagesCard({ pages, lastPublish, title, desc, index }) {
   );
 }
 
+// Event pages: each event with when it was last edited. Events nobody has
+// edited in the admin show their built-in content.
+function EventPagesCard({ events, lastPublish, title, desc, index }) {
+  const edited = events.filter((p) => p.updatedAt).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  let status = {
+    tone: "info",
+    text: `${events.length} event page${events.length === 1 ? "" : "s"} · all showing built-in content`,
+  };
+  if (edited.length) {
+    const by =
+      lastPublish && lastPublish.details && lastPublish.details.event_id === edited[0].id ? ` by ${actorName(lastPublish)}` : "";
+    status = { tone: "ok", text: `Last published ${ago(edited[0].updatedAt)}${by}` };
+  }
+  const shown = events.filter((p) => !p.parent);
+  return (
+    <Link to="/admin/events" className="ad-card ad-feature tone-sky" style={{ "--i": index }}>
+      <div className="ad-feature-head">
+        <span className="ad-icon">
+          <FaCalendarAlt />
+        </span>
+        <span className="ad-card-text">
+          <strong>{title}</strong>
+          <small>{desc}</small>
+          <Status value={status} />
+        </span>
+        <FaArrowRight className="ad-arrow" aria-hidden="true" />
+      </div>
+      <ul className="ad-teams ad-events">
+        {shown.map((p) => (
+          <li key={p.id}>
+            <span className="ad-team-logo">
+              {p.image ? (
+                <SmartImage src={p.image} width={96} alt="" fallback={<b>{p.title.charAt(0)}</b>} />
+              ) : (
+                <b>{p.title.charAt(0)}</b>
+              )}
+            </span>
+            <span className="ad-team-name">{p.title}</span>
+            <span className={`ad-team-when${p.updatedAt ? "" : " is-default"}`}>
+              {p.updatedAt ? ago(p.updatedAt) : "built-in"}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </Link>
+  );
+}
+
 function Section({ label, icon: Icon, children }) {
   return (
     <section className="ad-section">
@@ -224,7 +277,7 @@ function Section({ label, icon: Icon, children }) {
   );
 }
 
-function ActivityPanel({ activity, teamTitle }) {
+function ActivityPanel({ activity, teamTitle, eventTitle }) {
   return (
     <aside className="ad-panel">
       <div className="ad-panel-head">
@@ -251,7 +304,7 @@ function ActivityPanel({ activity, teamTitle }) {
           {activity.map((e) => {
             const meta = actionMeta(e.action);
             const Icon = meta.icon;
-            const target = activityObject(e, teamTitle);
+            const target = activityObject(e, teamTitle, eventTitle);
             return (
               <li key={e.id} className={`ad-feed-${meta.group}`}>
                 <span className="ad-feed-icon">
@@ -347,7 +400,10 @@ export default function Admin() {
     [data.pages, editor, who.teams]
   );
   const teamTitle = (id) => (data.pages.find((p) => p.id === id) || {}).title || `Team ${id}`;
+  const eventTitle = (id) => eventTitleIn(data.events, id);
   const lastPublish = (data.activity || []).find((e) => e.action === "publish");
+  const lastEventPublish = (data.activity || []).find((e) => e.action === "event_publish");
+  const myEvents = useMemo(() => data.events.filter((p) => canEditEvent(who, p.id)), [data.events, who]);
   const firstName = (who.name || (who.email || "").split("@")[0]).split(" ")[0];
   const today = new Date().toLocaleDateString([], { weekday: "long", day: "numeric", month: "long" });
 
@@ -381,9 +437,18 @@ export default function Admin() {
       <div className="ad-layout">
         <main className="ad-main">
           {editor ? (
-            <Section label="Your team" icon={FaPenNib}>
+            <>
+            <Section label={myEvents.length && !pages.length ? "Your events" : "Your team"} icon={FaPenNib}>
               <div className="ad-grid ad-grid-content">
-                {pages.length > 0 ? (
+                {pages.length === 0 && myEvents.length > 0 ? (
+                  <EventPagesCard
+                    events={myEvents}
+                    lastPublish={lastEventPublish}
+                    title={myEvents.length > 1 ? "Your event pages" : "Your event page"}
+                    desc="Sections, photos and programme. Edit and publish."
+                    index={n++}
+                  />
+                ) : pages.length > 0 ? (
                   <TeamPagesCard
                     pages={pages}
                     title={pages.length > 1 ? "Your team pages" : "Your team page"}
@@ -394,15 +459,17 @@ export default function Admin() {
                   <p className="ad-panel-empty">You're not assigned to a team yet. Ask a main admin to add you.</p>
                 )}
                 <div className="ad-stack">
-                  <Card
-                    to="/admin/team-join"
-                    icon={FaHandshake}
-                    tone="rose"
-                    title="Join requests"
-                    desc="People who applied to join your team."
-                    status={joinStatus(data.apps)}
-                    index={n++}
-                  />
+                  {pages.length > 0 && (
+                    <Card
+                      to="/admin/team-join"
+                      icon={FaHandshake}
+                      tone="rose"
+                      title="Join requests"
+                      desc="People who applied to join your team."
+                      status={joinStatus(data.apps)}
+                      index={n++}
+                    />
+                  )}
                   <Card
                     to="/admin/account"
                     icon={FaUserCog}
@@ -414,6 +481,20 @@ export default function Admin() {
                 </div>
               </div>
             </Section>
+            {pages.length > 0 && myEvents.length > 0 && (
+              <Section label="Your events" icon={FaCalendarAlt}>
+                <div className="ad-grid">
+                  <EventPagesCard
+                    events={myEvents}
+                    lastPublish={lastEventPublish}
+                    title={myEvents.length > 1 ? "Your event pages" : "Your event page"}
+                    desc="Sections, photos and programme. Edit and publish."
+                    index={n++}
+                  />
+                </div>
+              </Section>
+            )}
+            </>
           ) : (
             <>
               <Section label="Website content" icon={FaPenNib}>
@@ -457,6 +538,18 @@ export default function Admin() {
                 </div>
               </Section>
 
+              <Section label="Events" icon={FaCalendarAlt}>
+                <div className="ad-grid">
+                  <EventPagesCard
+                    events={data.events}
+                    lastPublish={lastEventPublish}
+                    title="Event pages"
+                    desc="Every event's page, the home page cards, and who edits what."
+                    index={n++}
+                  />
+                </div>
+              </Section>
+
               <div className="ad-duo">
                 <Section label="People & access" icon={FaUsersCog}>
                   <div className="ad-grid ad-grid-2">
@@ -464,8 +557,8 @@ export default function Admin() {
                       to="/admin/editors"
                       icon={FaUsersCog}
                       tone="violet"
-                      title="Team editors"
-                      desc="Logins that can only edit their own team."
+                      title="Editors"
+                      desc="Logins that can only edit their own teams and events."
                       status={editorsStatus(data.accounts)}
                       index={n++}
                     />
@@ -507,7 +600,7 @@ export default function Admin() {
           )}
         </main>
 
-        {editor ? <TipsPanel /> : <ActivityPanel activity={data.activity} teamTitle={teamTitle} />}
+        {editor ? <TipsPanel /> : <ActivityPanel activity={data.activity} teamTitle={teamTitle} eventTitle={eventTitle} />}
       </div>
     </div>
   );
