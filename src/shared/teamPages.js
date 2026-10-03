@@ -11,9 +11,8 @@ const LS_KEY = "tla_team_pages";
 
 export const SECTION_TYPES = [
   "text",
-  "people",
+  "years",
   "timeline",
-  "members",
   "youtube",
   "instagram",
   "competitions",
@@ -22,9 +21,8 @@ export const SECTION_TYPES = [
 
 const DEFAULT_TITLES = {
   text: "அணி பற்றி",
-  people: "தற்போதைய ஒருங்கிணைப்பாளர்கள்",
-  timeline: "முன்னாள் ஒருங்கிணைப்பாளர்கள்",
-  members: "அணி உறுப்பினர்கள்",
+  years: "எமது அணி",
+  timeline: "எமது பயணம்",
   youtube: "காணொளிகள்",
   instagram: "Instagram பதிவுகள்",
   competitions: "எமது போட்டிகள்",
@@ -42,12 +40,10 @@ export function blankSection(type) {
   switch (type) {
     case "text":
       return { ...base, text: "", buttonLabel: "", buttonUrl: "" };
-    case "people":
-      return { ...base, people: [blankPerson()] };
+    case "years":
+      return { ...base, years: [blankYear()] };
     case "timeline":
       return { ...base, items: [blankTimelineItem()] };
-    case "members":
-      return { ...base, names: [] };
     case "competitions":
       return { ...base, items: [blankCompetition()] };
     case "gallery":
@@ -58,6 +54,8 @@ export function blankSection(type) {
 }
 
 export const blankPerson = () => ({ id: newId("p"), name: "", role: "", phone: "", photo: "", linkedin: "" });
+export const thisYear = () => String(new Date().getFullYear());
+export const blankYear = (year = thisYear()) => ({ id: newId("y"), year, people: [blankPerson()], members: [] });
 export const blankTimelineItem = () => ({ id: newId("t"), year: "", text: "" });
 export const blankCompetition = () => ({
   id: newId("c"),
@@ -79,6 +77,85 @@ const dim = (v) => {
 };
 
 export const blankImage = (url = "") => ({ id: newId("g"), url, caption: "", width: 0, height: 0 });
+
+function sanitizePerson(p) {
+  const name = str(p && p.name, 200);
+  if (!name) return null;
+  return {
+    id: str(p.id, 80) || newId("p"),
+    name,
+    role: str(p.role, 200),
+    phone: str(p.phone, 40),
+    photo: safeUrl(p.photo),
+    linkedin: safeUrl(p.linkedin),
+  };
+}
+
+// Newest year first; anything that isn't a plain year number goes last.
+export function sortYears(years) {
+  const n = (y) => (/^\d{4}$/.test(y.year) ? Number(y.year) : -1);
+  return [...years].sort((a, b) => n(b) - n(a));
+}
+
+function sanitizeYear(y) {
+  const year = str(y && y.year, 20);
+  if (!year) return null;
+  return {
+    id: str(y.id, 80) || newId("y"),
+    year,
+    people: list(y.people, sanitizePerson),
+    members: list(y.members, (m) => str(m, 200) || null),
+  };
+}
+
+// ---- Older pages: one "Team by year" section instead of three ------------
+// Pages used to keep current coordinators ("people"), current members
+// ("members") and past coordinators (a "timeline" with this title) in
+// separate sections. They're folded into a single "years" section when a page
+// loads; nothing changes on the live site until it's published.
+const LEGACY_PAST_TITLE = "முன்னாள் ஒருங்கிணைப்பாளர்கள்";
+
+const isLegacyTeamSection = (s) =>
+  !!s &&
+  (s.type === "people" || s.type === "members" || (s.type === "timeline" && str(s.title) === LEGACY_PAST_TITLE));
+
+export function upgradeSections(sections) {
+  if (!Array.isArray(sections) || !sections.some(isLegacyTeamSection)) return sections;
+  const current = thisYear();
+  const byYear = new Map();
+  const yearOf = (label) => {
+    if (!byYear.has(label)) byYear.set(label, { id: `y_${label}`, year: label, people: [], members: [] });
+    return byYear.get(label);
+  };
+  let at = -1;
+  let allHidden = true;
+  sections.forEach((s, i) => {
+    if (!isLegacyTeamSection(s)) return;
+    if (at < 0) at = i;
+    if (!s.hidden) allHidden = false;
+    if (s.type === "people") yearOf(current).people.push(...(s.people || []));
+    if (s.type === "members") yearOf(current).members.push(...(s.names || []));
+    if (s.type === "timeline") {
+      (s.items || []).forEach((t) => {
+        const name = str(t && t.text, 200);
+        if (!name) return;
+        const m = str(t.year, 40).match(/\d{4}/);
+        const y = yearOf(m ? m[0] : str(t.year, 20) || current);
+        if (!y.people.some((p) => p.name === name)) y.people.push({ id: `p_${t.id || name}`, name, role: "" });
+      });
+    }
+  });
+  const merged = {
+    id: "years_legacy",
+    type: "years",
+    title: DEFAULT_TITLES.years,
+    hidden: allHidden,
+    years: sortYears([...byYear.values()]),
+  };
+  const rest = sections.filter((s) => !isLegacyTeamSection(s));
+  rest.splice(at, 0, merged); // where the first of the old sections was
+  return rest;
+}
 
 // Gallery photos are { id, url, caption, width, height }. Galleries saved
 // before uploads existed hold plain URL strings; those still load.
@@ -112,22 +189,8 @@ function sanitizeSection(raw) {
         buttonLabel: str(r.buttonLabel, 80),
         buttonUrl: safeUrl(r.buttonUrl),
       };
-    case "people":
-      return {
-        ...base,
-        people: list(r.people, (p) => {
-          const name = str(p && p.name, 200);
-          if (!name) return null;
-          return {
-            id: str(p.id, 80) || newId("p"),
-            name,
-            role: str(p.role, 200),
-            phone: str(p.phone, 40),
-            photo: safeUrl(p.photo),
-            linkedin: safeUrl(p.linkedin),
-          };
-        }),
-      };
+    case "years":
+      return { ...base, years: sortYears(list(r.years, sanitizeYear)) };
     case "timeline":
       return {
         ...base,
@@ -138,8 +201,6 @@ function sanitizeSection(raw) {
           return { id: str(t.id, 80) || newId("t"), year, text };
         }),
       };
-    case "members":
-      return { ...base, names: list(r.names, (n) => str(n, 200) || null) };
     case "competitions":
       return {
         ...base,
@@ -169,21 +230,26 @@ function sanitizeSection(raw) {
 }
 
 function defaultPage(team) {
+  // Built in the old three-section shape and upgraded like a saved page, so
+  // built-in content and converted pages end up the same.
   const sections = [{ ...blankSection("text"), text: str(team.description, 20000) }];
   if (team.coordinators && team.coordinators.length) {
     sections.push({
-      ...blankSection("people"),
-      people: team.coordinators.map((c) => ({ ...blankPerson(), ...c })),
+      id: "people_default",
+      type: "people",
+      people: team.coordinators.map((c, i) => ({ ...c, id: `p_default_${i}` })),
     });
   }
   if (team.pastCoordinators && team.pastCoordinators.length) {
     sections.push({
-      ...blankSection("timeline"),
-      items: team.pastCoordinators.map((p) => ({ ...blankTimelineItem(), year: p.year, text: p.name })),
+      id: "timeline_default",
+      type: "timeline",
+      title: LEGACY_PAST_TITLE,
+      items: team.pastCoordinators.map((p, i) => ({ id: `t_default_${i}`, year: p.year, text: p.name })),
     });
   }
   if (team.members && team.members.length) {
-    sections.push({ ...blankSection("members"), names: [...team.members] });
+    sections.push({ id: "members_default", type: "members", names: [...team.members] });
   }
   return {
     title: team.title,
@@ -193,7 +259,7 @@ function defaultPage(team) {
     logo: "",
     banner: "",
     socials: [],
-    sections: sections.map(sanitizeSection).filter(Boolean),
+    sections: upgradeSections(sections).map(sanitizeSection).filter(Boolean),
   };
 }
 
@@ -209,7 +275,7 @@ export function sanitizePage(raw, team) {
     logo: safeUrl(raw.logo),
     banner: safeUrl(raw.banner),
     socials: [...new Set(list(raw.socials, (u) => safeSocialUrl(u) || null))],
-    sections: raw.sections.map(sanitizeSection).filter(Boolean),
+    sections: upgradeSections(raw.sections).map(sanitizeSection).filter(Boolean),
   };
 }
 
@@ -292,7 +358,7 @@ export function pagePublicIds(page) {
   if (!page) return new Set();
   const urls = [page.logo, page.banner, page.cover];
   (page.sections || []).forEach((s) => {
-    if (s.type === "people") s.people.forEach((p) => urls.push(p.photo));
+    if (s.type === "years") s.years.forEach((y) => y.people.forEach((p) => urls.push(p.photo)));
     if (s.type === "competitions") s.items.forEach((c) => urls.push(c.poster));
     if (s.type === "gallery") s.images.forEach((img) => urls.push(img.url));
   });
