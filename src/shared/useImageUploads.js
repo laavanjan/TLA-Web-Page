@@ -7,8 +7,9 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { prepareImage } from "./imagePrep";
 import { signUploads, signatureFresh, uploadSigned } from "./cloudinaryUpload";
 
-// Provided by the admin page: which team uploads belong to, and a counter of
-// editors with uploads in flight (Publish waits for them).
+// Provided by the admin page: which team (a number) or event (a string id)
+// uploads belong to, and a counter of editors with uploads in flight (Publish
+// waits for them).
 export const UploadContext = createContext({ teamId: null, onBusy: () => {} });
 
 const IMAGE_EXT = /\.(jpe?g|png|webp|gif|avif|heic|heif)$/i;

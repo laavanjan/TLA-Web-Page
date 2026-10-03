@@ -9,9 +9,15 @@ const SIGNATURE_TTL_MS = 50 * 60 * 1000; // Cloudinary accepts them for 1 hour
 
 const callFn = (body) => callEdgeFunction(FN, body);
 
+// `scope` is a team id (number) for team pages or an event id (string, e.g.
+// "thaipongal") for event pages; uploads land in that team's / event's folder.
 // -> [{ cloudName, apiKey, signature, params, fetchedAt }]
-export async function signUploads(teamId, count) {
-  const data = await callFn({ action: "sign", teamId, count });
+export async function signUploads(scope, count) {
+  const data = await callFn({
+    action: "sign",
+    ...(typeof scope === "string" ? { eventId: scope } : { teamId: scope }),
+    count,
+  });
   const fetchedAt = Date.now();
   return data.uploads.map((u) => ({ ...u, cloudName: data.cloudName, fetchedAt }));
 }
