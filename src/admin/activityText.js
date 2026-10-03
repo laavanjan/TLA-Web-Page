@@ -10,10 +10,14 @@ import {
   FaCheckCircle,
   FaTrash,
   FaUserMinus,
+  FaThList,
 } from "react-icons/fa";
 
 export const ACTIONS = {
   publish: { icon: FaUpload, verb: "published", group: "pages" },
+  event_publish: { icon: FaUpload, verb: "published the event page", group: "pages" },
+  event_layout: { icon: FaThList, verb: "rearranged the home page event cards", group: "pages" },
+  event_removed: { icon: FaTrash, verb: "removed the published event page", group: "pages" },
   application_deleted: { icon: FaTrash, verb: "deleted a join application", group: "applications" },
   account_created: { icon: FaUserPlus, verb: "created an account for", group: "accounts" },
   account_updated: { icon: FaUserEdit, verb: "updated the account of", group: "accounts" },
@@ -29,9 +33,12 @@ export const actionMeta = (action) => ACTIONS[action] || { icon: FaUserEdit, ver
 
 export const actorName = (e) => e.actor_name || e.actor_email || "Someone";
 
-// What the action was done to: the team for publishes, otherwise the account.
-export function activityObject(e, teamTitle) {
+// What the action was done to: the team or event for publishes, otherwise the
+// account. `eventTitle` looks up an event page's name from its id.
+export function activityObject(e, teamTitle, eventTitle = (id) => id) {
   if (e.action === "publish") return teamTitle(e.team_id);
+  if (e.action === "event_publish" || e.action === "event_removed") return eventTitle((e.details || {}).event_id);
+  if (e.action === "event_layout") return "";
   if (e.target_email && e.action !== "password_changed") return e.target_email;
   return "";
 }
