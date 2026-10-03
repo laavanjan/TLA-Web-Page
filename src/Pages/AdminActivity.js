@@ -14,6 +14,7 @@ import { getCachedEventPages, eventTitle as eventTitleIn } from "../shared/event
 import { isBuiltIn } from "../Components/events/eventsRegistry";
 import { summarizePageChange } from "../shared/pageDiff";
 import { summarizeEventChange, summarizeLayoutChange } from "../shared/eventPageDiff";
+import { summarizeStatusChange } from "../shared/siteStatus";
 import { ACTIONS, actionMeta, actorName, activityObject, when } from "../admin/activityText";
 import "./Frame.css";
 import "./Admin.css";
@@ -26,6 +27,7 @@ const GROUPS = [
   ["pages", "Page publishes"],
   ["accounts", "Accounts & passwords"],
   ["applications", "Join applications"],
+  ["site", "Site settings"],
 ];
 
 const teamsLabel = (ids, teamTitle) => (ids && ids.length ? ids.map(teamTitle).join(", ") : "no teams");
@@ -41,6 +43,10 @@ function detailLines(e, teamTitle, eventTitle) {
       return summarizeEventChange(d.before, d.after);
     case "event_layout":
       return summarizeLayoutChange(d.before, d.after, eventTitle);
+    case "maintenance_on":
+    case "maintenance_off":
+    case "maintenance_updated":
+      return summarizeStatusChange(d.before, d.after);
     case "event_removed":
       return [isBuiltIn(d.event_id) ? "Went back to the built-in content" : "Deleted the event and its page"];
     case "account_created": {

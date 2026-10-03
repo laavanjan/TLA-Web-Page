@@ -11,6 +11,8 @@ import {
   FaTrash,
   FaUserMinus,
   FaThList,
+  FaTools,
+  FaLockOpen,
 } from "react-icons/fa";
 
 export const ACTIONS = {
@@ -18,6 +20,9 @@ export const ACTIONS = {
   event_publish: { icon: FaUpload, verb: "published the event page", group: "pages" },
   event_layout: { icon: FaThList, verb: "rearranged the home page event cards", group: "pages" },
   event_removed: { icon: FaTrash, verb: "removed the published event page", group: "pages" },
+  maintenance_on: { icon: FaTools, verb: "turned maintenance mode on", group: "site" },
+  maintenance_off: { icon: FaLockOpen, verb: "turned maintenance mode off", group: "site" },
+  maintenance_updated: { icon: FaTools, verb: "changed the maintenance page", group: "site" },
   application_deleted: { icon: FaTrash, verb: "deleted a join application", group: "applications" },
   account_created: { icon: FaUserPlus, verb: "created an account for", group: "accounts" },
   account_updated: { icon: FaUserEdit, verb: "updated the account of", group: "accounts" },
