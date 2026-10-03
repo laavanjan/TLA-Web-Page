@@ -1,21 +1,9 @@
 import { useRoutes, Navigate } from "react-router-dom";
 
-import BrammamEventAbout from "./Components/events/brammam/aboutEvent/BrammamEventAbout";
+import { EventRoute, CustomEventRoute, BrammamCompetitionRoute } from "./Components/events/EventRoute";
 import ExtraInfo from "./Components/events/brammam/ExtraInfo/ExtraInfo";
-import Aramiyam from "./Pages/Aramiyam";
-import BloodDonation from "./Pages/Blood-donation";
-import Brammam from "./Pages/Brammam";
-import FoodFestival from "./Pages/Food-festival";
 import Home from "./Pages/Home";
-import Jeevanathi from "./Pages/Jeevanathi";
-import Kovil from "./Pages/Kovil";
-import MovieNight from "./Pages/Movie-night";
-import PPL from "./Pages/PPL";
 import SotkanaiDistrict from "./Pages/Sotkanai-district";
-import SotkanaiMain from "./Pages/Sotkanai-main";
-import Thaipongal from "./Pages/Thaipongal";
-import Thamilaruvi from "./Pages/Thamilaruvi";
-import VaniVilla from "./Pages/Vani-villa";
 import ComingSoon from "./shared/comingSoon/ComingSoon";
 
 import Contact from "./Components/Home/Contact/contact";
@@ -24,7 +12,6 @@ import BookViewer from "./Pages/BookViewer";
 import BookSubmitGuidelines from "./Pages/BookSubmitGuidelines";
 import BookSubmitForm from "./Pages/BookSubmitForm";
 import HistoryPage from "./Pages/History";
-import Ideathon from "./Pages/Ideathon";
 import MemorySharing from "./Pages/Memory-Sharing";
 import TeamsPage from "./Pages/Teams-Page";
 import TeamDetailPage from "./Pages/TeamDetailPage";
@@ -44,6 +31,7 @@ import AdminBooks from "./Pages/AdminBooks";
 import AdminContact from "./Pages/AdminContact";
 import AdminTeamJoin from "./Pages/AdminTeamJoin";
 import AdminTeams from "./Pages/AdminTeams";
+import AdminEvents from "./Pages/AdminEvents";
 import AdminLogin from "./Pages/AdminLogin";
 import RequireAdmin from "./Pages/RequireAdmin";
 import AdminEditors from "./Pages/AdminEditors";
@@ -56,77 +44,32 @@ function Router() {
       element: <Home />,
     },
     {
+      // Event pages: each reads the admin-published page (/admin/events) or the
+      // content built into the site. Events made in the admin match :slug.
       path: "/events",
       children: [
-        {
-          path: "thaipongal",
-          element: <Thaipongal />,
-        },
-        {
-          path: "sotkanai",
-          element: <SotkanaiMain />,
-        },
-        {
-          path: "sotkanai-district",
-          element: <SotkanaiDistrict />,
-        },
-        {
-          path: "aramiyam",
-          element: <Aramiyam />,
-        },
-        {
-          path: "jeevanathi",
-          element: <Jeevanathi />,
-        },
-        {
-          path: "vani-villa",
-          element: <VaniVilla />,
-        },
-        {
-          path: "kovil",
-          element: <Kovil />,
-        },
-        {
-          path: "blood-donation",
-          element: <BloodDonation />,
-        },
-        {
-          path: "food-festival",
-          element: <FoodFestival />,
-        },
-        {
-          path: "thamilaruvi",
-          element: <Thamilaruvi />,
-        },
-        {
-          path: "brammam",
-          element: <Brammam />,
-        },
-        {
-          path: "brammam/:event",
-          element: <BrammamEventAbout />,
-        },
-        {
-          path: "brammam/:event/rules",
-          element: <ExtraInfo />,
-        },
-        {
-          path: "comingSoon",
-          element: <ComingSoon />,
-        },
-        {
-          path: "ppl",
-          element: <PPL />,
-        },
-        {
-          path: "movie-night",
-          element: <MovieNight />,
-        },
+        { path: "thaipongal", element: <EventRoute id="thaipongal" /> },
+        { path: "vani-villa", element: <EventRoute id="vani-villa" /> },
+        { path: "thamilaruvi", element: <EventRoute id="thamilaruvi" /> },
+        { path: "sotkanai", element: <EventRoute id="sotkanai" /> },
+        { path: "sotkanai-district", element: <SotkanaiDistrict /> },
+        { path: "brammam", element: <EventRoute id="brammam" /> },
+        { path: "brammam/:event", element: <BrammamCompetitionRoute /> },
+        { path: "brammam/:event/rules", element: <ExtraInfo /> },
+        { path: "aramiyam", element: <EventRoute id="aramiyam" /> },
+        { path: "jeevanathi", element: <EventRoute id="jeevanathi" /> },
+        { path: "kovil", element: <EventRoute id="kovil" /> },
+        { path: "blood-donation", element: <EventRoute id="blood-donation" /> },
+        { path: "ppl", element: <EventRoute id="ppl" /> },
+        { path: "movie-night", element: <EventRoute id="movie-night" /> },
+        { path: "food-festival", element: <EventRoute id="food-festival" /> },
+        { path: "comingSoon", element: <ComingSoon /> },
+        { path: ":slug", element: <CustomEventRoute /> },
       ],
     },
     {
       path: "ideathon",
-      element: <Ideathon />,
+      element: <EventRoute id="ideathon" />,
     },
     {
       path: "/memory-sharing",
@@ -249,6 +192,14 @@ function Router() {
       element: (
         <RequireAdmin allow="any">
           <AdminTeams />
+        </RequireAdmin>
+      ),
+    },
+    {
+      path: "admin/events",
+      element: (
+        <RequireAdmin allow="any">
+          <AdminEvents />
         </RequireAdmin>
       ),
     },
