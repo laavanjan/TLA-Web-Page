@@ -4,6 +4,7 @@ import "./App.css";
 import Router from "./Router";
 import Navbar from "./Components/Home/Navbar/navbar";
 import Footer from "./Components/Home/Footer/footer";
+import MaintenanceGate from "./Components/maintenance/MaintenanceGate";
 import ScrollToTop from "./Components/ScrollToTop";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
@@ -20,12 +21,12 @@ function App() {
     currentUser().then(auth.loggedIn).catch(() => { });
   }, []);
   return (
-    <>
+    <MaintenanceGate>
       <ScrollToTop />
       {!standalone && <Navbar />}
       <Router/>
       {!standalone && <Footer />}
-    </>
+    </MaintenanceGate>
   );
 }
 
