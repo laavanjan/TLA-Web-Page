@@ -1,9 +1,9 @@
 # Team editors — setup
 
-Team editors are people who can sign in to `/admin` but only edit the team
-page(s) you assign them, and see who applied to join those teams. Main admins
-manage them at **/admin/editors** and can see everything they did at
-**/admin/activity**.
+Editors are people who can sign in to `/admin` but only edit the team page(s)
+and event page(s) you assign them, and see who applied to join those teams.
+Main admins manage them at **/admin/editors** and can see everything they did
+at **/admin/activity**. An editor can have any number of teams and events.
 
 Do these steps **in this order**, all in your Supabase project.
 
@@ -66,11 +66,18 @@ All accounts are created from /admin/editors now.
 4. Sign in as them in a private window: they land on their team page and can't
    see the other teams or admin tools.
 
+## Event pages
+
+Giving editors events needs one more script and a redeploy of this function and
+`cloudinary-sign`: run [`supabase/migrations/event_pages.sql`](../../migrations/event_pages.sql)
+(after `team_editors.sql`), then deploy the new [`index.ts`](./index.ts). Until then
+the **Events they can edit** picker on /admin/editors can't save.
+
 ## What main admins can do
 
 On **/admin/editors**, for each person:
 
-- **Edit** — name, email, role (team editor ↔ main admin), teams.
+- **Edit** — name, email, role (editor ↔ main admin), teams and events.
 - **Reset password** — set a new one (a strong one is suggested).
 - **Show password** — for team editors, even after they change it themselves.
   Each view is recorded in the activity log.
@@ -82,8 +89,9 @@ main admin.
 
 ## What's logged (/admin/activity)
 
-- Every team page **publish**: who, which team, when, and what changed
-  ("added 4 photos to Gallery, edited the About text…").
+- Every team page and event page **publish**: who, which team or event, when,
+  and what changed ("added 4 photos to Gallery, edited the About text…"). Also
+  changes to the home page cards and events sent back to their built-in content.
 - **Account changes**: created, edited, disabled/enabled, removed, password
   reset / changed / viewed.
 - **Deleted join applications**.
