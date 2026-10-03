@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FaPlay } from "react-icons/fa";
 import { imageCandidates, imageSrcSet, youTubeThumb, socialPlatform } from "../../../shared/mediaLinks";
 import { SOCIAL_META } from "../socialMeta";
@@ -51,10 +51,39 @@ export function LiteYouTube({ id, title = "YouTube video" }) {
   );
 }
 
+// Instagram's embed page reports its real height to the parent page
+// ({"type":"MEASURE","details":{"height":…}}); the iframe follows it so there's
+// no blank space under short posts and nothing cut off on long ones.
 export function InstagramEmbed({ post }) {
+  const frame = useRef(null);
+  const [height, setHeight] = useState(null);
+
+  useEffect(() => {
+    const onMessage = (e) => {
+      if (!frame.current || e.source !== frame.current.contentWindow) return;
+      if (!/^https:\/\/(www\.)?instagram\.com$/.test(e.origin)) return;
+      try {
+        const msg = typeof e.data === "string" ? JSON.parse(e.data) : e.data;
+        const h = msg && msg.type === "MEASURE" && msg.details && Number(msg.details.height);
+        if (h > 100 && h < 3000) setHeight(Math.ceil(h));
+      } catch {
+        /* not a message for us */
+      }
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, []);
+
   return (
     <div className="ig-embed">
-      <iframe src={post.embedUrl} title={`Instagram ${post.kind}`} loading="lazy" scrolling="no" />
+      <iframe
+        ref={frame}
+        src={post.embedUrl}
+        title={`Instagram ${post.kind}`}
+        loading="lazy"
+        scrolling="no"
+        style={height ? { height } : undefined}
+      />
     </div>
   );
 }
