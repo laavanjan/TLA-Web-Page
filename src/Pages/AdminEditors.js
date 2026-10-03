@@ -1,5 +1,6 @@
-// /admin/editors — main admins create and manage admin panel accounts: team
-// editors (only their teams' pages and join requests) and other main admins.
+// /admin/editors — main admins create and manage admin panel accounts: editors
+// (only the team pages, join requests and event pages they are given) and
+// other main admins.
 // All changes go through the admin-users Edge Function and are logged.
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet";
@@ -34,6 +35,8 @@ import {
   MIN_PASSWORD,
 } from "../admin/adminUsers";
 import { getCachedTeamPages } from "../shared/teamPages";
+import { getCachedEventPages } from "../shared/eventPages";
+import { EVENT_CATEGORIES } from "../shared/eventSections";
 import "./Frame.css";
 import "./Admin.css";
 import "./AdminEditors.css";
@@ -102,11 +105,46 @@ function TeamPicker({ teams, value, onChange }) {
   );
 }
 
+// Events grouped like the home page. A sub-page is named after its event.
+function EventPicker({ events, value, onChange }) {
+  const toggle = (id) => onChange(value.includes(id) ? value.filter((e) => e !== id) : [...value, id].sort());
+  const label = (e) => {
+    const parent = e.parent && events.find((p) => p.id === e.parent);
+    return parent ? `${parent.title} › ${e.title}` : e.title;
+  };
+  return (
+    <div className="ae-events">
+      {EVENT_CATEGORIES.map((c) => {
+        const inGroup = events.filter((e) => e.category === c.id);
+        if (!inGroup.length) return null;
+        return (
+          <div className="ae-event-group" key={c.id}>
+            <span className="ae-event-group-name">{c.title}</span>
+            <div className="ae-teams">
+              {inGroup.map((e) => (
+                <button
+                  type="button"
+                  key={e.id}
+                  className={`ae-team-chip${value.includes(e.id) ? " is-on" : ""}`}
+                  aria-pressed={value.includes(e.id)}
+                  onClick={() => toggle(e.id)}
+                >
+                  {value.includes(e.id) && <FaCheckCircle />} {label(e)}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function RolePicker({ value, onChange, disabled }) {
   return (
     <div className="ae-role" role="radiogroup" aria-label="Role">
       {[
-        ["editor", "Team editor", "Only the teams you pick"],
+        ["editor", "Editor", "Only the teams and events you pick"],
         ["admin", "Main admin", "Everything, including this page"],
       ].map(([v, label, hint]) => (
         <button
@@ -127,12 +165,13 @@ function RolePicker({ value, onChange, disabled }) {
 }
 
 // Create (no `account`) or edit an account.
-function AccountForm({ account, teams, isSelf, onDone, onCancel }) {
+function AccountForm({ account, teams, events, isSelf, onDone, onCancel }) {
   const editing = !!account;
   const [name, setName] = useState(account ? account.name : "");
   const [email, setEmail] = useState(account ? account.email : "");
   const [role, setRole] = useState(account ? account.role : "editor");
   const [picked, setPicked] = useState(account ? account.teams : []);
+  const [pickedEvents, setPickedEvents] = useState(account ? account.events || [] : []);
   const [password, setPassword] = useState(() => (editing ? "" : generatePassword()));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -140,17 +179,17 @@ function AccountForm({ account, teams, isSelf, onDone, onCancel }) {
   const submit = async (e) => {
     e.preventDefault();
     setError("");
-    if (role === "editor" && !picked.length) {
-      setError("Pick at least one team.");
+    if (role === "editor" && !picked.length && !pickedEvents.length) {
+      setError("Pick at least one team or event.");
       return;
     }
     setBusy(true);
     try {
       if (editing) {
-        await updateAccount(account.userId, { name, email, role, teams: picked });
+        await updateAccount(account.userId, { name, email, role, teams: picked, events: pickedEvents });
         onDone({ type: "ok", text: `Saved ${name}.` });
       } else {
-        await createAccount({ name, email, password, role, teams: picked });
+        await createAccount({ name, email, password, role, teams: picked, events: pickedEvents });
         onDone({ type: "created", text: `Created ${name}.`, email: email.trim().toLowerCase(), password });
       }
     } catch (err) {
@@ -178,10 +217,25 @@ function AccountForm({ account, teams, isSelf, onDone, onCancel }) {
         {isSelf && <small className="tj-muted">You can't change your own role.</small>}
       </div>
       {role === "editor" && (
-        <div className="tj-control">
-          <span className="tj-control-label">Teams they can edit</span>
-          <TeamPicker teams={teams} value={picked} onChange={setPicked} />
-        </div>
+        <>
+          <div className="tj-control">
+            <span className="tj-control-label">Teams they can edit</span>
+            <TeamPicker teams={teams} value={picked} onChange={setPicked} />
+          </div>
+          <div className="tj-control">
+            <span className="tj-control-label">
+              Events they can edit ({pickedEvents.length})
+              <button type="button" className="ts-link-btn" onClick={() => setPickedEvents(events.map((e) => e.id).sort())}>
+                All
+              </button>
+              <button type="button" className="ts-link-btn" onClick={() => setPickedEvents([])}>
+                None
+              </button>
+            </span>
+            <EventPicker events={events} value={pickedEvents} onChange={setPickedEvents} />
+            <small className="tj-muted">An editor can be given as many events as you like, and teams as well.</small>
+          </div>
+        </>
       )}
       {!editing && (
         <div className="tj-control">
@@ -264,11 +318,12 @@ function Revealed({ password, onHide }) {
   );
 }
 
-function AccountCard({ account, teams, isSelf, onChanged, onNotice }) {
+function AccountCard({ account, teams, events, isSelf, onChanged, onNotice }) {
   const [panel, setPanel] = useState(null); // edit | reset | null
   const [password, setPassword] = useState(null);
   const [busy, setBusy] = useState(false);
   const teamTitle = (id) => (teams.find((t) => t.id === id) || {}).title || `Team ${id}`;
+  const eventTitle = (id) => (events.find((e) => e.id === id) || {}).title || id;
   const label = account.name || account.email;
   const hide = useCallback(() => setPassword(null), []);
 
@@ -311,13 +366,20 @@ function AccountCard({ account, teams, isSelf, onChanged, onNotice }) {
           <span className="ae-email">{account.email}</span>
           <div className="ae-meta">
             {account.role === "editor" ? (
-              account.teams.map((id) => (
-                <span key={id} className="ae-team-tag">
-                  {teamTitle(id)}
-                </span>
-              ))
+              <>
+                {account.teams.map((id) => (
+                  <span key={id} className="ae-team-tag">
+                    {teamTitle(id)}
+                  </span>
+                ))}
+                {(account.events || []).map((id) => (
+                  <span key={id} className="ae-team-tag ae-event-tag">
+                    {eventTitle(id)}
+                  </span>
+                ))}
+              </>
             ) : (
-              <span className="ae-team-tag ae-team-all">All teams · full admin</span>
+              <span className="ae-team-tag ae-team-all">Everything · full admin</span>
             )}
           </div>
           <small className="tj-muted">
@@ -372,6 +434,7 @@ function AccountCard({ account, teams, isSelf, onChanged, onNotice }) {
         <AccountForm
           account={account}
           teams={teams}
+          events={events}
           isSelf={isSelf}
           onCancel={() => setPanel(null)}
           onDone={(n) => {
@@ -434,6 +497,9 @@ function Notice({ notice, onClose }) {
 export default function AdminEditors() {
   const me = useAdminRole();
   const teams = useRef(getCachedTeamPages().map((p) => ({ id: p.id, title: p.title }))).current;
+  const events = useRef(
+    getCachedEventPages().pages.map((p) => ({ id: p.id, title: p.title, category: p.category, parent: p.parent }))
+  ).current;
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -458,18 +524,26 @@ export default function AdminEditors() {
   const editors = accounts.filter((a) => a.role === "editor");
   const admins = accounts.filter((a) => a.role === "admin");
   const card = (a) => (
-    <AccountCard key={a.userId} account={a} teams={teams} isSelf={a.userId === me.userId} onChanged={load} onNotice={setNotice} />
+    <AccountCard
+      key={a.userId}
+      account={a}
+      teams={teams}
+      events={events}
+      isSelf={a.userId === me.userId}
+      onChanged={load}
+      onNotice={setNotice}
+    />
   );
 
   return (
     <div className="frame-page admin-page">
       <Helmet>
-        <title>Team editors · Admin</title>
+        <title>Editors · Admin</title>
       </Helmet>
       <header className="frame-topbar">
         <span className="frame-brand">தமிழ் இலக்கிய மன்றம்</span>
         <LotusDivider />
-        <span className="frame-subtitle">Admin · Team editors</span>
+        <span className="frame-subtitle">Admin · Editors</span>
       </header>
 
       <div className="admin-hub admin-hub-xwide tj ae">
@@ -491,8 +565,8 @@ export default function AdminEditors() {
         </div>
 
         <p className="tj-muted ae-intro">
-          <b>Team editors</b> sign in at <code>/admin/login</code> and can only edit the team pages you give them, plus
-          see who applied to join those teams. <b>Main admins</b> can do everything.
+          <b>Editors</b> sign in at <code>/admin/login</code> and can only edit the team pages and event pages you give
+          them, plus see who applied to join those teams. <b>Main admins</b> can do everything.
         </p>
 
         <Notice notice={notice} onClose={() => setNotice(null)} />
@@ -500,6 +574,7 @@ export default function AdminEditors() {
         {adding && (
           <AccountForm
             teams={teams}
+            events={events}
             onCancel={() => setAdding(false)}
             onDone={(n) => {
               setAdding(false);
@@ -514,13 +589,13 @@ export default function AdminEditors() {
         <section className="tj-section">
           <header className="tj-section-head">
             <div>
-              <h3 className="tj-h3">Team editors</h3>
+              <h3 className="tj-h3">Editors</h3>
               <p className="tj-muted">{loading && !accounts.length ? "Loading…" : `${editors.length} ${editors.length === 1 ? "person" : "people"}`}</p>
             </div>
           </header>
           {editors.map(card)}
           {!loading && !error && editors.length === 0 && (
-            <p className="tj-empty">No team editors yet - use "Add person" to give someone access to their team's page.</p>
+            <p className="tj-empty">No editors yet - use "Add person" to give someone access to their team or event pages.</p>
           )}
         </section>
 
