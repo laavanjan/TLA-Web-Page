@@ -14,7 +14,7 @@ function srcset(image, size, rows = 1, cols = 1) {
     };
 }
 
-const images = [
+export const images = [
     {
         img:"https://live.staticflickr.com/65535/53565962650_e1b3735de8.jpg",
         thumbnail:"https://live.staticflickr.com/65535/53565962650_e1b3735de8.jpg"

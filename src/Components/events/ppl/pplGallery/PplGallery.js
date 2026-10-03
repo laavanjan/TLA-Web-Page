@@ -6,7 +6,7 @@ import Heading from "../../../../shared/Heading";
 import ImageGallery from "../../../../shared/imageGallery/ImageGallery";
 import './pplgallery.css';
 
-const images = [
+export const images = [
     {
         img: "https://live.staticflickr.com/65535/53529246361_935d481bbe_c.jpg",
         thumbnail: 'https://live.staticflickr.com/65535/53529246361_935d481bbe_c.jpg',

@@ -5,7 +5,7 @@ import {
 import './pplteams.css';
 import Heading from "../../../../shared/Heading";
 
-const pplTeamImages = [
+export const pplTeamImages = [
     {
         img: "https://live.staticflickr.com/65535/53529394853_f4b5dd313e_w.jpg",
         thumbnail: "https://live.staticflickr.com/65535/53529394853_f4b5dd313e_w.jpg"
