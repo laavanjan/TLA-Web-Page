@@ -2,9 +2,18 @@
 // into things the site can embed. Only http(s) URLs are ever used, so a pasted
 // `javascript:` link can never end up in an href or src.
 
+import { bundledAsset, isBundledKey } from "./bundledAssets";
+
 export function safeUrl(url) {
   const s = String(url || "").trim();
   return /^https?:\/\/[^\s]+$/i.test(s) ? s : "";
+}
+
+// An image field: either a normal https link or the key of an image that
+// ships with the site ("asset:…", see bundledAssets.js).
+export function safeImage(url) {
+  const s = String(url || "").trim();
+  return isBundledKey(s) ? s : safeUrl(s);
 }
 
 function parse(url) {
@@ -69,22 +78,26 @@ export function driveFileId(url) {
 }
 
 const CLOUDINARY_RE = /^(https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/i;
-// Files uploaded from /admin/teams: tla/teams/<teamId>/<random id>.<ext>
-const UPLOADED_RE = /\/image\/upload\/(?:[^?#]*\/)?(tla\/teams\/(\d{1,3})\/[A-Za-z0-9_-]{8,64})\.[A-Za-z0-9]+(?:[?#].*)?$/;
+// Files uploaded from the admin: tla/teams/<teamId>/<random id>.<ext> for team
+// pages, tla/events/<eventId>/<random id>.<ext> for event pages.
+const UPLOADED_RE =
+  /\/image\/upload\/(?:[^?#]*\/)?(tla\/(?:teams\/(\d{1,3})|events\/([a-z0-9][a-z0-9-]{0,48}))\/[A-Za-z0-9_-]{8,64})\.[A-Za-z0-9]+(?:[?#].*)?$/;
 
 export function imageSource(url) {
+  if (isBundledKey(url)) return bundledAsset(url) ? "bundled" : "";
   if (!safeUrl(url)) return "";
   if (driveFileId(url)) return "drive";
   if (CLOUDINARY_RE.test(url.trim())) return "cloudinary";
   return "web";
 }
 
-// { publicId, teamId } for an image uploaded through the admin, else null.
-// Derived from the URL so there's a single source of truth for what to delete.
+// { publicId, teamId, eventId } for an image uploaded through the admin (one
+// of teamId / eventId is set, the other null), else null. Derived from the URL
+// so there's a single source of truth for what to delete.
 export function uploadedImage(url) {
   const s = safeUrl(url);
   const m = s && CLOUDINARY_RE.test(s) && s.match(UPLOADED_RE);
-  return m ? { publicId: m[1], teamId: Number(m[2]) } : null;
+  return m ? { publicId: m[1], teamId: m[2] ? Number(m[2]) : null, eventId: m[3] || null } : null;
 }
 
 // A Cloudinary URL with a delivery transformation inserted, e.g.
@@ -111,6 +124,10 @@ export function imageSrcSet(url, widths, crop = "c_limit") {
 // Ordered list of URLs to try for an image; the <SmartImage> component falls
 // through them on load errors. Drive files need "Anyone with the link" sharing.
 export function imageCandidates(url, width = 1600) {
+  if (isBundledKey(url)) {
+    const file = bundledAsset(url);
+    return file ? [file] : [];
+  }
   const s = safeUrl(url);
   if (!s) return [];
   const driveId = driveFileId(s);
