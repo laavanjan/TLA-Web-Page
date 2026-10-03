@@ -1221,3 +1221,19 @@
   color: #ffb08a !important;
   border-color: rgba(255, 140, 90, 0.45) !important;
 }
+
+/* Long names in a card header shrink with "…" instead of pushing the move /
+   delete buttons off the edge (people nested inside a year are narrow). */
+.ts-item-head > strong {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .ts-item .ts-item {
+    padding: 8px 9px;
+  }
+}
