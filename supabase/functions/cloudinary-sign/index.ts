@@ -1,18 +1,20 @@
-// Signs Cloudinary uploads and deletes for the team-page admin (/admin/teams).
+// Signs Cloudinary uploads and deletes for the team-page admin (/admin/teams)
+// and the event-page admin (/admin/events).
 //
 // The Cloudinary API secret lives only here (as a Supabase secret). The
 // browser asks this function for a short-lived signature, then uploads the
 // file straight to Cloudinary — so files never pass through Supabase.
 //
-//   POST { action: "sign",   teamId: 1, count: 3 }
+//   POST { action: "sign",   teamId: 1, count: 3 }          (team page photos)
+//   POST { action: "sign",   eventId: "ppl", count: 3 }     (event page photos)
 //     -> { cloudName, uploads: [{ apiKey, timestamp, signature, params }, …] }
-//   POST { action: "delete", publicIds: ["tla/teams/1/abc…", …] }
+//   POST { action: "delete", publicIds: ["tla/teams/1/abc…", "tla/events/ppl/abc…", …] }
 //     -> { deleted: [...], failed: [...] }
 //
 // Every request must carry a signed-in panel user's Supabase access token
 // (supabase.functions.invoke() attaches it automatically). Main admins may
-// work on any team; team editors only on the teams they're assigned to (see
-// supabase/migrations/team_editors.sql).
+// work on any team or event; editors only on the teams and events they're
+// assigned to (see supabase/migrations/team_editors.sql and event_pages.sql).
 //
 // Secrets (supabase secrets set NAME=value):
 //   CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET
@@ -26,11 +28,15 @@ const API_SECRET = Deno.env.get("CLOUDINARY_API_SECRET") ?? "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 
 const ROOT = "tla/teams";
+const EVENT_ROOT = "tla/events";
 const MAX_SIGN = 30; // signatures per request
 const MAX_DELETE = 60; // public ids per request
 const ALLOWED_FORMATS = "jpg,jpeg,png,webp,gif,avif,heic,heif";
-// Only ever delete what this feature uploaded: tla/teams/<teamId>/<random id>.
-const PUBLIC_ID_RE = /^tla\/teams\/\d{1,3}\/[A-Za-z0-9_-]{8,64}$/;
+// Only ever delete what this feature uploaded: tla/teams/<teamId>/<random id>
+// or tla/events/<eventId>/<random id>.
+const TEAM_ID_RE = /^tla\/teams\/(\d{1,3})\/[A-Za-z0-9_-]{8,64}$/;
+const EVENT_ID_RE = /^tla\/events\/([a-z0-9][a-z0-9-]{0,48})\/[A-Za-z0-9_-]{8,64}$/;
+const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,48}$/;
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -63,9 +69,9 @@ function sign(params: Record<string, string | number>) {
 const randomId = () => crypto.randomUUID().replace(/-/g, "").slice(0, 20);
 const now = () => Math.floor(Date.now() / 1000);
 
-type Access = { canEdit: (teamId: number) => boolean };
+type Access = { canEdit: (teamId: number) => boolean; canEditEvent: (eventId: string) => boolean };
 
-// Which teams the caller may upload to / delete from, or null for no access.
+// Which teams and events the caller may upload to / delete from, or null for no access.
 async function access(req: Request): Promise<Access | null> {
   const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
   if (!token) return null;
@@ -76,38 +82,65 @@ async function access(req: Request): Promise<Access | null> {
   const service = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const { data: row, error: roleErr } = await service
+  // deno-lint-ignore no-explicit-any
+  let row: any = null;
+  let roleErr: { code?: string } | null = null;
+  ({ data: row, error: roleErr } = await service
     .from("admin_users")
-    .select("role, disabled, admin_user_teams(team_id)")
+    .select("role, disabled, admin_user_teams(team_id), admin_user_events(event_id)")
     .eq("user_id", user.id)
-    .maybeSingle();
+    .maybeSingle());
+  if (roleErr?.code === "PGRST200") {
+    // event_pages.sql not run yet: nobody has events, teams work as before.
+    ({ data: row, error: roleErr } = await service
+      .from("admin_users")
+      .select("role, disabled, admin_user_teams(team_id)")
+      .eq("user_id", user.id)
+      .maybeSingle());
+  }
   if (roleErr) {
     // Roles table not created yet (team_editors.sql not run): any signed-in
     // user, as before team editors existed.
-    if (roleErr.code === "42P01" || roleErr.code === "PGRST205") return { canEdit: () => true };
+    if (roleErr.code === "42P01" || roleErr.code === "PGRST205") {
+      return { canEdit: () => true, canEditEvent: () => true };
+    }
     throw roleErr;
   }
   if (!row || row.disabled) return null;
-  if (row.role === "admin") return { canEdit: () => true };
+  if (row.role === "admin") return { canEdit: () => true, canEditEvent: () => true };
   const teams = new Set((row.admin_user_teams ?? []).map((t: { team_id: number }) => t.team_id));
-  return { canEdit: (teamId) => teams.has(teamId) };
+  const events = new Set((row.admin_user_events ?? []).map((e: { event_id: string }) => e.event_id));
+  return { canEdit: (teamId) => teams.has(teamId), canEditEvent: (eventId) => events.has(eventId) };
 }
 
-async function signUploads(who: Access, teamId: unknown, count: unknown) {
-  const id = Number(teamId);
-  if (!Number.isInteger(id) || id < 1 || id > 999) return json({ error: "Invalid team." }, 400);
-  if (!who.canEdit(id)) return json({ error: "You can only upload photos to your own team's page." }, 403);
-  const n = Math.min(MAX_SIGN, Math.max(1, Math.floor(Number(count) || 1)));
+async function signUploads(who: Access, body: Record<string, unknown>) {
+  // A team page upload names a teamId, an event page upload an eventId.
+  let folder: string;
+  let tag: string;
+  if (typeof body.eventId === "string") {
+    const slug = body.eventId;
+    if (!SLUG_RE.test(slug)) return json({ error: "Invalid event." }, 400);
+    if (!who.canEditEvent(slug)) return json({ error: "You can only upload photos to your own events' pages." }, 403);
+    folder = `${EVENT_ROOT}/${slug}`;
+    tag = `tla-event-${slug}`;
+  } else {
+    const id = Number(body.teamId);
+    if (!Number.isInteger(id) || id < 1 || id > 999) return json({ error: "Invalid team." }, 400);
+    if (!who.canEdit(id)) return json({ error: "You can only upload photos to your own team's page." }, 403);
+    folder = `${ROOT}/${id}`;
+    tag = `tla-team-${id}`;
+  }
+  const n = Math.min(MAX_SIGN, Math.max(1, Math.floor(Number(body.count) || 1)));
   const timestamp = now();
 
   const uploads = await Promise.all(
     Array.from({ length: n }, async () => {
       // Each signature is bound to one random public id, so it can only ever
-      // create that single file inside this team's folder.
+      // create that single file inside this team's / event's folder.
       const params = {
-        public_id: `${ROOT}/${id}/${randomId()}`,
+        public_id: `${folder}/${randomId()}`,
         allowed_formats: ALLOWED_FORMATS,
-        tags: `tla-team-${id}`,
+        tags: tag,
         timestamp,
       };
       return { apiKey: API_KEY, signature: await sign(params), params };
@@ -134,10 +167,13 @@ async function destroy(publicId: string) {
 async function deleteImages(who: Access, publicIds: unknown) {
   if (!Array.isArray(publicIds) || publicIds.length === 0) return json({ deleted: [], failed: [] });
   if (publicIds.length > MAX_DELETE) return json({ error: `At most ${MAX_DELETE} images per request.` }, 400);
-  const bad = publicIds.filter((p) => typeof p !== "string" || !PUBLIC_ID_RE.test(p));
-  if (bad.length) return json({ error: "Refusing to delete images outside tla/teams/.", bad }, 400);
-  const notYours = publicIds.filter((p) => !who.canEdit(Number((p as string).split("/")[2])));
-  if (notYours.length) return json({ error: "You can only delete your own team's photos.", bad: notYours }, 403);
+  const bad = publicIds.filter((p) => typeof p !== "string" || !(TEAM_ID_RE.test(p) || EVENT_ID_RE.test(p)));
+  if (bad.length) return json({ error: "Refusing to delete images outside tla/teams/ and tla/events/.", bad }, 400);
+  // tla/teams/<teamId>/… or tla/events/<eventId>/… - the third path segment says whose it is.
+  const mine = (p: string) =>
+    p.startsWith("tla/teams/") ? who.canEdit(Number(p.split("/")[2])) : who.canEditEvent(p.split("/")[2]);
+  const notYours = publicIds.filter((p) => !mine(p as string));
+  if (notYours.length) return json({ error: "You can only delete photos from your own teams and events.", bad: notYours }, 403);
 
   const ids = [...new Set(publicIds as string[])];
   const results = await Promise.all(ids.map((p) => destroy(p).catch(() => false)));
@@ -171,7 +207,7 @@ Deno.serve(async (req) => {
 
   switch (body.action) {
     case "sign":
-      return signUploads(who, body.teamId, body.count);
+      return signUploads(who, body);
     case "delete":
       return deleteImages(who, body.publicIds);
     default:
