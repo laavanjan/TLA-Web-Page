@@ -1,172 +1,513 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  FaLayerGroup,
+  FaBookOpen,
+  FaHandshake,
+  FaAddressCard,
+  FaUsersCog,
+  FaHistory,
+  FaQrcode,
+  FaPalette,
+  FaArrowRight,
+  FaExternalLinkAlt,
+  FaSignOutAlt,
+  FaUserCog,
+  FaPenNib,
+  FaRegLightbulb,
+} from "react-icons/fa";
 
 import LotusDivider from "./LotusDivider";
+import { SmartImage } from "../Components/teams/team-detail/media";
 import { useAdminRole } from "../admin/adminRole";
-import { getCachedTeamPages } from "../shared/teamPages";
+import { logout, getEnabledStickerIds } from "../admin/adminStore";
+import { fetchActivity } from "../admin/adminUsers";
+import { actionMeta, actorName, activityObject, ago } from "../admin/activityText";
+import { getCachedTeamPages, fetchTeamPages } from "../shared/teamPages";
+import { fetchTeamJoinApplications } from "../shared/teamJoinApplications";
+import { fetchTeamJoinConfig } from "../shared/teamJoinConfig";
+import { fetchContactConfig } from "../shared/contactConfig";
+import { fetchBookConfig, isSubmissionOpen } from "../book/bookConfig";
+import { DESIGNS } from "../assets/frame/designs";
+import { supabase } from "../helpers/supabaseClient";
 import "./Frame.css";
 import "./Admin.css";
+import "./AdminDashboard.css";
 
-function QrIcon() {
+const WEEK = 7 * 24 * 3600 * 1000;
+
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+const shortDate = (ymd) => {
+  const [y, m, d] = ymd.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString([], { day: "numeric", month: "short" });
+};
+
+// Everything the cards report on, loaded in parallel. Each key stays
+// undefined while loading, so its card shows a shimmer instead of a guess.
+function useDashboardData(admin) {
+  const [d, setD] = useState({ pages: getCachedTeamPages() });
+
+  useEffect(() => {
+    let alive = true;
+    const set = (key, value) => alive && setD((prev) => ({ ...prev, [key]: value }));
+    const since = Date.now() - WEEK;
+
+    fetchTeamPages()
+      .then((pages) => set("pages", pages))
+      .catch(() => {});
+    fetchTeamJoinApplications()
+      .then((apps) => set("apps", { total: apps.length, week: apps.filter((a) => new Date(a.created_at) > since).length }))
+      .catch(() => set("apps", null));
+
+    if (admin) {
+      fetchTeamJoinConfig()
+        .then((c) => set("joinOpen", !!c.enabled))
+        .catch(() => set("joinOpen", null));
+      fetchBookConfig()
+        .then((c) => set("book", c))
+        .catch(() => set("book", null));
+      fetchContactConfig()
+        .then((c) => set("contact", c))
+        .catch(() => set("contact", null));
+      supabase
+        .from("admin_users")
+        .select("role, disabled")
+        .then(({ data, error }) => set("accounts", error ? null : data || []));
+      fetchActivity({ limit: 6 })
+        .then((rows) => set("activity", rows))
+        .catch(() => set("activity", null));
+    }
+    return () => {
+      alive = false;
+    };
+  }, [admin]);
+
+  return d;
+}
+
+// ---- Status pills -----------------------------------------------------------
+
+// A card's status while its data is still on the way (shows a shimmer).
+// Cards with no status at all just leave the prop out.
+const LOADING = "loading";
+
+function Status({ value }) {
+  if (value === LOADING) return <span className="ad-status is-loading" aria-hidden="true" />;
+  if (!value) return null;
   return (
-    <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true">
-      <g fill="currentColor">
-        <path d="M3 3h7v7H3V3zm2 2v3h3V5H5z" />
-        <path d="M14 3h7v7h-7V3zm2 2v3h3V5h-3z" />
-        <path d="M3 14h7v7H3v-7zm2 2v3h3v-3H5z" />
-        <path d="M14 14h3v3h-3v-3zM18 14h3v3h-3v-3zM14 18h3v3h-3v-3zM18 18h3v3h-3v-3z" />
-      </g>
-    </svg>
+    <span className={`ad-status is-${value.tone || "info"}`}>
+      <i />
+      {value.text}
+    </span>
   );
 }
 
-// Each tile carries its own category (content/tools/account) — grouping is
-// expressed through the tile's own tint + tag rather than separate sections,
-// so it stays tidy no matter how many tiles land in any one category.
-const TILES = [
-  {
-    to: "/admin/books",
-    icon: "📖",
-    title: "Book Submissions",
-    desc: "Open/close submissions, set the deadline, dropdowns and limits.",
-    category: "content",
-  },
-  {
-    to: "/admin/contact",
-    icon: "☎️",
-    title: "Contact Info",
-    desc: "Edit the email, phone and social media links shown on the Contact section.",
-    category: "content",
-  },
-  {
-    to: "/admin/teams",
-    icon: "🧩",
-    title: "Team Pages",
-    desc: "Edit each team's page — sections, YouTube & Instagram posts, competitions, photos.",
-    category: "content",
-  },
-  {
-    to: "/admin/team-join",
-    icon: "🤝",
-    title: "Team Join Requests",
-    desc: "Open/close applications, choose form fields, set WhatsApp links, view applicants.",
-    category: "content",
-  },
-  {
-    to: "/admin/qr",
-    icon: <QrIcon />,
-    title: "QR Code Generator",
-    desc: "Create a QR that opens the photo-frame editor ready to print or share.",
-    category: "tools",
-  },
-  {
-    to: "/admin/stickers",
-    icon: "🎨",
-    title: "Stickers",
-    desc: "Choose which sticker designs appear in the editor.",
-    category: "tools",
-  },
-  {
-    to: "/admin/editors",
-    icon: "👥",
-    title: "Team Editors",
-    desc: "Give people a login that can only edit their own team's page. Reset or view passwords.",
-    category: "account",
-  },
-  {
-    to: "/admin/activity",
-    icon: "🕑",
-    title: "Activity Log",
-    desc: "See who published what and when, plus account changes.",
-    category: "account",
-  },
-  {
-    to: "/admin/account",
-    icon: "🔑",
-    title: "Account & Password",
-    desc: "Change your admin email or reset your password.",
-    category: "account",
-  },
-];
-
-// What a team editor sees: just their team(s), its join requests and their
-// own password.
-function editorTiles(teamNames) {
-  return [
-    {
-      to: "/admin/teams",
-      icon: "🧩",
-      title: teamNames.length > 1 ? "Your Team Pages" : "Your Team Page",
-      desc: `Edit ${teamNames.join(", ")} - sections, photos, competitions and more.`,
-      category: "content",
-    },
-    {
-      to: "/admin/team-join",
-      icon: "🤝",
-      title: "Join Requests",
-      desc: "People who applied to join your team.",
-      category: "content",
-    },
-    {
-      to: "/admin/account",
-      icon: "🔑",
-      title: "Change Password",
-      desc: "Update the password you sign in with.",
-      category: "account",
-    },
-  ];
+function bookStatus(book) {
+  if (book === undefined) return LOADING;
+  if (!book) return null;
+  if (!isSubmissionOpen(book)) return { tone: "off", text: "Closed" };
+  return { tone: "ok", text: book.deadline ? `Open · closes ${shortDate(book.deadline)}` : "Open · no deadline" };
 }
 
-const CATEGORY_LABEL = {
-  content: "Content",
-  tools: "Tools",
-  account: "Account",
-};
+function joinStatus(apps, joinOpen) {
+  if (apps === undefined) return LOADING;
+  if (joinOpen === false && !(apps && apps.week)) return { tone: "off", text: "Applications closed" };
+  if (!apps) return null;
+  if (apps.week) return { tone: "warn", text: `${apps.week} new this week · ${apps.total} total` };
+  return { tone: "info", text: apps.total ? `${apps.total} total · none this week` : "No applications yet" };
+}
 
-// Admin dashboard: a grid of tools. Each tile links to its own page.
+function editorsStatus(accounts) {
+  if (accounts === undefined) return LOADING;
+  if (!accounts) return { tone: "off", text: "Not set up yet" };
+  const editors = accounts.filter((a) => a.role === "editor");
+  const off = editors.filter((a) => a.disabled).length;
+  if (!editors.length) return { tone: "info", text: "No editors yet" };
+  return { tone: "ok", text: `${editors.length} editor${editors.length === 1 ? "" : "s"}${off ? ` · ${off} disabled` : ""}` };
+}
+
+function contactStatus(contact) {
+  if (contact === undefined) return LOADING;
+  if (!contact) return null;
+  return { tone: "info", text: contact.email };
+}
+
+function activityStatus(activity) {
+  if (activity === undefined) return LOADING;
+  if (!activity || !activity[0]) return null;
+  return { tone: "info", text: `Latest ${ago(activity[0].created_at)}` };
+}
+
+function stickersStatus() {
+  const ids = getEnabledStickerIds();
+  const on = ids ? ids.length : DESIGNS.length;
+  return { tone: "info", text: on === DESIGNS.length ? `All ${DESIGNS.length} shown` : `${on} of ${DESIGNS.length} shown` };
+}
+
+// ---- Pieces -----------------------------------------------------------------
+
+function Card({ to, icon: Icon, title, desc, status, tone, index }) {
+  return (
+    <Link to={to} className={`ad-card tone-${tone}`} style={{ "--i": index }}>
+      <span className="ad-icon">
+        <Icon />
+      </span>
+      <span className="ad-card-text">
+        <strong>{title}</strong>
+        <small>{desc}</small>
+        <Status value={status} />
+      </span>
+      <FaArrowRight className="ad-arrow" aria-hidden="true" />
+    </Link>
+  );
+}
+
+function TeamPagesCard({ pages, lastPublish, title, desc, index }) {
+  const latest = pages.filter((p) => p.updatedAt).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
+  let status = {
+    tone: "info",
+    text: pages.length === 1 ? "Not published yet, showing the built-in page" : "Every team shows its built-in page",
+  };
+  if (latest) {
+    const by = lastPublish && lastPublish.team_id === latest.id ? ` by ${actorName(lastPublish)}` : "";
+    status = { tone: "ok", text: `Last published ${ago(latest.updatedAt)}${by}` };
+  }
+  return (
+    <Link to="/admin/teams" className="ad-card ad-feature tone-gold" style={{ "--i": index }}>
+      <div className="ad-feature-head">
+        <span className="ad-icon">
+          <FaLayerGroup />
+        </span>
+        <span className="ad-card-text">
+          <strong>{title}</strong>
+          <small>{desc}</small>
+          <Status value={status} />
+        </span>
+        <FaArrowRight className="ad-arrow" aria-hidden="true" />
+      </div>
+      <ul className="ad-teams">
+        {pages.map((p) => (
+          <li key={p.id}>
+            <span className="ad-team-logo">
+              {p.logo ? (
+                <SmartImage src={p.logo} width={96} alt="" fallback={<b>{p.title.charAt(0)}</b>} />
+              ) : (
+                <b>{p.title.charAt(0)}</b>
+              )}
+            </span>
+            <span className="ad-team-name">{p.title}</span>
+            <span className={`ad-team-when${p.updatedAt ? "" : " is-default"}`}>
+              {p.updatedAt ? ago(p.updatedAt) : "built-in"}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </Link>
+  );
+}
+
+function Section({ label, icon: Icon, children }) {
+  return (
+    <section className="ad-section">
+      <h2 className="ad-section-label">
+        <Icon /> {label}
+      </h2>
+      {children}
+    </section>
+  );
+}
+
+function ActivityPanel({ activity, teamTitle }) {
+  return (
+    <aside className="ad-panel">
+      <div className="ad-panel-head">
+        <h2>
+          <FaHistory /> Recent activity
+        </h2>
+        <Link to="/admin/activity">
+          See all <FaArrowRight />
+        </Link>
+      </div>
+      {activity === undefined && (
+        <ul className="ad-feed">
+          {[0, 1, 2, 3].map((n) => (
+            <li key={n} className="ad-feed-skeleton" />
+          ))}
+        </ul>
+      )}
+      {activity === null && <p className="ad-panel-empty">The activity log starts once team editors are set up.</p>}
+      {activity && activity.length === 0 && (
+        <p className="ad-panel-empty">Nothing yet. Publishes and account changes will show up here.</p>
+      )}
+      {activity && activity.length > 0 && (
+        <ul className="ad-feed">
+          {activity.map((e) => {
+            const meta = actionMeta(e.action);
+            const Icon = meta.icon;
+            const target = activityObject(e, teamTitle);
+            return (
+              <li key={e.id} className={`ad-feed-${meta.group}`}>
+                <span className="ad-feed-icon">
+                  <Icon />
+                </span>
+                <span className="ad-feed-text">
+                  <b>{actorName(e)}</b> {meta.verb}
+                  {target && <> <b>{target}</b></>}
+                </span>
+                <time dateTime={e.created_at}>{ago(e.created_at)}</time>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </aside>
+  );
+}
+
+function TipsPanel() {
+  return (
+    <aside className="ad-panel">
+      <div className="ad-panel-head">
+        <h2>
+          <FaRegLightbulb /> Tips
+        </h2>
+      </div>
+      <ol className="ad-tips">
+        <li>
+          <b>Add photos</b> with a <i>Photo gallery</i> section. Drop them in and they're optimised for you.
+        </li>
+        <li>
+          <b>Check the Preview tab</b> before publishing to see the page as visitors will.
+        </li>
+        <li>
+          Nothing is live until you press <b>Publish</b>. Discard throws your draft away.
+        </li>
+      </ol>
+    </aside>
+  );
+}
+
+function TopBar({ who }) {
+  const navigate = useNavigate();
+  const label = who.name || who.email;
+  return (
+    <div className="ad-topbar">
+      <div className="ad-brand">
+        <span className="ad-brand-mark">த</span>
+        <span>
+          <strong>Admin</strong>
+          <small>tlauom.com</small>
+        </span>
+      </div>
+      <div className="ad-me">
+        <span className="ad-avatar" aria-hidden="true">
+          {(label || "?").charAt(0).toUpperCase()}
+        </span>
+        <span className="ad-me-text">
+          <strong title={who.email}>{label}</strong>
+          <small>{who.role === "editor" ? "Team editor" : "Main admin"}</small>
+        </span>
+        <a href="/" target="_blank" rel="noopener noreferrer" className="ad-bar-btn" title="Open the website">
+          <FaExternalLinkAlt /> <span>View site</span>
+        </a>
+        <Link to="/admin/account" className="ad-bar-btn" title="Account & password">
+          <FaUserCog /> <span>Account</span>
+        </Link>
+        <button
+          type="button"
+          className="ad-bar-btn is-exit"
+          onClick={async () => {
+            await logout();
+            navigate("/admin/login", { replace: true });
+          }}
+        >
+          <FaSignOutAlt /> <span>Log out</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ---- Page -------------------------------------------------------------------
+
 export default function Admin() {
   const who = useAdminRole();
   const editor = who.role === "editor";
-  const teamNames = editor
-    ? getCachedTeamPages()
-        .filter((p) => who.teams.includes(p.id))
-        .map((p) => p.title)
-    : [];
-  const tiles = editor ? editorTiles(teamNames) : TILES;
+  const data = useDashboardData(!editor);
+
+  const pages = useMemo(
+    () => (editor ? data.pages.filter((p) => who.teams.includes(p.id)) : data.pages),
+    [data.pages, editor, who.teams]
+  );
+  const teamTitle = (id) => (data.pages.find((p) => p.id === id) || {}).title || `Team ${id}`;
+  const lastPublish = (data.activity || []).find((e) => e.action === "publish");
+  const firstName = (who.name || (who.email || "").split("@")[0]).split(" ")[0];
+  const today = new Date().toLocaleDateString([], { weekday: "long", day: "numeric", month: "long" });
+
+  let n = 0; // entrance order, so the cards rise in one after another
 
   return (
-    <div className="frame-page admin-page">
+    <div className="frame-page admin-page ad-page">
       <Helmet>
         <title>Admin · தமிழ் இலக்கிய மன்றம்</title>
       </Helmet>
+      <div className="ad-aurora" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </div>
 
-      <header className="frame-topbar">
+      <TopBar who={who} />
+
+      <header className="ad-hero">
         <span className="frame-brand">தமிழ் இலக்கிய மன்றம்</span>
         <LotusDivider />
-        <span className="frame-subtitle">{editor ? "Team Editor" : "Admin Dashboard"}</span>
+        <h1>
+          வணக்கம், <span>{firstName}</span>
+        </h1>
+        <p>
+          {greeting()} · {today}
+          {editor && pages.length > 0 && <> · editor of {pages.map((p) => p.title).join(", ")}</>}
+        </p>
       </header>
 
-      {editor && (
-        <p className="admin-dash-hello">
-          Signed in as <b>{who.name || who.email}</b> · editor of {teamNames.join(", ") || "no teams yet"}
-        </p>
-      )}
+      <div className="ad-layout">
+        <main className="ad-main">
+          {editor ? (
+            <Section label="Your team" icon={FaPenNib}>
+              <div className="ad-grid ad-grid-content">
+                {pages.length > 0 ? (
+                  <TeamPagesCard
+                    pages={pages}
+                    title={pages.length > 1 ? "Your team pages" : "Your team page"}
+                    desc="Sections, photos and competitions. Edit and publish."
+                    index={n++}
+                  />
+                ) : (
+                  <p className="ad-panel-empty">You're not assigned to a team yet. Ask a main admin to add you.</p>
+                )}
+                <div className="ad-stack">
+                  <Card
+                    to="/admin/team-join"
+                    icon={FaHandshake}
+                    tone="rose"
+                    title="Join requests"
+                    desc="People who applied to join your team."
+                    status={joinStatus(data.apps)}
+                    index={n++}
+                  />
+                  <Card
+                    to="/admin/account"
+                    icon={FaUserCog}
+                    tone="violet"
+                    title="Change password"
+                    desc="Update the password you sign in with."
+                    index={n++}
+                  />
+                </div>
+              </div>
+            </Section>
+          ) : (
+            <>
+              <Section label="Website content" icon={FaPenNib}>
+                <div className="ad-grid ad-grid-content">
+                  <TeamPagesCard
+                    pages={pages}
+                    lastPublish={lastPublish}
+                    title="Team pages"
+                    desc="Each team's page: sections, galleries, competitions."
+                    index={n++}
+                  />
+                  <div className="ad-stack">
+                    <Card
+                      to="/admin/books"
+                      icon={FaBookOpen}
+                      tone="amber"
+                      title="Book submissions"
+                      desc="Open or close submissions, deadline and form options."
+                      status={bookStatus(data.book)}
+                      index={n++}
+                    />
+                    <Card
+                      to="/admin/team-join"
+                      icon={FaHandshake}
+                      tone="rose"
+                      title="Join requests"
+                      desc="Application form, WhatsApp links and applicants."
+                      status={joinStatus(data.apps, data.joinOpen)}
+                      index={n++}
+                    />
+                    <Card
+                      to="/admin/contact"
+                      icon={FaAddressCard}
+                      tone="sky"
+                      title="Contact info"
+                      desc="Email, phone and social links on the site."
+                      status={contactStatus(data.contact)}
+                      index={n++}
+                    />
+                  </div>
+                </div>
+              </Section>
 
-      <div className="admin-dash">
-        {tiles.map((tile) => (
-          <Link
-            key={tile.to}
-            className={`admin-tile cat-${tile.category}`}
-            to={tile.to}
-          >
-            <span className="admin-tile-tag">{CATEGORY_LABEL[tile.category]}</span>
-            <span className="admin-tile-ic">{tile.icon}</span>
-            <span className="admin-tile-title">{tile.title}</span>
-            <span className="admin-tile-desc">{tile.desc}</span>
-            <span className="admin-tile-go">Open →</span>
-          </Link>
-        ))}
+              <div className="ad-duo">
+                <Section label="People & access" icon={FaUsersCog}>
+                  <div className="ad-grid ad-grid-2">
+                    <Card
+                      to="/admin/editors"
+                      icon={FaUsersCog}
+                      tone="violet"
+                      title="Team editors"
+                      desc="Logins that can only edit their own team."
+                      status={editorsStatus(data.accounts)}
+                      index={n++}
+                    />
+                    <Card
+                      to="/admin/activity"
+                      icon={FaHistory}
+                      tone="indigo"
+                      title="Activity log"
+                      desc="Who published what, and when."
+                      status={activityStatus(data.activity)}
+                      index={n++}
+                    />
+                  </div>
+                </Section>
+
+                <Section label="Tools" icon={FaPalette}>
+                  <div className="ad-grid ad-grid-2">
+                    <Card
+                      to="/admin/qr"
+                      icon={FaQrcode}
+                      tone="teal"
+                      title="QR code"
+                      desc="Print-ready QR for the photo-frame editor."
+                      index={n++}
+                    />
+                    <Card
+                      to="/admin/stickers"
+                      icon={FaPalette}
+                      tone="teal"
+                      title="Stickers"
+                      desc="Choose the designs in the frame editor."
+                      status={stickersStatus()}
+                      index={n++}
+                    />
+                  </div>
+                </Section>
+              </div>
+            </>
+          )}
+        </main>
+
+        {editor ? <TipsPanel /> : <ActivityPanel activity={data.activity} teamTitle={teamTitle} />}
       </div>
     </div>
   );
