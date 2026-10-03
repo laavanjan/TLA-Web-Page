@@ -151,3 +151,6 @@ export function summarizePageChange(rawBefore, rawAfter) {
 
   return out.length ? out : ["Published with no visible changes"];
 }
+
+// Shared with the event page summaries (eventPageDiff.js).
+export { plural, match, same, quoteList, countChange };
