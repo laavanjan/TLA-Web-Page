@@ -18,6 +18,7 @@ import {
   FaTimes,
   FaCloudUploadAlt,
   FaRedo,
+  FaArrowRight,
 } from "react-icons/fa";
 
 import LotusDivider from "./LotusDivider";
@@ -32,8 +33,12 @@ import {
   saveTeamPage,
   blankSection,
   blankPerson,
+  blankYear,
   blankTimelineItem,
   blankCompetition,
+  sortYears,
+  thisYear,
+  newId,
   competitionStatus,
   cleanPage,
   pagePublicIds,
@@ -365,8 +370,9 @@ function TextEditor({ s, set }) {
   );
 }
 
-function PeopleEditor({ s, set }) {
+function PeopleEditor({ s, set, showPhone = true, noun = "person" }) {
   const setPeople = (people) => set({ ...s, people });
+  const Noun = noun.charAt(0).toUpperCase() + noun.slice(1);
   return (
     <div className="ts-items">
       {s.people.map((p, i) => {
@@ -374,11 +380,11 @@ function PeopleEditor({ s, set }) {
         return (
           <div className="ts-item" key={p.id}>
             <div className="ts-item-head">
-              <strong>{p.name || `Person ${i + 1}`}</strong>
+              <strong>{p.name || `${Noun} ${i + 1}`}</strong>
               <RowTools
                 index={i}
                 total={s.people.length}
-                label="person"
+                label={noun}
                 onMove={(d) => setPeople(move(s.people, i, d))}
                 onRemove={() => setPeople(removeAt(s.people, i))}
               />
@@ -390,19 +396,21 @@ function PeopleEditor({ s, set }) {
               <Field label="Role">
                 <input className="tj-input" value={p.role} onChange={(e) => put({ role: e.target.value })} placeholder="பிரதம ஒருங்கிணைப்பாளர்" />
               </Field>
-              <Field label="Phone">
-                <input className="tj-input" value={p.phone} onChange={(e) => put({ phone: e.target.value })} placeholder="07X XXX XXXX" />
-              </Field>
+              {showPhone && (
+                <Field label="Phone">
+                  <input className="tj-input" value={p.phone} onChange={(e) => put({ phone: e.target.value })} placeholder="07X XXX XXXX" />
+                </Field>
+              )}
               <Field label="LinkedIn">
                 <input className="tj-input" value={p.linkedin} onChange={(e) => put({ linkedin: e.target.value })} placeholder="https://linkedin.com/in/…" />
               </Field>
             </div>
-            <ImageField label="Photo" value={p.photo} onChange={(v) => put({ photo: v })} />
+            <ImageField label="Photo (optional)" value={p.photo} onChange={(v) => put({ photo: v })} />
           </div>
         );
       })}
       <button type="button" className="tj-btn tj-btn-ghost" onClick={() => setPeople([...s.people, blankPerson()])}>
-        <FaPlus /> Add person
+        <FaPlus /> Add {noun}
       </button>
     </div>
   );
@@ -424,7 +432,7 @@ function TimelineEditor({ s, set }) {
             className="tj-input"
             value={t.text}
             onChange={(e) => setItems(setAt(s.items, i, { ...t, text: e.target.value }))}
-            placeholder="Name or milestone"
+            placeholder="Milestone, e.g. First Thamilaruvi website launched"
           />
           <RowTools
             index={i}
@@ -453,6 +461,240 @@ function MembersEditor({ s, set }) {
         onChange={(e) => set({ ...s, names: e.target.value.split("\n") })}
       />
     </Field>
+  );
+}
+
+// ---- Team by year --------------------------------------------------------
+
+const yearNum = (y) => (/^\d{4}$/.test(String(y).trim()) ? Number(y) : null);
+
+function AddYearForm({ years, onAdd, onCancel }) {
+  const nums = years.map((y) => yearNum(y.year)).filter(Boolean);
+  const [value, setValue] = useState(String(nums.length ? Math.min(...nums) - 1 : Number(thisYear()) - 1));
+  const taken = years.some((y) => y.year.trim() === value.trim());
+  const valid = yearNum(value) && !taken;
+  return (
+    <div className="ts-year-panel">
+      <strong>Add a past year</strong>
+      <div className="ts-year-panel-row">
+        <input
+          className="tj-input ts-year"
+          value={value}
+          inputMode="numeric"
+          maxLength={4}
+          onChange={(e) => setValue(e.target.value.replace(/\D/g, ""))}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              if (valid) onAdd(value);
+            }
+          }}
+          aria-label="Year"
+          autoFocus
+        />
+        <button type="button" className="tj-btn" onClick={() => onAdd(value)} disabled={!valid}>
+          <FaPlus /> Add
+        </button>
+        <button type="button" className="tj-btn tj-btn-ghost" onClick={onCancel}>
+          Cancel
+        </button>
+      </div>
+      {taken && <small className="tj-warn">{value} is already there.</small>}
+    </div>
+  );
+}
+
+// Handover: file the current team under its year and open the next one,
+// carrying over members who are staying (and the coordinators, if asked).
+function HandoverPanel({ current, years, onStart, onCancel }) {
+  const base = yearNum(current.year) || Number(thisYear());
+  const [label, setLabel] = useState(String(base + 1));
+  const members = current.members.map((m) => m.trim()).filter(Boolean);
+  const [staying, setStaying] = useState(() => new Set(members));
+  const [keepCoordinators, setKeepCoordinators] = useState(false);
+  const taken = years.some((y) => y.year.trim() === label.trim());
+  const valid = yearNum(label) && !taken;
+  const toggle = (m) =>
+    setStaying((prev) => {
+      const next = new Set(prev);
+      if (next.has(m)) next.delete(m);
+      else next.add(m);
+      return next;
+    });
+
+  return (
+    <div className="ts-year-panel ts-handover">
+      <strong>
+        Start {label || "the next year"} - {current.year} moves to the past years
+      </strong>
+      <label className="tj-control">
+        <span className="tj-control-label">New year</span>
+        <input
+          className="tj-input ts-year"
+          value={label}
+          inputMode="numeric"
+          maxLength={4}
+          onChange={(e) => setLabel(e.target.value.replace(/\D/g, ""))}
+        />
+        {taken && <small className="tj-warn">{label} already exists.</small>}
+      </label>
+
+      {members.length > 0 && (
+        <div className="tj-control">
+          <span className="tj-control-label">
+            Members continuing into {label || "the new year"} ({staying.size} of {members.length})
+            <button type="button" className="ts-link-btn" onClick={() => setStaying(new Set(members))}>
+              All
+            </button>
+            <button type="button" className="ts-link-btn" onClick={() => setStaying(new Set())}>
+              None
+            </button>
+          </span>
+          <div className="ts-member-checks">
+            {members.map((m) => (
+              <label key={m} className={staying.has(m) ? "is-on" : ""}>
+                <input type="checkbox" checked={staying.has(m)} onChange={() => toggle(m)} />
+                {m}
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <label className="ts-check">
+        <input type="checkbox" checked={keepCoordinators} onChange={(e) => setKeepCoordinators(e.target.checked)} />
+        Keep the same coordinators (you can edit them afterwards)
+      </label>
+
+      <div className="ts-year-panel-row">
+        <button
+          type="button"
+          className="tj-btn"
+          disabled={!valid}
+          onClick={() => onStart({ label, members: members.filter((m) => staying.has(m)), keepCoordinators })}
+        >
+          <FaArrowRight /> Start {label}
+        </button>
+        <button type="button" className="tj-btn tj-btn-ghost" onClick={onCancel}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function YearsEditor({ s, set }) {
+  const years = s.years;
+  const [openId, setOpenId] = useState(years.length ? years[0].id : null);
+  const [panel, setPanel] = useState(null); // "add" | "next" | null
+  const setYears = (next) => set({ ...s, years: next });
+  const putYear = (id, patch) => setYears(years.map((y) => (y.id === id ? { ...y, ...patch } : y)));
+  const current = years[0];
+  const nextLabel = current ? String((yearNum(current.year) || Number(thisYear())) + 1) : thisYear();
+  const count = (label) => years.filter((y) => y.year.trim() === label.trim()).length;
+
+  const addYear = (label) => {
+    const y = { ...blankYear(label), people: [] };
+    setYears(sortYears([...years, y]));
+    setOpenId(y.id);
+    setPanel(null);
+  };
+
+  const startNext = ({ label, members, keepCoordinators }) => {
+    const y = {
+      id: newId("y"),
+      year: label,
+      people: keepCoordinators ? current.people.map((p) => ({ ...p, id: newId("p") })) : [blankPerson()],
+      members,
+    };
+    setYears(sortYears([y, ...years]));
+    setOpenId(y.id);
+    setPanel(null);
+  };
+
+  return (
+    <div className="ts-items">
+      <p className="tj-muted ts-years-help">
+        The newest year shows first on the page as the current team. Phone numbers only appear for the current year.
+      </p>
+      <div className="ts-years-actions">
+        {current ? (
+          <button type="button" className="tj-btn" onClick={() => setPanel(panel === "next" ? null : "next")}>
+            <FaArrowRight /> Start {nextLabel}
+          </button>
+        ) : (
+          <button type="button" className="tj-btn" onClick={() => addYear(thisYear())}>
+            <FaPlus /> Add {thisYear()}
+          </button>
+        )}
+        <button type="button" className="tj-btn tj-btn-ghost" onClick={() => setPanel(panel === "add" ? null : "add")}>
+          <FaPlus /> Add a past year
+        </button>
+      </div>
+
+      {panel === "next" && current && (
+        <HandoverPanel current={current} years={years} onStart={startNext} onCancel={() => setPanel(null)} />
+      )}
+      {panel === "add" && <AddYearForm years={years} onAdd={addYear} onCancel={() => setPanel(null)} />}
+
+      {years.map((y, i) => {
+        const open = openId === y.id;
+        const people = y.people.filter((p) => p.name.trim()).length;
+        const members = y.members.filter((m) => m.trim()).length;
+        return (
+          <div className={`ts-item${open ? " is-open" : ""}`} key={y.id}>
+            <div className="ts-item-head">
+              <button type="button" className="ts-item-toggle" onClick={() => setOpenId(open ? null : y.id)}>
+                <strong>{y.year || "Year?"}</strong>
+                {i === 0 && <span className="tj-chip ts-status is-up">Current</span>}
+                <span className="tj-chip">
+                  {people} coordinator{people === 1 ? "" : "s"}
+                </span>
+                <span className="tj-chip">
+                  {members} member{members === 1 ? "" : "s"}
+                </span>
+                {count(y.year) > 1 && <span className="tj-chip ts-chip-bad">Same year twice</span>}
+                <FaChevronDown className="tj-field-caret" />
+              </button>
+              <button
+                type="button"
+                className="tj-tool tj-tool-del"
+                aria-label={`Remove ${y.year}`}
+                title={`Remove ${y.year}`}
+                onClick={() =>
+                  window.confirm(`Remove ${y.year || "this year"} and everyone listed in it?`) &&
+                  setYears(years.filter((x) => x.id !== y.id))
+                }
+              >
+                <FaTrash />
+              </button>
+            </div>
+            {open && (
+              <div className="ts-item-body">
+                <Field label="Year">
+                  <input
+                    className="tj-input ts-year"
+                    value={y.year}
+                    inputMode="numeric"
+                    maxLength={4}
+                    onChange={(e) => putYear(y.id, { year: e.target.value.replace(/\D/g, "") })}
+                    placeholder={thisYear()}
+                  />
+                </Field>
+                <span className="tj-control-label">Coordinators</span>
+                <PeopleEditor
+                  s={{ people: y.people }}
+                  set={(x) => putYear(y.id, { people: x.people })}
+                  showPhone={i === 0}
+                  noun="coordinator"
+                />
+                <MembersEditor s={{ names: y.members }} set={(x) => putYear(y.id, { members: x.names })} />
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -554,12 +796,10 @@ function SectionBody({ s, set, onUpdate }) {
   switch (s.type) {
     case "text":
       return <TextEditor s={s} set={set} />;
-    case "people":
-      return <PeopleEditor s={s} set={set} />;
+    case "years":
+      return <YearsEditor s={s} set={set} />;
     case "timeline":
       return <TimelineEditor s={s} set={set} />;
-    case "members":
-      return <MembersEditor s={s} set={set} />;
     case "competitions":
       return <CompetitionsEditor s={s} set={set} />;
     case "gallery":
@@ -572,12 +812,10 @@ function SectionBody({ s, set, onUpdate }) {
 function countLabel(s) {
   const n = (v, word) => `${v} ${word}${v === 1 ? "" : "s"}`;
   switch (s.type) {
-    case "people":
-      return n(s.people.length, "person").replace("persons", "people");
+    case "years":
+      return n(s.years.length, "year");
     case "timeline":
       return n(s.items.length, "entry").replace("entrys", "entries");
-    case "members":
-      return n(s.names.filter((x) => x.trim()).length, "member");
     case "youtube":
       return n(s.links.length, "video");
     case "instagram":

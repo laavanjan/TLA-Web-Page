@@ -1123,3 +1123,101 @@
     animation: none;
   }
 }
+
+/* ---- Team by year editor ---- */
+.ts-years-help {
+  margin: 0;
+}
+
+.ts-years-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ts-item-body .ts-year,
+.ts-year-panel .ts-year {
+  width: 110px;
+  max-width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-year-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(230, 180, 34, 0.35);
+  background: rgba(230, 180, 34, 0.06);
+}
+
+.ts-year-panel > strong {
+  color: #ffd76e;
+  font-size: 14px;
+}
+
+.ts-year-panel-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.ts-member-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ts-member-checks label,
+.ts-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.ts-member-checks label {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: #97a1b5;
+  font-size: 13px;
+  text-decoration: line-through;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.ts-member-checks label.is-on {
+  border-color: rgba(46, 160, 90, 0.55);
+  background: rgba(46, 160, 90, 0.14);
+  color: #bff0d0;
+  text-decoration: none;
+}
+
+.ts-member-checks input,
+.ts-check input {
+  accent-color: #e6b422;
+}
+
+.ts-check {
+  font-size: 13.5px;
+  color: #dfe4ee;
+}
+
+.ts-link-btn {
+  margin-left: 10px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #ffd76e;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ts-chip-bad {
+  color: #ffb08a !important;
+  border-color: rgba(255, 140, 90, 0.45) !important;
+}
