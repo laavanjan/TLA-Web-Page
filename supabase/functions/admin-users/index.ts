@@ -29,7 +29,7 @@ const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const VAULT_KEY = Deno.env.get("PASSWORD_VAULT_KEY") ?? "";
 
-const TEAM_IDS = [1, 2, 3, 4]; // src/Components/teams/teamsData.js
+const TEAM_IDS = [1, 2, 3, 4]; // src/Components/teams/teamsData.js; teams made in /admin/teams are looked up in team_pages
 // Event addresses: the built-in ones (src/Components/events/eventsRegistry.js)
 // and any made in /admin/events, so only the shape is checked.
 const EVENT_ID_RE = /^[a-z0-9][a-z0-9-]{1,48}$/;
@@ -116,8 +116,16 @@ async function log(me: Me, action: string, target: { id?: string; email?: string
   });
 }
 
-const cleanTeams = (teams: unknown) =>
-  [...new Set((Array.isArray(teams) ? teams : []).map(Number).filter((t) => TEAM_IDS.includes(t)))].sort();
+async function cleanTeams(teams: unknown) {
+  const asked = [...new Set((Array.isArray(teams) ? teams : []).map(Number).filter((t) => Number.isInteger(t) && t >= 1 && t <= 999))];
+  const others = asked.filter((t) => !TEAM_IDS.includes(t));
+  let made: number[] = [];
+  if (others.length) {
+    const { data } = await admin.from("team_pages").select("id").in("id", others);
+    made = (data ?? []).map((r: { id: number }) => r.id);
+  }
+  return asked.filter((t) => TEAM_IDS.includes(t) || made.includes(t)).sort((a, b) => a - b);
+}
 
 const cleanEvents = (events: unknown) =>
   [...new Set((Array.isArray(events) ? events : []).filter((e): e is string => typeof e === "string" && EVENT_ID_RE.test(e)))].sort();
@@ -201,7 +209,7 @@ async function create(me: Me, b: Record<string, unknown>) {
   const name = String(b.name ?? "").trim().slice(0, 120);
   const email = String(b.email ?? "").trim().toLowerCase();
   const role = b.role === "admin" ? "admin" : "editor";
-  const teams = role === "editor" ? cleanTeams(b.teams) : [];
+  const teams = role === "editor" ? await cleanTeams(b.teams) : [];
   const events = role === "editor" ? cleanEvents(b.events) : [];
   const password = checkPassword(b.password);
   if (!name) throw new HttpError(400, "Enter a name.");
@@ -258,7 +266,7 @@ async function update(me: Me, b: Record<string, unknown>) {
     const { data: curEvents } = await admin.from("admin_user_events").select("event_id").eq("user_id", t.user_id);
     const teamsBefore = (curTeams ?? []).map((x) => x.team_id).sort();
     const eventsBefore = (curEvents ?? []).map((x) => x.event_id).sort();
-    const teamsAfter = b.teams !== undefined ? cleanTeams(b.teams) : teamsBefore;
+    const teamsAfter = b.teams !== undefined ? await cleanTeams(b.teams) : teamsBefore;
     const eventsAfter = b.events !== undefined ? cleanEvents(b.events) : eventsBefore;
     if (!teamsAfter.length && !eventsAfter.length) throw new HttpError(400, "Pick at least one team or event.");
     if (teamsBefore.join() !== teamsAfter.join()) {
