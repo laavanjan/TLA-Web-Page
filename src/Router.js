@@ -33,6 +33,7 @@ import AdminTeamJoin from "./Pages/AdminTeamJoin";
 import AdminTeams from "./Pages/AdminTeams";
 import AdminEvents from "./Pages/AdminEvents";
 import AdminMaintenance from "./Pages/AdminMaintenance";
+import AdminWallpapers from "./Pages/AdminWallpapers";
 import AdminLogin from "./Pages/AdminLogin";
 import RequireAdmin from "./Pages/RequireAdmin";
 import AdminEditors from "./Pages/AdminEditors";
@@ -201,6 +202,14 @@ function Router() {
       element: (
         <RequireAdmin allow="any">
           <AdminEvents />
+        </RequireAdmin>
+      ),
+    },
+    {
+      path: "admin/wallpapers",
+      element: (
+        <RequireAdmin>
+          <AdminWallpapers />
         </RequireAdmin>
       ),
     },
