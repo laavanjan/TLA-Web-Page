@@ -11,7 +11,7 @@ import {
 
 const Teams = () => {
     const [joinCfg, setJoinCfg] = useState(getCachedTeamJoinConfig);
-    const pages = useTeamPages();
+    const pages = useTeamPages().filter((t) => !t.hidden);
     const upcoming = upcomingCompetitions(pages);
 
     useEffect(() => {
