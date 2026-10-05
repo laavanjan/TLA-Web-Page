@@ -8,6 +8,7 @@
 //   POST { action: "sign",   teamId: 1, count: 3 }          (team page photos)
 //   POST { action: "sign",   eventId: "ppl", count: 3 }     (event page photos)
 //     -> { cloudName, uploads: [{ apiKey, timestamp, signature, params }, …] }
+//   POST { action: "sign",   wallpapers: true, count: 1 } (home page wallpapers, main admins only)
 //   POST { action: "delete", publicIds: ["tla/teams/1/abc…", "tla/events/ppl/abc…", …] }
 //     -> { deleted: [...], failed: [...] }
 //
@@ -29,6 +30,7 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 
 const ROOT = "tla/teams";
 const EVENT_ROOT = "tla/events";
+const WALLPAPER_ROOT = "tla/wallpapers";
 const MAX_SIGN = 30; // signatures per request
 const MAX_DELETE = 60; // public ids per request
 const ALLOWED_FORMATS = "jpg,jpeg,png,webp,gif,avif,heic,heif";
@@ -36,6 +38,7 @@ const ALLOWED_FORMATS = "jpg,jpeg,png,webp,gif,avif,heic,heif";
 // or tla/events/<eventId>/<random id>.
 const TEAM_ID_RE = /^tla\/teams\/(\d{1,3})\/[A-Za-z0-9_-]{8,64}$/;
 const EVENT_ID_RE = /^tla\/events\/([a-z0-9][a-z0-9-]{0,48})\/[A-Za-z0-9_-]{8,64}$/;
+const WALLPAPER_ID_RE = /^tla/wallpapers/[A-Za-z0-9_-]{8,64}$/;
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,48}$/;
 
 const CORS = {
@@ -69,7 +72,11 @@ function sign(params: Record<string, string | number>) {
 const randomId = () => crypto.randomUUID().replace(/-/g, "").slice(0, 20);
 const now = () => Math.floor(Date.now() / 1000);
 
-type Access = { canEdit: (teamId: number) => boolean; canEditEvent: (eventId: string) => boolean };
+type Access = {
+  canEdit: (teamId: number) => boolean;
+  canEditEvent: (eventId: string) => boolean;
+  isAdmin: boolean; // main admin: may also manage the home page wallpapers
+};
 
 // Which teams and events the caller may upload to / delete from, or null for no access.
 async function access(req: Request): Promise<Access | null> {
@@ -102,22 +109,26 @@ async function access(req: Request): Promise<Access | null> {
     // Roles table not created yet (team_editors.sql not run): any signed-in
     // user, as before team editors existed.
     if (roleErr.code === "42P01" || roleErr.code === "PGRST205") {
-      return { canEdit: () => true, canEditEvent: () => true };
+      return { canEdit: () => true, canEditEvent: () => true, isAdmin: true };
     }
     throw roleErr;
   }
   if (!row || row.disabled) return null;
-  if (row.role === "admin") return { canEdit: () => true, canEditEvent: () => true };
+  if (row.role === "admin") return { canEdit: () => true, canEditEvent: () => true, isAdmin: true };
   const teams = new Set((row.admin_user_teams ?? []).map((t: { team_id: number }) => t.team_id));
   const events = new Set((row.admin_user_events ?? []).map((e: { event_id: string }) => e.event_id));
-  return { canEdit: (teamId) => teams.has(teamId), canEditEvent: (eventId) => events.has(eventId) };
+  return { canEdit: (teamId) => teams.has(teamId), canEditEvent: (eventId) => events.has(eventId), isAdmin: false };
 }
 
 async function signUploads(who: Access, body: Record<string, unknown>) {
   // A team page upload names a teamId, an event page upload an eventId.
   let folder: string;
   let tag: string;
-  if (typeof body.eventId === "string") {
+  if (body.wallpapers === true) {
+    if (!who.isAdmin) return json({ error: "Only main admins can change the home page wallpapers." }, 403);
+    folder = WALLPAPER_ROOT;
+    tag = "tla-wallpapers";
+  } else if (typeof body.eventId === "string") {
     const slug = body.eventId;
     if (!SLUG_RE.test(slug)) return json({ error: "Invalid event." }, 400);
     if (!who.canEditEvent(slug)) return json({ error: "You can only upload photos to your own events' pages." }, 403);
@@ -167,11 +178,13 @@ async function destroy(publicId: string) {
 async function deleteImages(who: Access, publicIds: unknown) {
   if (!Array.isArray(publicIds) || publicIds.length === 0) return json({ deleted: [], failed: [] });
   if (publicIds.length > MAX_DELETE) return json({ error: `At most ${MAX_DELETE} images per request.` }, 400);
-  const bad = publicIds.filter((p) => typeof p !== "string" || !(TEAM_ID_RE.test(p) || EVENT_ID_RE.test(p)));
-  if (bad.length) return json({ error: "Refusing to delete images outside tla/teams/ and tla/events/.", bad }, 400);
+  const bad = publicIds.filter((p) => typeof p !== "string" || !(TEAM_ID_RE.test(p) || EVENT_ID_RE.test(p) || WALLPAPER_ID_RE.test(p)));
+  if (bad.length) return json({ error: "Refusing to delete images outside tla/teams/, tla/events/ and tla/wallpapers/.", bad }, 400);
   // tla/teams/<teamId>/… or tla/events/<eventId>/… - the third path segment says whose it is.
   const mine = (p: string) =>
-    p.startsWith("tla/teams/") ? who.canEdit(Number(p.split("/")[2])) : who.canEditEvent(p.split("/")[2]);
+    p.startsWith("tla/wallpapers/")
+      ? who.isAdmin
+      : p.startsWith("tla/teams/") ? who.canEdit(Number(p.split("/")[2])) : who.canEditEvent(p.split("/")[2]);
   const notYours = publicIds.filter((p) => !mine(p as string));
   if (notYours.length) return json({ error: "You can only delete photos from your own teams and events.", bad: notYours }, 403);
 
