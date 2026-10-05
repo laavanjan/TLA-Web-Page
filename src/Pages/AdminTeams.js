@@ -6,6 +6,8 @@ import {
   FaPlus,
   FaChevronDown,
   FaEye,
+  FaEyeSlash,
+  FaTrashAlt,
   FaExternalLinkAlt,
   FaExclamationTriangle,
   FaLightbulb,
@@ -31,6 +33,9 @@ import {
   pagePublicIds,
   missingFrom,
   SECTION_TYPES,
+  setTeamHidden,
+  createTeamPage,
+  deleteTeamPage,
 } from "../shared/teamPages";
 import { deleteImages } from "../shared/cloudinaryUpload";
 import { UploadContext } from "../shared/useImageUploads";
@@ -515,12 +520,12 @@ function TeamPagesStudio({ who }) {
     setPicker(false);
   };
 
-  const selectTeam = (id) => {
+  const selectTeam = (id, made) => {
     if (id === activeId) return;
     if (uploads && !window.confirm("Photos are still uploading for this team. Cancel the uploads and switch?")) return;
     if (dirty && !window.confirm("You have unpublished changes for this team. Discard them?")) return;
     if (dirty) dropUnpublishedUploads(draft, JSON.parse(savedJson));
-    const p = pages.find((x) => x.id === id);
+    const p = made || pages.find((x) => x.id === id);
     activeRef.current = id;
     touched.current = false;
     setActiveId(id);
@@ -529,6 +534,78 @@ function TeamPagesStudio({ who }) {
     setOpenKey(null);
     setPicker(false);
     setMsg({ type: "", text: "" });
+  };
+
+  // Main admins only: make a new team page. It starts hidden.
+  const [naming, setNaming] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [creating, setCreating] = useState(false);
+
+  const createTeam = async (e) => {
+    e.preventDefault();
+    if (!newName.trim() || creating) return;
+    setCreating(true);
+    setMsg({ type: "", text: "" });
+    try {
+      const made = await createTeamPage(newName);
+      setPages((ps) => [...ps, made]);
+      setNaming(false);
+      setNewName("");
+      selectTeam(made.id, made);
+      setMsg({ type: "ok", text: "Team created. It is hidden from visitors - click its eye when the page is ready." });
+    } catch (err) {
+      setMsg({ type: "err", text: err.message || "Could not create the team." });
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  // Main admins only, and only for teams made here.
+  const removeTeam = async (id) => {
+    const page = pages.find((x) => x.id === id);
+    if (!page || !page.custom) return;
+    if (!window.confirm(`Delete "${page.title}" for good?\n\nIts page, sections and uploaded photos are removed, and editors lose access to it. This can't be undone.\n\nTo keep it but stop showing it, use the eye instead.`)) return;
+    setMsg({ type: "", text: "" });
+    try {
+      await deleteTeamPage(page);
+      const rest = pages.filter((x) => x.id !== id);
+      setPages(rest);
+      if (id === activeRef.current && rest.length) {
+        const next = rest[0];
+        touched.current = false;
+        activeRef.current = next.id;
+        setActiveId(next.id);
+        setDraft(next);
+        setSavedJson(JSON.stringify(next));
+        setOpenKey(null);
+        setPicker(false);
+      }
+      setMsg({ type: "ok", text: "Team deleted." });
+    } catch (err) {
+      setMsg({ type: "err", text: err.message || "Could not delete the team." });
+    }
+  };
+
+  // Main admins only: hide a team's page from visitors, or show it again.
+  const toggleHidden = async (id) => {
+    const page = pages.find((x) => x.id === id);
+    if (!page) return;
+    const next = !page.hidden;
+    if (next && !window.confirm("Hide this team from visitors?
+
+Its card, page and join-form option disappear from the public site. Your content is kept, and you can show it again any time.")) return;
+    setMsg({ type: "", text: "" });
+    try {
+      await setTeamHidden(id, next);
+      setPages((ps) => ps.map((x) => (x.id === id ? { ...x, hidden: next } : x)));
+      if (id === activeRef.current) {
+        setDraft((d) => ({ ...d, hidden: next }));
+        setSavedJson((j) => JSON.stringify({ ...JSON.parse(j), hidden: next }));
+      }
+      setMsg({ type: "ok", text: next ? "Team hidden from visitors." : "Team is visible to visitors again." });
+    } catch (err) {
+      setMsg({ type: "err", text: err.message || "Could not change visibility." });
+    }
   };
 
   const discard = () => {
@@ -603,11 +680,11 @@ function TeamPagesStudio({ who }) {
             const shown = active ? draft : p;
             const visible = shown.sections.filter((s) => !s.hidden).length;
             return (
+              <div key={p.id} className={`ts-team-wrap${p.hidden ? " is-hidden" : ""}`}>
               <button
                 type="button"
                 role="tab"
                 aria-selected={active}
-                key={p.id}
                 className={`ts-team${active ? " is-active" : ""}`}
                 onClick={() => selectTeam(p.id)}
               >
@@ -619,10 +696,60 @@ function TeamPagesStudio({ who }) {
                 <small>
                   {visible} section{visible === 1 ? "" : "s"} ·{" "}
                   {p.updatedAt ? `updated ${ago(p.updatedAt)}` : "default content"}
+                  {p.hidden ? " · hidden" : ""}
                 </small>
               </button>
+              {who.role === "admin" && (
+                <button
+                  type="button"
+                  className="ts-team-eye"
+                  onClick={() => toggleHidden(p.id)}
+                  title={p.hidden ? "Hidden from visitors - click to show" : "Visible to visitors - click to hide"}
+                  aria-label={p.hidden ? "Show this team to visitors" : "Hide this team from visitors"}
+                >
+                  {p.hidden ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              )}
+              {who.role === "admin" && p.custom && (
+                <button
+                  type="button"
+                  className="ts-team-del"
+                  onClick={() => removeTeam(p.id)}
+                  title="Delete this team"
+                  aria-label="Delete this team"
+                >
+                  <FaTrashAlt />
+                </button>
+              )}
+              </div>
             );
           })}
+          {who.role === "admin" &&
+            (naming ? (
+              <form className="ts-team-new is-open" onSubmit={createTeam}>
+                <input
+                  className="admin-input admin-field"
+                  autoFocus
+                  value={newName}
+                  maxLength={200}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="Team name"
+                  aria-label="New team name"
+                />
+                <div className="ts-team-new-actions">
+                  <button type="submit" className="tj-btn" disabled={creating || !newName.trim()}>
+                    {creating ? "Creating…" : "Create"}
+                  </button>
+                  <button type="button" className="tj-btn" onClick={() => { setNaming(false); setNewName(""); }}>
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <button type="button" className="ts-team-new" onClick={() => setNaming(true)}>
+                <FaPlus /> New team
+              </button>
+            ))}
         </div>
 
         {/* Hidden rather than unmounted in Preview, so uploads keep going. Keyed
