@@ -591,9 +591,7 @@ function TeamPagesStudio({ who }) {
     const page = pages.find((x) => x.id === id);
     if (!page) return;
     const next = !page.hidden;
-    if (next && !window.confirm("Hide this team from visitors?
-
-Its card, page and join-form option disappear from the public site. Your content is kept, and you can show it again any time.")) return;
+    if (next && !window.confirm("Hide this team from visitors?\n\nIts card, page and join-form option disappear from the public site. Your content is kept, and you can show it again any time.")) return;
     setMsg({ type: "", text: "" });
     try {
       await setTeamHidden(id, next);
