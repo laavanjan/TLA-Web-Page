@@ -13,6 +13,8 @@ import {
   getCachedTeamJoinConfig,
 } from "../shared/teamJoinConfig";
 import { submitTeamJoinApplication } from "../shared/teamJoinApplications";
+import { useTeamPages } from "../shared/teamPages";
+import { TeamsData } from "../Components/teams/teamsData";
 
 const Field = ({ label, value, error, onChange, placeholder, required, full }) => (
   <div className={full ? "sf-field sf-full" : "sf-field"}>
@@ -70,6 +72,18 @@ const TextAreaField = ({ label, value, error, onChange, placeholder, required })
 export default function TeamJoinForm() {
   const navigate = useNavigate();
   const [cfg, setCfg] = useState(getCachedTeamJoinConfig);
+  // Teams an admin has hidden can't be applied to.
+  const hiddenTeams = new Set();
+  const teamPages = useTeamPages();
+  // Teams made in /admin/teams join the list once they are visible.
+  const madeTeams = teamPages.filter((t) => t.custom && !t.hidden).map((t) => t.title);
+  teamPages
+    .filter((t) => t.hidden)
+    .forEach((t) => {
+      hiddenTeams.add(t.title);
+      const base = TeamsData.find((x) => x.id === t.id);
+      if (base) hiddenTeams.add(base.title);
+    });
   const [name, setName] = useState("");
   const [answers, setAnswers] = useState({});
   const [errors, setErrors] = useState({});
@@ -243,7 +257,7 @@ export default function TeamJoinForm() {
                     value={value}
                     error={error}
                     onChange={onChange}
-                    options={f.options}
+                    options={f.key === "team" ? [...f.options.filter((o) => !hiddenTeams.has(o)), ...madeTeams.filter((t) => !f.options.includes(t))] : f.options}
                     placeholder={`${f.label}ஐத் தெரிவுசெய்யவும்`}
                   />
                 );
