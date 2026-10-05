@@ -18,6 +18,7 @@ import {
   FaRegLightbulb,
   FaCalendarAlt,
   FaTools,
+  FaImages,
 } from "react-icons/fa";
 
 import LotusDivider from "./LotusDivider";
@@ -31,6 +32,7 @@ import { getCachedEventPages, fetchEventPages, eventTitle as eventTitleIn } from
 import { fetchTeamJoinApplications } from "../shared/teamJoinApplications";
 import { fetchTeamJoinConfig } from "../shared/teamJoinConfig";
 import { fetchContactConfig } from "../shared/contactConfig";
+import { fetchWallpapers } from "../shared/wallpapers";
 import { fetchSiteStatus, isMaintenanceOn, formatReopen } from "../shared/siteStatus";
 import { fetchBookConfig, isSubmissionOpen } from "../book/bookConfig";
 import { DESIGNS } from "../assets/frame/designs";
@@ -86,6 +88,9 @@ function useDashboardData(admin) {
       fetchSiteStatus()
         .then((s) => set("maintenance", s))
         .catch(() => set("maintenance", null));
+      fetchWallpapers()
+        .then((w) => set("wallpapers", w))
+        .catch(() => set("wallpapers", null));
       supabase
         .from("admin_users")
         .select("role, disabled")
@@ -147,6 +152,14 @@ function contactStatus(contact) {
   if (contact === undefined) return LOADING;
   if (!contact) return null;
   return { tone: "info", text: contact.email };
+}
+
+function wallpaperStatus(list) {
+  if (list === undefined) return LOADING;
+  if (!list) return { tone: "off", text: "Not set up yet" };
+  const shown = list.filter((w) => w.is_visible).length;
+  if (!shown) return { tone: "info", text: list.length ? `${list.length} hidden · default picture` : "Default picture" };
+  return { tone: "ok", text: `${shown} showing${shown > 1 ? " · rotating" : ""}${list.length > shown ? ` · ${list.length - shown} hidden` : ""}` };
 }
 
 function maintenanceStatus(site) {
@@ -538,6 +551,15 @@ export default function Admin() {
                       title="Join requests"
                       desc="Application form, WhatsApp links and applicants."
                       status={joinStatus(data.apps, data.joinOpen)}
+                      index={n++}
+                    />
+                    <Card
+                      to="/admin/wallpapers"
+                      icon={FaImages}
+                      tone="amber"
+                      title="Home wallpapers"
+                      desc="Add, hide, reorder and delete the sliding home page pictures."
+                      status={wallpaperStatus(data.wallpapers)}
                       index={n++}
                     />
                     <Card
