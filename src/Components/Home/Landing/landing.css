@@ -5,10 +5,102 @@
 
 .landing-container {
     min-height: 100vh;
+    position: relative;
+    z-index: 1;
+}
+
+/* Admin-managed wallpapers: full-bleed slides behind the heading. */
+.landing-container-div {
+    position: relative;
+    overflow: hidden;
+}
+
+.landing-slides {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+.landing-slide {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: right center;
+    background-repeat: no-repeat;
+}
+
+.landing-slide {
+    display: flex;
+    align-items: center;
+}
+
+.landing-tint {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.landing-slide-content {
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+.landing-heading-custom {
+    white-space: pre-line;
+}
+
+.landing-slide.is-in {
+    animation: landingSlideIn 1s ease-in-out both;
+}
+
+.landing-slide.is-out {
+    animation: landingSlideOut 1s ease-in-out both;
+}
+
+@keyframes landingSlideIn {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+@keyframes landingSlideOut {
+    from { transform: translateX(0); }
+    to { transform: translateX(-100%); }
+}
+
+.landing-dots {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 18px;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.landing-dots i {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(32, 32, 32, 0.3);
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.landing-dots i.is-on {
+    background: #202020;
+    transform: scale(1.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .landing-slide.is-in,
+    .landing-slide.is-out {
+        animation-duration: 0.01s;
+    }
 }
 
 .landing-heading1 {
-    color: #202020 !important;
+    color: #202020;
     font-size: 60px !important;
     font-family: 'Heading' !important;
     letter-spacing: normal;
