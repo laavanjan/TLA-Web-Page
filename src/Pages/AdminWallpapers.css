@@ -1,0 +1,142 @@
+/* Home page wallpapers admin page (AdminWallpapers.js) - builds on Admin.css
+   and the .am-chip / .am-hint styles from AdminMaintenance.css. */
+
+.aw-actions {
+  margin-top: 14px;
+}
+
+.aw-actions .frame-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.aw-list {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.aw-item {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.aw-item.is-hidden .aw-thumb {
+  opacity: 0.35;
+  filter: grayscale(1);
+}
+
+.aw-num {
+  flex: 0 0 auto;
+  width: 24px;
+  text-align: center;
+  color: #a6b0c4;
+  font-size: 14px;
+}
+
+.aw-thumb {
+  flex: 0 0 auto;
+  width: 200px;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #1c2433;
+}
+
+.aw-state {
+  flex: 1 1 80px;
+  color: #e7ebf3;
+  font-size: 13px;
+}
+
+.aw-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.aw-btns .am-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.aw-danger {
+  color: #ffb4b4;
+  border-color: rgba(255, 120, 120, 0.4);
+}
+
+@media (max-width: 600px) {
+  .aw-thumb {
+    width: 100%;
+  }
+}
+
+.aw-shared,
+.aw-editor {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.aw-shared textarea,
+.aw-editor textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.aw-editor {
+  flex: 1 1 100%;
+  margin-top: 4px;
+}
+
+.aw-color {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: #e7ebf3;
+  font-size: 13px;
+}
+
+.aw-color input[type="color"] {
+  width: 44px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+}
+
+.aw-range {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #e7ebf3;
+  font-size: 13px;
+  width: min(320px, 100%);
+}
+
+.aw-editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
