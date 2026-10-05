@@ -1,6 +1,6 @@
 import React from "react";
 import { Helmet } from "react-helmet";
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import TeamDetail from "../Components/teams/team-detail/TeamDetail";
 import { useTeamPages } from "../shared/teamPages";
 
@@ -8,6 +8,9 @@ function TeamDetailPage() {
   const { teamId } = useParams();
   const pages = useTeamPages();
   const page = pages.find((p) => String(p.id) === teamId);
+
+  // A team an admin has hidden is not public: back to the Teams list.
+  if (page && page.hidden) return <Navigate to="/teams" replace />;
 
   return (
     <>
