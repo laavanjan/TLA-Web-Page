@@ -9,13 +9,16 @@ const SIGNATURE_TTL_MS = 50 * 60 * 1000; // Cloudinary accepts them for 1 hour
 
 const callFn = (body) => callEdgeFunction(FN, body);
 
+// Pass this as `scope` for the home page wallpapers (main admins only).
+export const WALLPAPER_SCOPE = "@wallpapers";
+
 // `scope` is a team id (number) for team pages or an event id (string, e.g.
 // "thaipongal") for event pages; uploads land in that team's / event's folder.
 // -> [{ cloudName, apiKey, signature, params, fetchedAt }]
 export async function signUploads(scope, count) {
   const data = await callFn({
     action: "sign",
-    ...(typeof scope === "string" ? { eventId: scope } : { teamId: scope }),
+    ...(scope === WALLPAPER_SCOPE ? { wallpapers: true } : typeof scope === "string" ? { eventId: scope } : { teamId: scope }),
     count,
   });
   const fetchedAt = Date.now();
