@@ -6,6 +6,7 @@ import {
   FaUserEdit,
   FaKey,
   FaEye,
+  FaEyeSlash,
   FaBan,
   FaCheckCircle,
   FaTrash,
@@ -13,6 +14,7 @@ import {
   FaThList,
   FaTools,
   FaLockOpen,
+  FaImages,
 } from "react-icons/fa";
 
 export const ACTIONS = {
@@ -20,9 +22,17 @@ export const ACTIONS = {
   event_publish: { icon: FaUpload, verb: "published the event page", group: "pages" },
   event_layout: { icon: FaThList, verb: "rearranged the home page event cards", group: "pages" },
   event_removed: { icon: FaTrash, verb: "removed the published event page", group: "pages" },
+  team_created: { icon: FaUpload, verb: "created the team page", group: "pages" },
+  team_deleted: { icon: FaTrash, verb: "deleted the team page", group: "pages" },
+  team_hidden: { icon: FaEyeSlash, verb: "hid a team page from visitors", group: "pages" },
+  team_shown: { icon: FaEye, verb: "showed a team page to visitors again", group: "pages" },
   maintenance_on: { icon: FaTools, verb: "turned maintenance mode on", group: "site" },
   maintenance_off: { icon: FaLockOpen, verb: "turned maintenance mode off", group: "site" },
   maintenance_updated: { icon: FaTools, verb: "changed the maintenance page", group: "site" },
+  wallpaper_added: { icon: FaImages, verb: "added a home page wallpaper", group: "site" },
+  wallpaper_removed: { icon: FaTrash, verb: "deleted a home page wallpaper", group: "site" },
+  wallpaper_hidden: { icon: FaImages, verb: "hid a home page wallpaper", group: "site" },
+  wallpaper_shown: { icon: FaImages, verb: "showed a home page wallpaper again", group: "site" },
   application_deleted: { icon: FaTrash, verb: "deleted a join application", group: "applications" },
   account_created: { icon: FaUserPlus, verb: "created an account for", group: "accounts" },
   account_updated: { icon: FaUserEdit, verb: "updated the account of", group: "accounts" },
@@ -41,7 +51,8 @@ export const actorName = (e) => e.actor_name || e.actor_email || "Someone";
 // What the action was done to: the team or event for publishes, otherwise the
 // account. `eventTitle` looks up an event page's name from its id.
 export function activityObject(e, teamTitle, eventTitle = (id) => id) {
-  if (e.action === "publish") return teamTitle(e.team_id);
+  if (e.action === "publish" || e.action === "team_hidden" || e.action === "team_shown") return teamTitle(e.team_id);
+  if (e.action === "team_created" || e.action === "team_deleted") return (e.details || {}).title || "";
   if (e.action === "event_publish" || e.action === "event_removed") return eventTitle((e.details || {}).event_id);
   if (e.action === "event_layout") return "";
   if (e.target_email && e.action !== "password_changed") return e.target_email;
