@@ -34,7 +34,7 @@ import {
   generatePassword,
   MIN_PASSWORD,
 } from "../admin/adminUsers";
-import { getCachedTeamPages } from "../shared/teamPages";
+import { getCachedTeamPages, fetchTeamPages } from "../shared/teamPages";
 import { getCachedEventPages } from "../shared/eventPages";
 import { EVENT_CATEGORIES } from "../shared/eventSections";
 import "./Frame.css";
@@ -496,7 +496,16 @@ function Notice({ notice, onClose }) {
 
 export default function AdminEditors() {
   const me = useAdminRole();
-  const teams = useRef(getCachedTeamPages().map((p) => ({ id: p.id, title: p.title }))).current;
+  const [teams, setTeams] = useState(() => getCachedTeamPages().map((p) => ({ id: p.id, title: p.title })));
+  useEffect(() => {
+    let alive = true;
+    fetchTeamPages()
+      .then((all) => alive && setTeams(all.map((p) => ({ id: p.id, title: p.title }))))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
   const events = useRef(
     getCachedEventPages().pages.map((p) => ({ id: p.id, title: p.title, category: p.category, parent: p.parent }))
   ).current;
