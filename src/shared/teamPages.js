@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../helpers/supabaseClient";
 import { TeamsData } from "../Components/teams/teamsData";
 import { safeUrl, safeSocialUrl, uploadedImage } from "./mediaLinks";
+import { deleteImages } from "./cloudinaryUpload";
 
 const LS_KEY = "tla_team_pages";
 
@@ -263,11 +264,33 @@ function defaultPage(team) {
   };
 }
 
+// Teams made in /admin/teams have no entry in teamsData.js: their title lives
+// in the saved page itself, and ids start here.
+export const CUSTOM_TEAM_FIRST_ID = 101;
+export const MAX_TEAM_ID = 999;
+
+// The built-in team with this id, or - for a team an admin made - a stand-in
+// built from its saved page.
+const teamBase = (id, data) => {
+  const built = TeamsData.find((t) => t.id === id);
+  if (built) return built;
+  if (data && typeof data === "object" && data.custom === true) {
+    return { id, title: str(data.title, 200) || "புதிய அணி", custom: true };
+  }
+  return null;
+};
+
 export function sanitizePage(raw, team) {
+  // hidden: an admin switched the whole page off for visitors (/admin/teams).
+  const hidden = !!raw && typeof raw === "object" && raw.hidden === true;
+  // custom: made in /admin/teams rather than built in; only those can be deleted.
+  const custom = !!raw && typeof raw === "object" && raw.custom === true;
   if (!raw || typeof raw !== "object" || !Array.isArray(raw.sections)) {
-    return defaultPage(team);
+    return { ...defaultPage(team), hidden, custom };
   }
   return {
+    hidden,
+    custom,
     title: str(raw.title, 200) || team.title,
     tagline: str(raw.tagline, 400),
     summary: str(raw.summary, 20000),
@@ -281,14 +304,23 @@ export function sanitizePage(raw, team) {
 
 // A draft as it will look once published (blank rows dropped, bad links removed).
 export function cleanPage(page) {
-  const team = TeamsData.find((t) => t.id === page.id);
+  const team = teamBase(page.id, page);
   return team ? { ...page, ...sanitizePage(page, team) } : page;
 }
 
 // rows: { [teamId]: { data, updated_at } }
 function buildPages(rows) {
   const r = rows || {};
-  return TeamsData.map((team) => {
+  const teams = [...TeamsData];
+  Object.keys(r)
+    .map(Number)
+    .filter((id) => !TeamsData.some((t) => t.id === id))
+    .sort((a, b) => a - b)
+    .forEach((id) => {
+      const base = teamBase(id, r[id] && r[id].data);
+      if (base) teams.push(base);
+    });
+  return teams.map((team) => {
     const row = r[team.id];
     return {
       id: team.id,
@@ -334,7 +366,7 @@ export async function fetchTeamPages() {
 // Publishes one team's page — live for every visitor. RLS only allows
 // signed-in admins to write.
 export async function saveTeamPage(teamId, page) {
-  const team = TeamsData.find((t) => t.id === teamId);
+  const team = teamBase(teamId, page);
   if (!team) throw new Error("Unknown team.");
   const clean = sanitizePage({ ...page, sections: page.sections || [] }, team);
   const updated_at = new Date().toISOString();
@@ -347,6 +379,75 @@ export async function saveTeamPage(teamId, page) {
   rows[teamId] = { data: clean, updated_at };
   writeLocal(rows);
   return { id: teamId, updatedAt: updated_at, fallbackPhoto: team.photo, ...clean };
+}
+
+// Hides a team's page from visitors, or shows it again. The content is left
+// alone. Main admins only - the database ignores it from anyone else (see
+// supabase/migrations/team_hidden.sql).
+export async function setTeamHidden(teamId, hidden) {
+  const { data: row, error: readErr } = await supabase
+    .from("team_pages")
+    .select("data, updated_at")
+    .eq("id", teamId)
+    .maybeSingle();
+  if (readErr) throw new Error(readErr.message || "Could not read the page.");
+
+  if (!row && !TeamsData.some((t) => t.id === teamId)) throw new Error("Unknown team.");
+  const base = row && row.data && typeof row.data === "object" ? row.data : {};
+  const data = { ...base, hidden: !!hidden };
+  const query = supabase.from("team_pages");
+  const { data: done, error } = row
+    ? await query.update({ data }).eq("id", teamId).select("id")
+    : await query.insert({ id: teamId, data, updated_at: new Date().toISOString() }).select("id");
+  if (error) throw new Error(error.message || "Could not save.");
+  if (!done || !done.length) throw new Error("Nothing was saved - only main admins can hide a team.");
+
+  const rows = readLocal() || {};
+  rows[teamId] = { data, updated_at: row ? row.updated_at : new Date().toISOString() };
+  writeLocal(rows);
+  return !!hidden;
+}
+
+// Makes a new, empty team page (main admins only). It starts hidden, so it can
+// be built before visitors see it. Returns the page, like fetchTeamPages does.
+export async function createTeamPage(title) {
+  const name = str(title, 200);
+  if (!name) throw new Error("Give the team a name.");
+  const { data: ids, error: idErr } = await supabase.from("team_pages").select("id");
+  if (idErr) throw new Error(idErr.message || "Could not read the teams.");
+  let id = Math.max(CUSTOM_TEAM_FIRST_ID - 1, ...(ids || []).map((x) => x.id)) + 1;
+
+  const data = { title: name, tagline: "", summary: "", sections: [], hidden: true, custom: true };
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    if (id > MAX_TEAM_ID) throw new Error("No more team ids are free.");
+    const updated_at = new Date().toISOString();
+    const { error } = await supabase.from("team_pages").insert({ id, data, updated_at });
+    if (!error) {
+      const rows = readLocal() || {};
+      rows[id] = { data, updated_at };
+      writeLocal(rows);
+      const team = teamBase(id, data);
+      return { id, updatedAt: updated_at, fallbackPhoto: undefined, ...sanitizePage(data, team) };
+    }
+    if (error.code !== "23505") throw new Error(error.message || "Could not create the team.");
+    id += 1; // someone else took that number a moment ago
+  }
+  throw new Error("Could not create the team - try again.");
+}
+
+// Deletes a team made in /admin/teams, with its page and the images it
+// uploaded. The built-in teams can only be hidden. Main admins only.
+export async function deleteTeamPage(page) {
+  if (!page || !page.custom) throw new Error("Only teams you created can be deleted. Hide this one instead.");
+  const { data, error } = await supabase.from("team_pages").delete().eq("id", page.id).select("id");
+  if (error) throw new Error(error.message || "Could not delete.");
+  if (!data || !data.length) throw new Error("Nothing was deleted - only main admins can delete a team.");
+
+  const rows = readLocal() || {};
+  delete rows[page.id];
+  writeLocal(rows);
+  const ids = [...pagePublicIds(page)];
+  if (ids.length) await deleteImages(ids); // best effort
 }
 
 // Cloudinary public ids of every image this team uploaded that the page still
@@ -414,6 +515,7 @@ export function competitionStatus(c) {
 export function upcomingCompetitions(pages) {
   const out = [];
   pages.forEach((page) =>
+    !page.hidden &&
     page.sections
       .filter((s) => s.type === "competitions" && !s.hidden)
       .forEach((s) =>
