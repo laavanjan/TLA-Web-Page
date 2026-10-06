@@ -38,7 +38,7 @@ const ALLOWED_FORMATS = "jpg,jpeg,png,webp,gif,avif,heic,heif";
 // or tla/events/<eventId>/<random id>.
 const TEAM_ID_RE = /^tla\/teams\/(\d{1,3})\/[A-Za-z0-9_-]{8,64}$/;
 const EVENT_ID_RE = /^tla\/events\/([a-z0-9][a-z0-9-]{0,48})\/[A-Za-z0-9_-]{8,64}$/;
-const WALLPAPER_ID_RE = /^tla/wallpapers/[A-Za-z0-9_-]{8,64}$/;
+const WALLPAPER_ID_RE = /^tla\/wallpapers\/[A-Za-z0-9_-]{8,64}$/;
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,48}$/;
 
 const CORS = {

@@ -165,6 +165,8 @@ export default function AdminWallpapers() {
       text_color: row.text_color,
       tint_color: row.tint_color,
       tint_opacity: row.tint_opacity,
+      focus_x: row.focus_x,
+      focus_y: row.focus_y,
     });
   };
 
@@ -297,6 +299,21 @@ export default function AdminWallpapers() {
                   </div>
                   {editId === r.id && draft && (
                     <div className="aw-editor">
+                      <span className="admin-label">Which part of the picture to keep in view</span>
+                      <small className="am-hint">
+                        The home page crops the picture to fit each screen. Click or drag on the picture to mark the part that must
+                        stay visible - the two previews below show exactly what visitors will see.
+                      </small>
+                      <FocusPicker
+                        url={r.image_url}
+                        x={draft.focus_x}
+                        y={draft.focus_y}
+                        onChange={(x, y) => setDraft((d) => ({ ...d, focus_x: x, focus_y: y }))}
+                      />
+                      <div className="aw-previews">
+                        <CropPreview label="Computer screen" className="is-wide" url={r.image_url} draft={draft} sharedDraft={sharedDraft} />
+                        <CropPreview label="Phone" className="is-phone" url={r.image_url} draft={draft} sharedDraft={sharedDraft} />
+                      </div>
                       <span className="admin-label">Heading on this wallpaper</span>
                       {[
                         ["default", "Shared text"],
@@ -376,5 +393,69 @@ function ColorField({ label, value, fallback, onChange, resetLabel = "Default" }
         {resetLabel}
       </button>
     </div>
+  );
+}
+
+const clampPct = (n) => Math.min(100, Math.max(0, Math.round(n)));
+const VERSE = "தித்திக்கும் தமிழில் நித்திலம் சொரிய எத்திக்கும் அதிர்ந்திட சங்கே முழங்கு!";
+
+// The whole picture with a movable marker: click, drag or use the arrow keys.
+function FocusPicker({ url, x, y, onChange }) {
+  const box = useRef(null);
+  const set = (e) => {
+    const rect = box.current.getBoundingClientRect();
+    onChange(clampPct(((e.clientX - rect.left) / rect.width) * 100), clampPct(((e.clientY - rect.top) / rect.height) * 100));
+  };
+  const onKey = (e) => {
+    const step = e.shiftKey ? 10 : 2;
+    const move = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
+    if (!move) return;
+    e.preventDefault();
+    onChange(clampPct(x + move[0]), clampPct(y + move[1]));
+  };
+  return (
+    <div className="aw-focus-wrap">
+      <div
+        ref={box}
+        className="aw-focus"
+        role="slider"
+        tabIndex={0}
+        aria-label="Focus point"
+        aria-valuetext={`${x}% across, ${y}% down`}
+        onPointerDown={(e) => {
+          e.currentTarget.setPointerCapture(e.pointerId);
+          set(e);
+        }}
+        onPointerMove={(e) => e.buttons === 1 && set(e)}
+        onKeyDown={onKey}
+      >
+        <img src={url} alt="" draggable={false} />
+        <span className="aw-focus-dot" style={{ left: x + "%", top: y + "%" }} />
+      </div>
+      <button type="button" className="am-chip" onClick={() => onChange(50, 50)} disabled={x === 50 && y === 50}>
+        Centre
+      </button>
+    </div>
+  );
+}
+
+// How the home page will crop this wallpaper (same CSS as the real thing), with the heading, tint and colours.
+function CropPreview({ label, className, url, draft, sharedDraft }) {
+  const text = draft.text_mode === "none" ? "" : draft.text_mode === "custom" ? draft.text : sharedDraft.default_text || VERSE;
+  const color = draft.text_color || sharedDraft.default_text_color || DEFAULT_TEXT_COLOR;
+  return (
+    <figure className={"aw-crop " + className}>
+      <div className="aw-crop-frame" style={{ backgroundImage: `url("${url}")`, backgroundPosition: `${draft.focus_x}% ${draft.focus_y}%` }}>
+        {draft.tint_color && draft.tint_opacity > 0 && (
+          <span className="aw-crop-tint" style={{ background: draft.tint_color, opacity: draft.tint_opacity / 100 }} />
+        )}
+        {text && (
+          <span className="aw-crop-text" style={{ color }}>
+            {text}
+          </span>
+        )}
+      </div>
+      <figcaption>{label}</figcaption>
+    </figure>
   );
 }

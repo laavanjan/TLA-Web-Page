@@ -54,7 +54,7 @@ function Landing() {
             <div
                 key={state.tick + (index === slide.cur ? 0 : -1)}
                 className={"landing-slide " + (index === slide.cur ? (state.prev === null ? "is-still" : "is-in") : "is-out")}
-                style={{ backgroundImage: `url("${w.url}")` }}
+                style={{ backgroundImage: `url("${w.url}")`, backgroundPosition: w.focus ? `${w.focus.x}% ${w.focus.y}%` : "50% 50%" }}
             >
                 {w.tint && <div className="landing-tint" style={{ background: w.tint.color, opacity: w.tint.opacity }} />}
                 <Container maxWidth='' className="landing-slide-content">

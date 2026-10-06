@@ -12,8 +12,8 @@ import { deleteImages } from "./cloudinaryUpload";
 
 const TABLE = "homepage_wallpapers";
 const SETTINGS = "homepage_wallpaper_settings";
-const COLUMNS = "id, image_url, public_id, is_visible, sort_order, created_at, text_mode, text, text_color, tint_color, tint_opacity";
-const LS_KEY = "tla_wallpapers_v2";
+const COLUMNS = "id, image_url, public_id, is_visible, sort_order, created_at, text_mode, text, text_color, tint_color, tint_opacity, focus_x, focus_y";
+const LS_KEY = "tla_wallpapers_v3";
 
 export const TEXT_MODES = ["default", "custom", "none"];
 export const DEFAULT_TEXT_COLOR = "#202020";
@@ -23,11 +23,19 @@ const MAX_TEXT = 300;
 export const isColor = (v) => typeof v === "string" && /^#[0-9a-f]{6}$/i.test(v);
 
 // Whitelist + validate so a bad row never breaks the home page.
+// 0-100, the middle when missing.
+const percent = (v) => {
+  const n = Number(v);
+  return v === null || v === undefined || v === "" || !Number.isFinite(n) ? 50 : Math.min(100, Math.max(0, Math.round(n)));
+};
+
 export function normalizeWallpaper(r) {
   const o = r || {};
   const opacity = Number(o.tint_opacity);
   return {
     ...o,
+    focus_x: percent(o.focus_x),
+    focus_y: percent(o.focus_y),
     text_mode: TEXT_MODES.includes(o.text_mode) ? o.text_mode : "default",
     text: typeof o.text === "string" ? o.text.slice(0, MAX_TEXT) : "",
     text_color: isColor(o.text_color) ? o.text_color : "",
@@ -52,6 +60,7 @@ export function toSlide(row, settings) {
   else text = shared.default_text.trim() || null;
   return {
     url: w.image_url,
+    focus: { x: w.focus_x, y: w.focus_y },
     text,
     color: w.text_color || shared.default_text_color || DEFAULT_TEXT_COLOR,
     tint: w.tint_color && w.tint_opacity > 0 ? { color: w.tint_color, opacity: w.tint_opacity / 100 } : null,
@@ -126,7 +135,7 @@ export async function setWallpaperVisible(id, visible) {
 export async function updateWallpaper(id, patch) {
   const clean = normalizeWallpaper(patch);
   const body = {};
-  ["text_mode", "text", "text_color", "tint_color", "tint_opacity"].forEach((k) => {
+  ["text_mode", "text", "text_color", "tint_color", "tint_opacity", "focus_x", "focus_y"].forEach((k) => {
     if (k in patch) body[k] = clean[k];
   });
   const { data, error } = await supabase.from(TABLE).update(body).eq("id", id).select("id");

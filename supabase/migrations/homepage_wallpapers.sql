@@ -90,3 +90,9 @@ create policy "wallpaper_settings_admin_write"
   on public.homepage_wallpaper_settings for update
   using (public.is_admin())
   with check (public.is_admin());
+
+-- ---- Focus point (added later; safe to re-run) -------------------------------------------
+-- Which part of the picture stays in view when the home page crops it to fit a
+-- screen: percent across / down, 0-100 (50, 50 = the middle).
+alter table public.homepage_wallpapers add column if not exists focus_x integer not null default 50;
+alter table public.homepage_wallpapers add column if not exists focus_y integer not null default 50;
