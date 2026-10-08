@@ -1,0 +1,21 @@
+.members-banner-wrap {
+    text-align: center;
+    padding-bottom: 60px;
+}
+
+.members-banner-btn {
+    display: inline-block;
+    font-family: "Para", sans-serif;
+    font-size: 22px;
+    padding: 12px 32px;
+    border-radius: 999px;
+    background: #c8932f;
+    color: #fff !important;
+    text-decoration: none;
+}
+
+.members-banner-btn:hover {
+    background: #022345;
+    color: #fff !important;
+}
+
