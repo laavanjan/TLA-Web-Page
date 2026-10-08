@@ -21,6 +21,7 @@ import Login from "./Components/Login";
 import Signup from "./Components/Signup";
 import MakkalMantramVote from "./Pages/MakkalMantramVote";
 import Seniors from "./Pages/Seniors";
+import MembersPage from "./Pages/Members";
 import MakkalMantramVoteResults from "./Pages/MakkalMantramVoteResults";
 import Frame from "./Pages/Frame";
 import Admin from "./Pages/Admin";
@@ -92,6 +93,10 @@ function Router() {
     {
       path: "/books/submit/form",
       element: <BookSubmitForm />,
+    },
+    {
+      path: "/members",
+      element: <MembersPage />,
     },
     {
       path: "/seniors",
