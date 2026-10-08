@@ -1,3 +1,15 @@
+/* Background: temple, students and palm-leaf manuscripts sit along the
+   bottom edges, so anchor the image to the bottom and keep the centre clear
+   for the text. */
+.members-banner {
+    display: flex;
+    align-items: center;
+    min-height: 480px;
+    background:
+        radial-gradient(ellipse at center, rgba(246, 246, 248, 0.75) 0%, rgba(246, 246, 248, 0) 55%),
+        #f6f6f8 url("../../../assets/members-bg.jpg") center bottom / cover no-repeat;
+}
+
 .members-banner-wrap {
     text-align: center;
     padding-bottom: 60px;
