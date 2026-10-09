@@ -27,6 +27,7 @@ const GROUPS = [
   ["pages", "Page publishes"],
   ["accounts", "Accounts & passwords"],
   ["applications", "Join applications"],
+  ["members", "Members list"],
   ["site", "Site settings"],
 ];
 
