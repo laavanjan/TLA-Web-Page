@@ -15,6 +15,7 @@ import {
   FaTools,
   FaLockOpen,
   FaImages,
+  FaIdCard,
 } from "react-icons/fa";
 
 export const ACTIONS = {
@@ -33,6 +34,9 @@ export const ACTIONS = {
   wallpaper_removed: { icon: FaTrash, verb: "deleted a home page wallpaper", group: "site" },
   wallpaper_hidden: { icon: FaImages, verb: "hid a home page wallpaper", group: "site" },
   wallpaper_shown: { icon: FaImages, verb: "showed a home page wallpaper again", group: "site" },
+  member_added: { icon: FaIdCard, verb: "added the member", group: "members" },
+  member_updated: { icon: FaIdCard, verb: "edited the member", group: "members" },
+  member_removed: { icon: FaTrash, verb: "removed the member", group: "members" },
   application_deleted: { icon: FaTrash, verb: "deleted a join application", group: "applications" },
   account_created: { icon: FaUserPlus, verb: "created an account for", group: "accounts" },
   account_updated: { icon: FaUserEdit, verb: "updated the account of", group: "accounts" },
@@ -55,6 +59,7 @@ export function activityObject(e, teamTitle, eventTitle = (id) => id) {
   if (e.action === "team_created" || e.action === "team_deleted") return (e.details || {}).title || "";
   if (e.action === "event_publish" || e.action === "event_removed") return eventTitle((e.details || {}).event_id);
   if (e.action === "event_layout") return "";
+  if (e.action.startsWith("member_")) return (e.details || {}).name || "";
   if (e.target_email && e.action !== "password_changed") return e.target_email;
   return "";
 }
