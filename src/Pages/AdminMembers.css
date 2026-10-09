@@ -1,0 +1,224 @@
+/* Members admin page (AdminMembers.js) - builds on the .tj styles in Admin.css. */
+
+.amb-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.amb-filter-row .tj-search {
+  flex: 2 1 260px;
+  max-width: none;
+}
+
+.amb-select {
+  flex: 1 1 170px;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.amb-name {
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+}
+
+.amb-name:hover {
+  color: #ffd76e;
+  text-decoration: underline;
+}
+
+.amb-tools {
+  width: 1%;
+  text-align: right;
+}
+
+/* ---- View / add / edit dialog --------------------------------------------- */
+
+.amb-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 10vh 16px 16px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  background: rgba(4, 6, 12, 0.68);
+  backdrop-filter: blur(3px);
+}
+
+.amb-dialog {
+  width: 100%;
+  max-width: 520px;
+}
+
+.amb-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 22px;
+  border-radius: 16px;
+  border: 1px solid rgba(230, 180, 34, 0.4);
+  background: #141a26;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+
+.amb-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.amb-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.amb-wide {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 520px) {
+  .amb-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.amb-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.tj .amb-warn {
+  color: #ffd76e;
+}
+
+.amb-danger {
+  margin-right: auto;
+  color: #ffb4b4;
+  border-color: rgba(255, 120, 120, 0.4);
+}
+
+.amb-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 18px;
+  border-radius: 12px;
+  background: #f6f6f8;
+}
+
+.amb-preview .members-card {
+  width: 240px;
+  max-width: 100%;
+}
+
+.tj .amb-preview .tj-muted {
+  margin: 0;
+  color: #717274;
+}
+
+.amb-details {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 8px 16px;
+  margin: 0;
+  font-size: 14px;
+}
+
+.amb-details dt {
+  color: #97a1b5;
+}
+
+.amb-details dd {
+  margin: 0;
+  color: #f4f6fb;
+  overflow-wrap: anywhere;
+}
+
+/* ---- Membership fee and receipt ------------------------------------------- */
+
+.amb-dialog.is-wide {
+  max-width: 760px;
+}
+
+.amb-view {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+@media (max-width: 640px) {
+  .amb-view {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.amb-receipt[data-ready="yes"] {
+  color: #ffd76e;
+}
+
+.amb-receipt-box,
+.amb-fee {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.amb-receipt-box .tj-control-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tj .amb-receipt-box .tj-muted,
+.tj .amb-fee .tj-muted {
+  margin: 0;
+}
+
+.amb-receipt-preview {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2480 / 1748;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.amb-receipt-preview.is-loading {
+  background: linear-gradient(90deg, #1c2433 0%, #262f40 50%, #1c2433 100%);
+}
+
+.tj .amb-check {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #f4f6fb;
+}
+
+.amb-receipt-no {
+  margin-left: auto;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffd76e;
+  background: rgba(230, 180, 34, 0.14);
+}
