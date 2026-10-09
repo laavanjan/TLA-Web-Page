@@ -366,6 +366,11 @@
   background: rgba(255, 140, 90, 0.14);
 }
 
+.ae-act-members .ae-entry-icon {
+  color: #7ee0a0;
+  background: rgba(126, 224, 160, 0.14);
+}
+
 .ae-entry-body {
   flex: 1 1 auto;
   min-width: 0;
