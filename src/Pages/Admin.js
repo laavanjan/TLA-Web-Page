@@ -19,6 +19,7 @@ import {
   FaCalendarAlt,
   FaTools,
   FaImages,
+  FaIdCard,
 } from "react-icons/fa";
 
 import LotusDivider from "./LotusDivider";
@@ -91,6 +92,10 @@ function useDashboardData(admin) {
       fetchWallpapers()
         .then((w) => set("wallpapers", w))
         .catch(() => set("wallpapers", null));
+      supabase
+        .from("members")
+        .select("id", { count: "exact", head: true })
+        .then(({ count, error }) => set("members", error ? null : count));
       supabase
         .from("admin_users")
         .select("role, disabled")
@@ -170,6 +175,12 @@ function maintenanceStatus(site) {
     tone: "warn",
     text: site.reopensAt ? `ON · reopens ${formatReopen(site.reopensAt, "en-GB")}` : "ON · visitors see the maintenance page",
   };
+}
+
+function membersStatus(count) {
+  if (count === undefined) return LOADING;
+  if (count === null) return { tone: "off", text: "Not set up yet" };
+  return { tone: "info", text: `${count} member${count === 1 ? "" : "s"}` };
 }
 
 function activityStatus(activity) {
@@ -590,6 +601,15 @@ export default function Admin() {
               <div className="ad-duo">
                 <Section label="People & access" icon={FaUsersCog}>
                   <div className="ad-grid ad-grid-2">
+                    <Card
+                      to="/admin/members"
+                      icon={FaIdCard}
+                      tone="amber"
+                      title="Members"
+                      desc="Add, edit, view and remove the members on the members page."
+                      status={membersStatus(data.members)}
+                      index={n++}
+                    />
                     <Card
                       to="/admin/editors"
                       icon={FaUsersCog}
