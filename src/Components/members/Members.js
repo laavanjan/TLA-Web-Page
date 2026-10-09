@@ -1,79 +1,23 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { supabase } from "../../helpers/supabaseClient";
+import React, { useEffect, useState } from "react";
 import { FaMapMarkerAlt } from "react-icons/fa";
+import { fetchMembers, useMemberFilters, MEMBER_FIELDS, initials } from "../../shared/members";
 import "./members.css";
-
-const initials = (name) =>
-    name
-        .split(/[\s.]+/)
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((w) => w[0].toUpperCase())
-        .join("");
-
-const BATCH_ORDER = (a, b) => b - a;
 
 const Members = () => {
     const [rows, setRows] = useState(null);
     const [error, setError] = useState(false);
-    const [batch, setBatch] = useState(null);
-    const [query, setQuery] = useState("");
-    const [faculty, setFaculty] = useState("");
-    const [department, setDepartment] = useState("");
-    const [district, setDistrict] = useState("");
+    const { batches, active, pickBatch, query, setQuery, filters, setFilter, optionsOf, shown } =
+        useMemberFilters(rows);
 
     useEffect(() => {
         let alive = true;
-        supabase
-            .from("members")
-            .select("id,batch,name,faculty,department,district")
-            .order("name")
-            .range(0, 4999)
-            .then(({ data, error: err }) => {
-                if (!alive) return;
-                if (err) return setError(true);
-                setRows(data || []);
-            });
+        fetchMembers()
+            .then((data) => alive && setRows(data))
+            .catch(() => alive && setError(true));
         return () => {
             alive = false;
         };
     }, []);
-
-    const batches = useMemo(
-        () => [...new Set((rows || []).map((r) => r.batch))].sort(BATCH_ORDER),
-        [rows]
-    );
-    const active = batch ?? batches[0];
-
-    const batchRows = useMemo(
-        () => (rows || []).filter((r) => r.batch === active),
-        [rows, active]
-    );
-    const optionsOf = (key) =>
-        [...new Set(batchRows.map((r) => r[key]).filter(Boolean))].sort((a, b) =>
-            a.localeCompare(b)
-        );
-
-    const pickBatch = (b) => {
-        setBatch(b);
-        setFaculty("");
-        setDepartment("");
-        setDistrict("");
-    };
-
-    const shown = useMemo(() => {
-        const q = query.trim().toLowerCase();
-        return batchRows.filter(
-            (r) =>
-                (!faculty || r.faculty === faculty) &&
-                (!department || r.department === department) &&
-                (!district || r.district === district) &&
-                (!q ||
-                    [r.name, r.faculty, r.department, r.district]
-                        .filter(Boolean)
-                        .some((v) => v.toLowerCase().includes(q)))
-        );
-    }, [batchRows, query, faculty, department, district]);
 
     return (
         <div className="members">
@@ -108,16 +52,12 @@ const Members = () => {
                         onChange={(e) => setQuery(e.target.value)}
                     />
                     <div className="members-filters">
-                        {[
-                            ["faculty", "பீடம் (Faculty)", faculty, setFaculty],
-                            ["department", "துறை (Department)", department, setDepartment],
-                            ["district", "மாவட்டம் (District)", district, setDistrict],
-                        ].map(([key, label, value, set]) => (
+                        {MEMBER_FIELDS.map(([key, label]) => (
                             <select
                                 key={key}
                                 className="members-select"
-                                value={value}
-                                onChange={(e) => set(e.target.value)}
+                                value={filters[key]}
+                                onChange={(e) => setFilter(key, e.target.value)}
                             >
                                 <option value="">{label} - அனைத்தும்</option>
                                 {optionsOf(key).map((o) => (
