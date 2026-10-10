@@ -91,6 +91,66 @@ create trigger members_touch
   before update on public.members
   for each row execute function public.touch_member();
 
+-- ---- Membership ID ----------------------------------------------------------------------
+-- Every member gets a permanent running number, and an ID built from it:
+-- TLA-<faculty initial>-<batch>-<number>, e.g. TLA-E-22-0023 (no faculty: X).
+-- The number never changes; if the faculty or batch is corrected, the letters
+-- in front follow. Browsers can't choose either. Only admins can read them.
+alter table public.members add column if not exists membership_no integer unique;
+alter table public.members add column if not exists membership_id text unique;
+
+create sequence if not exists public.member_no_seq;
+
+create or replace function public.membership_id_of(p_faculty text, p_batch smallint, p_no integer)
+returns text
+language sql
+immutable
+as $$
+  select 'TLA-' || coalesce(nullif(upper(left(trim(p_faculty), 1)), ''), 'X') || '-' || p_batch || '-' || lpad(p_no::text, 4, '0');
+$$;
+
+create or replace function public.number_member()
+returns trigger
+language plpgsql security definer set search_path = public
+as $$
+begin
+  if tg_op = 'INSERT' then
+    new.membership_no := nextval('public.member_no_seq');
+  else
+    new.membership_no := old.membership_no;
+  end if;
+  new.membership_id := public.membership_id_of(new.faculty, new.batch, new.membership_no);
+  return new;
+end;
+$$;
+
+-- Members without a number yet (everyone, the first time) are numbered in
+-- batch, faculty, name order. Other triggers are off meanwhile so this isn't
+-- logged or counted as an edit.
+drop trigger if exists members_number on public.members;
+alter table public.members disable trigger user;
+with todo as (
+  select id, row_number() over (order by batch, faculty nulls last, name, id) as n
+  from public.members
+  where membership_no is null
+), top as (
+  select coalesce(max(membership_no), 0) as n from public.members
+)
+update public.members m
+set membership_no = top.n + todo.n
+from todo, top
+where m.id = todo.id;
+update public.members
+set membership_id = public.membership_id_of(faculty, batch, membership_no)
+where membership_id is distinct from public.membership_id_of(faculty, batch, membership_no);
+alter table public.members enable trigger user;
+
+select setval('public.member_no_seq', greatest((select max(membership_no) from public.members), 1), (select count(*) > 0 from public.members));
+
+create trigger members_number
+  before insert or update on public.members
+  for each row execute function public.number_member();
+
 -- ---- Activity log -----------------------------------------------------------------------
 create or replace function public.log_member_change()
 returns trigger
