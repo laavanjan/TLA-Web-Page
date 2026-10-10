@@ -1,6 +1,7 @@
 // /admin/members - the paid TLA members listed on /members. Search and filter
 // them the same way as the public page, add, view, edit or remove them, record
-// each member's fee and download a receipt for it.
+// each member's fee and download a receipt for it - one at a time, or for every
+// ticked member at once (fee recorded together, receipts as one ZIP of PDFs).
 // Main admins only (the database enforces it, see members_admin.sql).
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet";
@@ -19,16 +20,18 @@ import {
   FaCog,
   FaFilePdf,
   FaImage,
+  FaFileArchive,
 } from "react-icons/fa";
 
 import LotusDivider from "./LotusDivider";
 import { ago } from "../admin/activityText";
-import { drawReceipt, downloadReceiptPdf, downloadReceiptImage } from "../admin/memberReceipt";
+import { drawReceipt, downloadReceiptPdf, downloadReceiptImage, downloadReceiptsZip } from "../admin/memberReceipt";
 import {
   fetchMembers,
   addMember,
   updateMember,
   removeMember,
+  recordFees,
   blankMember,
   useMemberFilters,
   fetchReceiptConfig,
@@ -68,6 +71,8 @@ export default function AdminMembers() {
   const [receiptCfg, setReceiptCfg] = useState(DEFAULT_RECEIPT_CONFIG);
   const [feeFilter, setFeeFilter] = useState("");
   const [busyReceipt, setBusyReceipt] = useState(null); // id of the member whose receipt is being made
+  const [picked, setPicked] = useState(() => new Set()); // ticked member ids
+  const [zipProgress, setZipProgress] = useState(null); // "3 of 20" while the ZIP is made
   const f = useMemberFilters(rows, { allowAll: true });
 
   const load = useCallback(() => {
@@ -103,11 +108,33 @@ export default function AdminMembers() {
     [f.shown, feeFilter]
   );
 
-  const onSaved = (saved, isNew) => {
-    setRows((cur) => {
-      const rest = (cur || []).filter((r) => r.id !== saved.id);
-      return [...rest, saved].sort((a, b) => a.name.localeCompare(b.name));
+  // Bulk actions work on the ticked members that the filters still show.
+  const selected = useMemo(() => shown.filter((m) => picked.has(m.id)), [shown, picked]);
+  const selectedUnpaid = selected.filter((m) => !isPaid(m));
+  const selectedReady = selected.filter((m) => m.receipt_no);
+  const allPicked = shown.length > 0 && selected.length === shown.length;
+  const togglePick = (id) =>
+    setPicked((cur) => {
+      const next = new Set(cur);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
     });
+  const toggleAll = () =>
+    setPicked((cur) => {
+      const next = new Set(cur);
+      shown.forEach((m) => (allPicked ? next.delete(m.id) : next.add(m.id)));
+      return next;
+    });
+
+  const mergeRows = (saved) =>
+    setRows((cur) => {
+      const ids = new Set(saved.map((r) => r.id));
+      return [...(cur || []).filter((r) => !ids.has(r.id)), ...saved].sort((a, b) => a.name.localeCompare(b.name));
+    });
+
+  const onSaved = (saved, isNew) => {
+    mergeRows([saved]);
     setNotice(`${isNew ? "Added" : "Saved"} ${saved.name}.${saved.receipt_no ? ` Receipt ${saved.receipt_no} is ready.` : ""}`);
   };
 
@@ -138,11 +165,40 @@ export default function AdminMembers() {
     }
   };
 
+  const receiptsZip = async () => {
+    setError("");
+    setNotice("");
+    setZipProgress(`0 of ${selectedReady.length}`);
+    try {
+      const scope = f.active === ALL_BATCHES ? "all" : `batch-${f.active}`;
+      await downloadReceiptsZip(selectedReady, receiptCfg, `TLA-receipts-${scope}-${todayYmd()}.zip`, (done, of) =>
+        setZipProgress(`${done} of ${of}`)
+      );
+      const skipped = selected.length - selectedReady.length;
+      setNotice(
+        `Downloaded ${selectedReady.length} receipt${selectedReady.length === 1 ? "" : "s"} as a ZIP.` +
+          (skipped ? ` ${skipped} ticked member${skipped === 1 ? " has" : "s have"} no receipt yet, so left out.` : "")
+      );
+    } catch (err) {
+      setError(`Couldn't make the receipts: ${err.message || "unknown error"}`);
+    } finally {
+      setZipProgress(null);
+    }
+  };
+
   const exportCsv = () => {
-    const head = ["Name", "Batch", "Faculty", "Department", "District", "Fee", "Paid on", "Receipt no"];
+    const head = ["Membership ID", "Name", "Batch", "Faculty", "Department", "District", "Fee", "Paid on", "Receipt no"];
     const lines = [
       head,
-      ...shown.map((m) => [m.name, m.batch, ...MEMBER_FIELDS.map(([key]) => m[key]), m.fee_amount, m.paid_on, m.receipt_no]),
+      ...shown.map((m) => [
+        m.membership_id,
+        m.name,
+        m.batch,
+        ...MEMBER_FIELDS.map(([key]) => m[key]),
+        m.fee_amount,
+        m.paid_on,
+        m.receipt_no,
+      ]),
     ];
     const blob = new Blob(["\ufeff" + lines.map((l) => l.map(csvCell).join(",")).join("\r\n")], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -235,7 +291,7 @@ export default function AdminMembers() {
                     type="search"
                     value={f.query}
                     onChange={(e) => f.setQuery(e.target.value)}
-                    placeholder="Search name, faculty, department, district…"
+                    placeholder="Search name, membership ID, faculty, department, district…"
                   />
                 </label>
                 {MEMBER_FIELDS.map(([key, label]) => (
@@ -276,6 +332,34 @@ export default function AdminMembers() {
           {error && <p className="tj-savebar-msg is-err">{error}</p>}
           {notice && !error && <p className="tj-savebar-msg is-ok">{notice}</p>}
 
+          {selected.length > 0 && (
+            <div className="amb-bulkbar">
+              <span>
+                <b>{selected.length}</b> selected
+                <small>
+                  {selectedReady.length} with a receipt · {selectedUnpaid.length} without a fee
+                </small>
+              </span>
+              <div className="tj-head-actions">
+                <button type="button" className="tj-btn tj-btn-ghost" onClick={() => setPicked(new Set())} disabled={!!zipProgress}>
+                  Clear
+                </button>
+                <button
+                  type="button"
+                  className="tj-btn tj-btn-ghost"
+                  onClick={() => setDialog({ mode: "bulkFee", members: selectedUnpaid })}
+                  disabled={!selectedUnpaid.length || !!zipProgress}
+                  title={selectedUnpaid.length ? undefined : "Everyone selected already has a fee recorded"}
+                >
+                  <FaPen /> Record fee ({selectedUnpaid.length})
+                </button>
+                <button type="button" className="tj-btn" onClick={receiptsZip} disabled={!selectedReady.length || !!zipProgress}>
+                  <FaFileArchive /> {zipProgress ? `Preparing ${zipProgress}…` : `Download receipts ZIP (${selectedReady.length})`}
+                </button>
+              </div>
+            </div>
+          )}
+
           {rows && total === 0 && !error && <p className="tj-empty">No members yet. Add the first one above.</p>}
           {total > 0 && shown.length === 0 && <p className="tj-empty">No members match these filters.</p>}
 
@@ -284,8 +368,12 @@ export default function AdminMembers() {
               <table className="tj-table">
                 <thead>
                   <tr>
+                    <th className="amb-col-pick">
+                      <input type="checkbox" checked={allPicked} onChange={toggleAll} aria-label="Select every member shown" />
+                    </th>
                     <th className="tj-col-num">#</th>
                     <th>Name</th>
+                    <th>Membership ID</th>
                     <th>Batch</th>
                     <th>Faculty</th>
                     <th>Department</th>
@@ -296,13 +384,22 @@ export default function AdminMembers() {
                 </thead>
                 <tbody>
                   {shown.map((m, i) => (
-                    <tr key={m.id}>
+                    <tr key={m.id} className={picked.has(m.id) ? "is-picked" : undefined}>
+                      <td className="amb-col-pick">
+                        <input
+                          type="checkbox"
+                          checked={picked.has(m.id)}
+                          onChange={() => togglePick(m.id)}
+                          aria-label={`Select ${m.name}`}
+                        />
+                      </td>
                       <td className="tj-col-num">{i + 1}</td>
                       <td className="tj-col-name">
                         <button type="button" className="amb-name" onClick={() => setDialog({ mode: "view", member: m })}>
                           {m.name}
                         </button>
                       </td>
+                      <td className="amb-col-id">{m.membership_id || <span className="tj-dash">—</span>}</td>
                       <td>{m.batch}</td>
                       {MEMBER_FIELDS.map(([key]) => (
                         <td key={key} title={m[key] || ""}>
@@ -376,7 +473,25 @@ export default function AdminMembers() {
             aria-modal="true"
             aria-labelledby="amb-dialog-title"
           >
-            {dialog.mode === "settings" ? (
+            {dialog.mode === "bulkFee" ? (
+              <BulkFeeForm
+                members={dialog.members}
+                defaultFee={receiptCfg.default_fee}
+                onDone={({ saved, failed }) => {
+                  mergeRows(saved);
+                  setDialog(null);
+                  setNotice(
+                    `Recorded the fee for ${saved.length} member${saved.length === 1 ? "" : "s"}.` +
+                      (saved.length ? " Their receipts are ready - use Download receipts ZIP." : "")
+                  );
+                  if (failed.length)
+                    setError(
+                      `Recorded ${saved.length}, but couldn't record the fee for ${failed.map((x) => x.member.name).join(", ")}: ${failed[0].message}`
+                    );
+                }}
+                onClose={() => setDialog(null)}
+              />
+            ) : dialog.mode === "settings" ? (
               <ReceiptSettings
                 config={receiptCfg}
                 onSaved={(cfg) => {
@@ -475,6 +590,8 @@ function MemberView({ member: m, config, busy, onReceipt, onEdit, onDelete, onCl
           <small className="tj-muted">How the card looks on the members page</small>
         </div>
         <dl className="amb-details">
+          <dt>Membership ID</dt>
+          <dd>{m.membership_id || <span className="tj-dash">Given when members_admin.sql is run</span>}</dd>
           <dt>Batch</dt>
           <dd>{m.batch}</dd>
           {MEMBER_FIELDS.map(([key, label]) => (
@@ -696,6 +813,70 @@ function MemberForm({ member, rows, defaultFee, onSaved, onClose }) {
         )}
         <button type="submit" className="tj-btn" disabled={busy}>
           {busy ? "Saving…" : isNew ? "Add member" : "Save"}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+// One fee and date for every ticked member without a fee yet. Saved one by one
+// in the list's order, so receipt numbers run alphabetically.
+function BulkFeeForm({ members, defaultFee, onDone, onClose }) {
+  const [draft, setDraft] = useState({ fee_amount: defaultFee ?? "", paid_on: todayYmd() });
+  const [progress, setProgress] = useState(null);
+  const [error, setError] = useState("");
+  const set = (key) => (e) => setDraft((d) => ({ ...d, [key]: e.target.value }));
+  const busy = progress !== null;
+
+  return (
+    <form
+      className="amb-panel"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        setError("");
+        setProgress(`0 of ${members.length}`);
+        try {
+          onDone(await recordFees(members, draft, (done, of) => setProgress(`${done} of ${of}`)));
+        } catch (err) {
+          setError(err.message);
+          setProgress(null);
+        }
+      }}
+    >
+      <DialogHead
+        title={`Record fee for ${members.length} member${members.length === 1 ? "" : "s"}`}
+        onClose={busy ? () => {} : onClose}
+      />
+      <p className="tj-muted amb-bulk-names">{members.map((m) => `${m.name} (${m.batch})`).join(", ")}</p>
+      <div className="amb-grid">
+        <label className="tj-control">
+          <span className="tj-control-label">Amount paid (Rs.)</span>
+          <input
+            className="tj-input"
+            type="number"
+            inputMode="decimal"
+            min="0"
+            step="0.01"
+            value={draft.fee_amount ?? ""}
+            onChange={set("fee_amount")}
+            required
+          />
+        </label>
+        <label className="tj-control">
+          <span className="tj-control-label">Date paid</span>
+          <input className="tj-input" type="date" max={todayYmd()} value={draft.paid_on} onChange={set("paid_on")} required />
+        </label>
+      </div>
+      <small className="tj-muted">
+        Each member gets their own receipt number. Members who already have a fee recorded aren't in this list and aren't changed.
+      </small>
+      {error && <p className="tj-savebar-msg is-err">{error}</p>}
+      <div className="amb-actions">
+        <button type="button" className="tj-btn tj-btn-ghost" onClick={onClose} disabled={busy}>
+          Cancel
+        </button>
+        <button type="submit" className="tj-btn" disabled={busy}>
+          {busy ? `Saving ${progress}…` : `Record fee for ${members.length}`}
         </button>
       </div>
     </form>
