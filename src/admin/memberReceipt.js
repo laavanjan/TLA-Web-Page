@@ -277,8 +277,8 @@ function drawSignature(ctx, name, cx, baseline, maxWidth) {
 
 // ---- The receipt -------------------------------------------------------------------
 
-// member: { name, batch, faculty, department, fee_amount, paid_on, receipt_no,
-//           receipt_signer_name, receipt_signer_title }
+// member: { name, membership_id, batch, faculty, department, fee_amount, paid_on,
+//           receipt_no, receipt_signer_name, receipt_signer_title }
 // config: { treasurer_name, treasurer_title } - used when the receipt was
 //         issued before a treasurer was set.
 export async function drawReceipt(member, config = {}) {
@@ -370,7 +370,15 @@ export async function drawReceipt(member, config = {}) {
   const halfValueX = half + 290;
 
   const rows = [
-    { ta: "நன்றியுடன் பெற்றது", en: "Received with thanks from", value: member.name, size: 62 },
+    {
+      ta: "நன்றியுடன் பெற்றது",
+      en: "Received with thanks from",
+      value: member.name,
+      size: 62,
+      right: member.membership_id
+        ? { ta: "அங்கத்துவ இல.", en: "Membership ID", value: member.membership_id, size: 48, at: 1610, valueAt: 1880 }
+        : null,
+    },
     {
       ta: "தொகுதி",
       en: "Batch",
@@ -407,9 +415,11 @@ export async function drawReceipt(member, config = {}) {
     const y = top + i * step;
     label(r, left, y, valueX - left - 30);
     if (r.right) {
-      value(r, valueX, y, half - 60);
-      label(r.right, half, y, halfValueX - half - 24);
-      value(r.right, halfValueX, y, end);
+      const at = r.right.at || half;
+      const valueAt = r.right.valueAt || halfValueX;
+      value(r, valueX, y, at - 60);
+      label(r.right, at, y, valueAt - at - 24);
+      value(r.right, valueAt, y, end);
     } else {
       value(r, valueX, y, end);
     }
@@ -475,13 +485,37 @@ export async function drawReceipt(member, config = {}) {
 const fileName = (member, ext) =>
   `TLA-receipt-${member.receipt_no || "draft"}-${String(member.name).replace(/[^\w]+/g, "-").replace(/^-|-$/g, "")}.${ext}`;
 
-export async function downloadReceiptPdf(member, config) {
+async function receiptPdf(member, config) {
   const canvas = await drawReceipt(member, config);
   const { jsPDF } = await import("jspdf");
   const pdf = new jsPDF({ unit: "mm", format: "a5", orientation: "landscape" });
   pdf.setProperties({ title: `Membership fee receipt ${member.receipt_no || ""}`.trim(), author: "Tamil Literary Association" });
   pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", 0, 0, 210, 148);
-  pdf.save(fileName(member, "pdf"));
+  return pdf;
+}
+
+export async function downloadReceiptPdf(member, config) {
+  (await receiptPdf(member, config)).save(fileName(member, "pdf"));
+}
+
+// Every member's receipt as its own PDF, in one ZIP. The PDFs are mostly JPEG
+// already, so they're stored rather than compressed again.
+export async function downloadReceiptsZip(members, config, zipName, onProgress = () => {}) {
+  const { default: JSZip } = await import("jszip");
+  const zip = new JSZip();
+  for (let i = 0; i < members.length; i += 1) {
+    onProgress(i, members.length);
+    const pdf = await receiptPdf(members[i], config);
+    zip.file(fileName(members[i], "pdf"), pdf.output("arraybuffer"));
+  }
+  onProgress(members.length, members.length);
+  const blob = await zip.generateAsync({ type: "blob", compression: "STORE" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = zipName;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
 
 export async function downloadReceiptImage(member, config) {
