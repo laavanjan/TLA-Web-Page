@@ -33,6 +33,59 @@
   text-decoration: underline;
 }
 
+.amb-col-pick {
+  width: 1%;
+}
+
+.amb-col-pick input {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  accent-color: #e6b422;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.tj-table tbody tr.is-picked td {
+  background: rgba(230, 180, 34, 0.07);
+}
+
+/* Shown while members are ticked: what can be done to all of them at once. */
+.amb-bulkbar {
+  position: sticky;
+  top: 8px;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin: 12px 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(230, 180, 34, 0.45);
+  background: #1f1d18;
+  color: #f4f6fb;
+  font-size: 14px;
+}
+
+.amb-bulkbar small {
+  display: block;
+  color: #97a1b5;
+  font-size: 12.5px;
+}
+
+.amb-bulk-names {
+  max-height: 120px;
+  overflow-y: auto;
+  margin: 0 0 12px;
+}
+
+.tj-table .amb-col-id {
+  font-variant-numeric: tabular-nums;
+  color: #ffd76e;
+}
+
 .amb-tools {
   width: 1%;
   text-align: right;
