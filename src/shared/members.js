@@ -45,11 +45,13 @@ export const todayYmd = () => {
 export const formatRupees = (n) =>
   "Rs. " + Number(n).toLocaleString("en-LK", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-// The admin page also wants when each row was added / last changed and the
-// fee. Falls back to the public columns before members_admin.sql has been run.
+// The admin page also wants when each row was added / last changed, the fee
+// and the membership ID. Falls back to fewer columns while members_admin.sql
+// (or its latest version) hasn't been run.
 export async function fetchMembers({ admin = false } = {}) {
   const query = (columns) => supabase.from(TABLE).select(columns).order("name").range(0, 4999);
-  let { data, error } = await query(admin ? ADMIN_COLUMNS : COLUMNS);
+  let { data, error } = await query(admin ? ADMIN_COLUMNS + ",membership_id" : COLUMNS);
+  if (error && admin) ({ data, error } = await query(ADMIN_COLUMNS));
   if (error && admin) ({ data, error } = await query(COLUMNS + ",created_at"));
   if (error) throw new Error(error.message || "Couldn't load the members.");
   return data || [];
@@ -67,18 +69,17 @@ export function memberRow(draft) {
   MEMBER_FIELDS.forEach(([key]) => {
     row[key] = clean(draft[key]) || null;
   });
-  row.fee_amount = null;
-  row.paid_on = null;
-  if (draft.paid) {
-    const amount = Number(draft.fee_amount);
-    if (draft.fee_amount === "" || draft.fee_amount === null || !Number.isFinite(amount) || amount < 0 || amount > 99999999)
-      throw new Error("Enter the fee paid, e.g. 500.");
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(draft.paid_on || "")) throw new Error("Enter the date the fee was paid.");
-    if (draft.paid_on > todayYmd()) throw new Error("The date paid can't be in the future.");
-    row.fee_amount = Math.round(amount * 100) / 100;
-    row.paid_on = draft.paid_on;
-  }
-  return row;
+  return { ...row, ...(draft.paid ? feeRow(draft) : { fee_amount: null, paid_on: null }) };
+}
+
+// The fee part of the form: { fee_amount, paid_on }, checked.
+export function feeRow(draft) {
+  const amount = Number(draft.fee_amount);
+  if (draft.fee_amount === "" || draft.fee_amount === null || !Number.isFinite(amount) || amount < 0 || amount > 99999999)
+    throw new Error("Enter the fee paid, e.g. 500.");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(draft.paid_on || "")) throw new Error("Enter the date the fee was paid.");
+  if (draft.paid_on > todayYmd()) throw new Error("The date paid can't be in the future.");
+  return { fee_amount: Math.round(amount * 100) / 100, paid_on: draft.paid_on };
 }
 
 const NEEDS_MIGRATION = "Run supabase/migrations/members_admin.sql in Supabase first.";
@@ -102,6 +103,24 @@ export async function updateMember(id, draft) {
   const { data, error } = await supabase.from(TABLE).update(memberRow(draft)).eq("id", id).select().single();
   if (error) throw writeError(error);
   return data;
+}
+
+// Record the same fee for several members, one at a time in the order given so
+// their receipt numbers follow that order. Only touches the fee columns; the
+// database gives each its receipt number. Returns the saved rows and the ones
+// that failed.
+export async function recordFees(members, fee, onProgress = () => {}) {
+  const row = feeRow(fee);
+  const saved = [];
+  const failed = [];
+  for (let i = 0; i < members.length; i += 1) {
+    onProgress(i, members.length);
+    const { data, error } = await supabase.from(TABLE).update(row).eq("id", members[i].id).select().single();
+    if (error) failed.push({ member: members[i], message: writeError(error).message });
+    else saved.push(data);
+  }
+  onProgress(members.length, members.length);
+  return { saved, failed };
 }
 
 export async function removeMember(id) {
@@ -170,7 +189,7 @@ export function useMemberFilters(rows, { allowAll = false } = {}) {
       (r) =>
         MEMBER_FIELDS.every(([key]) => !filters[key] || r[key] === filters[key]) &&
         (!q ||
-          [r.name, r.faculty, r.department, r.district]
+          [r.name, r.membership_id, r.faculty, r.department, r.district]
             .filter(Boolean)
             .some((v) => v.toLowerCase().includes(q)))
     );
