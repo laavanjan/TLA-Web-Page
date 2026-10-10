@@ -2,6 +2,7 @@
 // is shaped by the browser), then saved as a PDF or a picture. A5 landscape at
 // 300 dpi. Everything printed comes from the member row (including who signed
 // it), so a receipt downloaded again later is identical.
+import signatureFontUrl from "@fontsource/mrs-saint-delafield/files/mrs-saint-delafield-latin-400-normal.woff2";
 import logoUrl from "../images/logo.png";
 import { formatRupees } from "../shared/members";
 
@@ -16,6 +17,7 @@ const GREY = "#6b6f76";
 const DOTS = "#c3c9d3";
 const CREAM = "#fbf5e8";
 const STAMP = "#1b7a4c";
+const INK = "#1c3f94"; // pen-blue signature
 
 // The site's own Tamil fonts (public/fonts). Heading has Latin letters too,
 // Para is Tamil only and draws small for its size, so `ta()` scales it up to
@@ -23,6 +25,7 @@ const STAMP = "#1b7a4c";
 const TAMIL_HEAD = '"TLA Receipt Heading", "Nirmala UI", "Latha", sans-serif';
 const TAMIL_BODY = '"TLA Receipt Para", "Nirmala UI", "Latha", sans-serif';
 const LATIN = '"Segoe UI", Roboto, "Helvetica Neue", Arial, "TLA Receipt Para", "Nirmala UI", sans-serif';
+const SIGNATURE = '"TLA Receipt Signature", "Segoe Script", cursive';
 const ta = (size) => Math.round(size * 1.45);
 
 let fontsReady = null;
@@ -32,6 +35,7 @@ function loadFonts() {
       [
         ["TLA Receipt Heading", "/fonts/Heading.ttf"],
         ["TLA Receipt Para", "/fonts/Para.ttf"],
+        ["TLA Receipt Signature", signatureFontUrl],
       ].map(([family, url]) =>
         new FontFace(family, `url(${url})`)
           .load()
@@ -261,6 +265,16 @@ function drawStamp(ctx, cx, cy, member) {
   ctx.restore();
 }
 
+// The signer's name written in a handwriting font, sitting on the signature
+// line with a slight upward slant, like a pen signature.
+function drawSignature(ctx, name, cx, baseline, maxWidth) {
+  ctx.save();
+  ctx.translate(cx, baseline);
+  ctx.rotate(-0.06);
+  text(ctx, name, 0, 0, { size: 150, family: SIGNATURE, color: INK, align: "center", maxWidth });
+  ctx.restore();
+}
+
 // ---- The receipt -------------------------------------------------------------------
 
 // member: { name, batch, faculty, department, fee_amount, paid_on, receipt_no,
@@ -428,6 +442,7 @@ export async function drawReceipt(member, config = {}) {
   const sigX = (sigL + sigR) / 2;
   const signer = (member.receipt_signer_name || config.treasurer_name || "").trim();
   const title = (member.receipt_signer_title || config.treasurer_title || "Treasurer").trim();
+  if (signer) drawSignature(ctx, signer, sigX, 1418, sigR - sigL - 80);
   rule(ctx, sigL, 1440, sigR, { color: NAVY, width: 3 });
   if (signer) text(ctx, signer, sigX, 1500, { size: 46, weight: "700", align: "center", maxWidth: sigR - sigL });
   runs(
