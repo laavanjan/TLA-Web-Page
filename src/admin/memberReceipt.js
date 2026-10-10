@@ -238,7 +238,7 @@ function drawStamp(ctx, cx, cy, member) {
   circle(g, c, c, 152);
   g.lineWidth = 3;
   circle(g, c, c, 108);
-  arcText(g, "TAMIL LITERARY ASSOCIATION", c, c, 130, "top", `700 19px ${LATIN}`, 2);
+  arcText(g, "THAMIZH LITERARY ASSOCIATION", c, c, 130, "top", `700 19px ${LATIN}`, 2);
   arcText(g, stampDate(member.paid_on), c, c, 130, "bottom", `700 23px ${LATIN}`, 4);
   g.textAlign = "center";
   g.textBaseline = "middle";
@@ -321,8 +321,8 @@ export async function drawReceipt(member, config = {}) {
   if (logo) ctx.drawImage(logo, 262 - 118, 196 - 114, 236, 236);
 
   text(ctx, "தமிழ் இலக்கிய மன்றம்", 452, 190, { size: 100, family: TAMIL_HEAD, color: "#ffffff", maxWidth: 1080 });
-  text(ctx, "Tamil Literary Association", 456, 266, { size: 54, weight: "700", color: GOLD_LIGHT });
-  text(ctx, "University of Moratuwa · Sri Lanka", 456, 328, { size: 38, color: MIST });
+  text(ctx, "Thamizh Literary Association", 456, 266, { size: 54, weight: "700", color: GOLD_LIGHT });
+  text(ctx, "University of Moratuwa, Sri Lanka", 456, 328, { size: 38, color: MIST });
 
   const right = W - 150;
   runs(
@@ -340,7 +340,7 @@ export async function drawReceipt(member, config = {}) {
     ctx,
     [
       { text: "திகதி", size: ta(26), family: TAMIL_BODY, color: GOLD_LIGHT, gap: 14 },
-      { text: "·  DATE PAID", size: 27, weight: "600", color: GOLD_LIGHT },
+      { text: "|  DATE PAID", size: 27, weight: "600", color: GOLD_LIGHT },
     ],
     right,
     292,
@@ -349,13 +349,13 @@ export async function drawReceipt(member, config = {}) {
   text(ctx, longDate(member.paid_on), right, 352, { size: 48, weight: "600", color: "#ffffff", align: "right" });
 
   // ---- Title
-  text(ctx, "அங்கத்துவக் கட்டணப் பற்றுச்சீட்டு", W / 2, 522, {
+  text(ctx, "வருடாந்த அங்கத்துவக் கட்டணப் பற்றுச்சீட்டு", W / 2, 522, {
     size: 80,
     family: TAMIL_HEAD,
     align: "center",
     maxWidth: W - 400,
   });
-  const titleWidth = spaced(ctx, "MEMBERSHIP FEE RECEIPT", W / 2, 594, { size: 40, spacing: 12 });
+  const titleWidth = spaced(ctx, "ANNUAL MEMBERSHIP FEE RECEIPT", W / 2, 594, { size: 40, spacing: 12 });
   const gapX = titleWidth / 2 + 46;
   rule(ctx, W / 2 - gapX - 230, 580, W / 2 - gapX, { width: 3 });
   rule(ctx, W / 2 + gapX, 580, W / 2 + gapX + 230, { width: 3 });
@@ -366,37 +366,22 @@ export async function drawReceipt(member, config = {}) {
   const left = 170;
   const valueX = 790;
   const end = W - 170;
-  const half = 1340; // where the right half of a split row starts
-  const halfValueX = half + 290;
+  const idX = 1610; // membership ID, to the right of the name
+  const idValueX = 1880;
 
   const rows = [
     {
-      ta: "நன்றியுடன் பெற்றது",
-      en: "Received with thanks from",
+      ta: "பெயர்",
+      en: "Name",
       value: member.name,
       size: 62,
       right: member.membership_id
-        ? { ta: "அங்கத்துவ இல.", en: "Membership ID", value: member.membership_id, size: 48, at: 1610, valueAt: 1880 }
+        ? { ta: "அங்கத்துவ இல.", en: "Membership ID", value: member.membership_id, size: 48 }
         : null,
     },
-    {
-      ta: "தொகுதி",
-      en: "Batch",
-      value: String(member.batch),
-      size: 54,
-      right: member.faculty ? { ta: "பீடம்", en: "Faculty", value: member.faculty, size: 50 } : null,
-    },
+    member.faculty && { ta: "பீடம்", en: "Faculty", value: member.faculty, size: 50 },
     member.department && { ta: "துறை", en: "Department", value: member.department, size: 50 },
     { ta: "தொகை (எழுத்தில்)", en: "Amount in words", value: rupeesInWords(member.fee_amount), size: 50 },
-    {
-      ta: "விடயம்",
-      en: "Being",
-      parts: [
-        { text: "Membership fee", size: 50, weight: "700", gap: 18 },
-        { text: "·", size: 50, weight: "700", color: GOLD, gap: 18 },
-        { text: "அங்கத்துவக் கட்டணம்", size: 58, family: TAMIL_BODY },
-      ],
-    },
   ].filter(Boolean);
 
   const label = (r, x, y, width) => {
@@ -404,22 +389,19 @@ export async function drawReceipt(member, config = {}) {
     text(ctx, r.en, x, y + 30, { size: 29, color: GREY, maxWidth: width });
   };
   const value = (r, x, y, lineEnd) => {
-    const parts = r.parts || [{ text: r.value, size: r.size, weight: "700" }];
-    runs(ctx, parts, x, y + 22, { maxWidth: lineEnd - x - 10 });
+    text(ctx, r.value, x, y + 22, { size: r.size, weight: "700", maxWidth: lineEnd - x - 10 });
     rule(ctx, x, y + 48, lineEnd, { color: DOTS, width: 3, dash: [3, 10] });
   };
 
   const top = 700;
-  const step = Math.min(132, (1210 - top) / Math.max(1, rows.length - 1));
+  const step = Math.min(150, (1210 - top) / Math.max(1, rows.length - 1));
   rows.forEach((r, i) => {
     const y = top + i * step;
     label(r, left, y, valueX - left - 30);
     if (r.right) {
-      const at = r.right.at || half;
-      const valueAt = r.right.valueAt || halfValueX;
-      value(r, valueX, y, at - 60);
-      label(r.right, at, y, valueAt - at - 24);
-      value(r.right, valueAt, y, end);
+      value(r, valueX, y, idX - 60);
+      label(r.right, idX, y, idValueX - idX - 24);
+      value(r.right, idValueX, y, end);
     } else {
       value(r, valueX, y, end);
     }
@@ -459,7 +441,7 @@ export async function drawReceipt(member, config = {}) {
     ctx,
     [
       { text: "பொருளாளர்", size: ta(28), family: TAMIL_BODY, color: GREY, gap: 14 },
-      { text: `·  ${title}`, size: 32, color: GREY },
+      { text: `|  ${title}`, size: 32, color: GREY },
     ],
     sigX,
     signer ? 1556 : 1500,
@@ -473,7 +455,7 @@ export async function drawReceipt(member, config = {}) {
   ctx.fillRect(0, H - 112, W, 112);
   text(
     ctx,
-    "Computer-generated receipt  ·  Tamil Literary Association, University of Moratuwa  ·  Membership can be checked at tlauom.com/members",
+    "Computer-generated receipt  ·  Thamizh Literary Association, University of Moratuwa  ·  Membership can be checked at tlauom.com/members",
     W / 2,
     H - 44,
     { size: 30, color: MIST, align: "center", maxWidth: W - 300 }
@@ -489,7 +471,7 @@ async function receiptPdf(member, config) {
   const canvas = await drawReceipt(member, config);
   const { jsPDF } = await import("jspdf");
   const pdf = new jsPDF({ unit: "mm", format: "a5", orientation: "landscape" });
-  pdf.setProperties({ title: `Membership fee receipt ${member.receipt_no || ""}`.trim(), author: "Tamil Literary Association" });
+  pdf.setProperties({ title: `Membership fee receipt ${member.receipt_no || ""}`.trim(), author: "Thamizh Literary Association" });
   pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", 0, 0, 210, 148);
   return pdf;
 }
