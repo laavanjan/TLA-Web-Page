@@ -54,7 +54,7 @@ create sequence if not exists public.member_receipt_seq;
 -- cleared if the fee is removed (recording it again then gives a new number).
 create or replace function public.number_member_receipt()
 returns trigger
-language plpgsql
+language plpgsql security definer set search_path = public
 as $$
 begin
   if tg_op = 'INSERT' then
