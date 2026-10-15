@@ -1,0 +1,289 @@
+/* Books tab of /admin/books (AdminBooksLibrary.js) - builds on Admin.css and
+   the .am-chip / .am-hint styles from AdminMaintenance.css. */
+
+.ab-actions {
+  margin-top: 14px;
+}
+
+.ab-actions .frame-btn,
+.ab-editor .frame-btn,
+.ab-source .admin-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ab-list {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ab-item {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ab-item.is-hidden .ab-cover img {
+  opacity: 0.35;
+  filter: grayscale(1);
+}
+
+.ab-num {
+  flex: 0 0 auto;
+  width: 24px;
+  text-align: center;
+  color: #a6b0c4;
+  font-size: 14px;
+}
+
+.ab-cover {
+  flex: 0 0 auto;
+  width: 64px;
+  aspect-ratio: 3 / 4;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #1c2433;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #5d6880;
+  font-size: 22px;
+}
+
+.ab-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ab-cover-lg {
+  width: 120px;
+  font-size: 34px;
+}
+
+.ab-body {
+  flex: 1 1 220px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ab-title {
+  color: #f3f5fa;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.ab-meta {
+  color: #a6b0c4;
+  font-size: 13px;
+}
+
+.ab-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  font-size: 12px;
+}
+
+.ab-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #c6cede;
+}
+
+.ab-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #ffd76e;
+  font-size: 12.5px;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.ab-link:hover {
+  text-decoration: underline;
+}
+
+.ab-link svg {
+  font-size: 10px;
+}
+
+.ab-btns {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.ab-btns .am-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ab-visibility {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.35);
+  color: #e7ebf3;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.ab-visibility.is-listed {
+  border-color: rgba(126, 224, 160, 0.5);
+  color: #9fe8b8;
+}
+
+.ab-visibility.is-hidden {
+  color: #a6b0c4;
+}
+
+.ab-visibility option {
+  background: #141a26;
+  color: #e7ebf3;
+}
+
+.ab-danger {
+  color: #ffb4b4;
+  border-color: rgba(255, 120, 120, 0.4);
+}
+
+/* ---- Add / edit form ---- */
+
+.ab-editor {
+  flex: 1 1 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(230, 180, 34, 0.35);
+}
+
+.ab-item .ab-editor {
+  margin-top: 4px;
+}
+
+.ab-editor-title {
+  margin: 0 0 4px;
+  color: #f3f5fa;
+  font-size: 16px;
+}
+
+.ab-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 14px;
+}
+
+.ab-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ab-wide {
+  grid-column: 1 / -1;
+}
+
+.ab-gap {
+  margin-top: 8px;
+}
+
+.ab-field select.admin-input {
+  cursor: pointer;
+}
+
+.ab-field select.admin-input option {
+  background: #141a26;
+}
+
+.ab-slug {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #a6b0c4;
+  font-size: 14px;
+}
+
+.ab-warn {
+  color: #ffcf7a;
+}
+
+.ab-source {
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.ab-upload-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+
+.ab-cover-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.ab-cover-actions {
+  flex: 1 1 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.ab-editor .admin-check-row {
+  margin-top: 2px;
+  align-items: flex-start;
+}
+
+.ab-editor .am-hint a {
+  color: #ffd76e;
+}
+
+.ab-editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+@media (max-width: 600px) {
+  .ab-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ab-btns {
+    width: 100%;
+  }
+}
