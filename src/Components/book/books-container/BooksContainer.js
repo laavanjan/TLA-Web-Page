@@ -1,103 +1,47 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./booksContainer.css";
 import { Container } from "@material-ui/core";
-import thamilaruvi26Cover from "../../../images/Books/tla-book-cover.webp";
+import { useListedBooks, coverUrl } from "../../../book/books";
 
-// Books added locally (no backend record) that open their own /books/:slug
-// viewer page — see src/Pages/booksData.js and src/Pages/BookViewer.js.
-const LOCAL_BOOKS = [
-    {
-        bookName: "தமிழருவி'26 இதழ்",
-        year: 2026,
-        img: thamilaruvi26Cover,
-        isTlaBook: true,
-        isAccept: true,
-        viewerPath: "/books/thamilaruvi26",
-    },
-];
-
+// The books come from the Supabase `books` table, managed at /admin/books
+// (see src/book/books.js). Each card opens the book's /books/:slug page.
 const BooksContainer = () => {
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(false);
-    const [books, setBooks] = useState([]);
+    const books = useListedBooks();
+    const loaded = books !== null;
 
-    useEffect(() => {
-        const fetchEvents = async () => {
-            try {
-                const response = await fetch('/api/books');
+    const tlaBooks = (books || []).filter(book => book.category === "tla");
+    const studentBooks = (books || []).filter(book => book.category === "student");
 
-                if (!response.ok) {
-                    throw new Error('Failed to fetch events');
-                }
-
-                const data = await response.json();
-                setBooks(data);
-            } catch (error) {
-                console.error('Error fetching events:', error);
-            }
-        };
-
-        fetchEvents();
-        setTimeout(() => {
-            setLoading(true);
-        }, 500);
-    }, []);
-
-    const handleOpen = (book) => {
-        if (book.viewerPath) {
-            navigate(book.viewerPath);
-        } else {
-            window.open(book.pdfUrl, '_blank');
-        }
-    };
-
-    const allBooks = [...books, ...LOCAL_BOOKS];
+    const card = (book, extra) => (
+        <div key={book.slug} className={loaded ? "book-card fade-in" : "book-card"} onClick={() => navigate(`/books/${book.slug}`)}>
+            <div className="book-img-wrap">
+                <img src={coverUrl(book)} alt={book.title} className="book-img" loading="lazy" />
+            </div>
+            <p className="book-name">{book.title}</p>
+            {extra}
+        </div>
+    );
 
     return (
         <Container className="books-container">
             <div className="book-sub-container">
                 <p className="sub-heading">தமிழ் இலக்கிய மன்றத்தின் வெளியீடுகள்</p>
-                <hr class="underline"></hr>
+                <hr className="underline"></hr>
                 <div className="books">
-                    {allBooks
-                        .filter(book => book.isTlaBook && book.isAccept)
-                        .sort((a, b) => a.year - b.year)
-                        .map((book, index) => {
-                            return (
-                                <div key={`${book.bookName}-${index}`} className={loading ? "book-card fade-in" : "book-card"} onClick={() => handleOpen(book)}>
-                                    <div className="book-img-wrap">
-                                        <img src={book.img} alt="book" className="book-img" />
-                                    </div>
-                                    <p className="book-name">{book.bookName}</p>
-                                    <p className="book-year">{book.year}</p>
-                                </div>
-                            )
-                        })
-                    }
+                    {tlaBooks.map(book => card(book, book.year ? <p className="book-year">{book.year}</p> : null))}
                 </div>
             </div>
-            <div className="book-sub-container">
-                <p className="sub-heading">பல்கலைக்கழக மாணவர்களின் வெளியீடுகள்</p>
-                <hr class="underline"></hr>
-                <div className="books">
-                    {books
-                        .filter(book => !book.isTlaBook && book.isAccept)
-                        .sort((a, b) => a.year - b.year)
-                        .map((book, index) => {
-                            return (
-                                <div key={`${book.bookName}-${index}`} className={loading ? "book-card fade-in" : "book-card"} onClick={() => handleOpen(book)}>
-                                    <div className="book-img-wrap">
-                                        <img src={book.img} alt="book" className="book-img" />
-                                    </div>
-                                    <p className="book-name">{book.bookName}</p>
-                                    <p className="book-author">{book.author}</p>
-                                </div>
-                            )
-                        })
-                    }
+            {studentBooks.length > 0 && (
+                <div className="book-sub-container">
+                    <p className="sub-heading">பல்கலைக்கழக மாணவர்களின் வெளியீடுகள்</p>
+                    <hr className="underline"></hr>
+                    <div className="books">
+                        {studentBooks.map(book => card(book, book.author ? <p className="book-author">{book.author}</p> : null))}
+                    </div>
                 </div>
-            </div>
+            )}
         </Container>
     )
 }
