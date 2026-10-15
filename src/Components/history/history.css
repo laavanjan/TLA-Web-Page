@@ -68,3 +68,9 @@ p {
         display: block;
     }
 }
+
+/* Thamizharuvi history video, at the top of the page under the title. */
+.history-video {
+    width: min(860px, 100%);
+    margin: 40px auto;
+}
