@@ -42,7 +42,10 @@
     --></head>
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
-        <div id="root"></div>
+        <div id="root">
+            <!-- For crawlers that read the raw HTML; React replaces this on load. -->
+            <h1 class="visually-hidden" style="position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">மொறட்டுவைப் பல்கலைக்கழக தமிழ் இலக்கிய மன்றம் (Tamil Literary Association, University of Moratuwa)</h1>
+        </div>
         <div id="loader">
             <div class="loader-img-cont">
                 <img src="/images/logo.png" alt="TLA" />
