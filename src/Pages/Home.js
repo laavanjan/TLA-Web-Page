@@ -37,6 +37,7 @@ function Home() {
                     content="TLA, Tamil Literary Association, moratuwa, uom, university of moratuwa, tamil, tamizharuvi"
                 />
             </Helmet>
+            <h1 className="visually-hidden">மொறட்டுவைப் பல்கலைக்கழக தமிழ் இலக்கிய மன்றம் (Tamil Literary Association, University of Moratuwa)</h1>
             <Landing />
             <Intro />
             <Event />
