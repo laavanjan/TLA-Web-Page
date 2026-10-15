@@ -1,15 +1,26 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
     Grid, Container
 } from '@mui/material'
 import './landing.css'
 import { useHomeWallpapers } from "../../../shared/wallpapers";
+import { useScrollVar, exitProgress } from "../../../shared/scrollFx/scrollFx";
 import Img from '../../../images/LandingPage/V01.png'
 const SLIDE_MS = 5000;
 
 function Landing() {
 
     const [isLoaded, setIsLoaded] = useState(false);
+
+    // --hero: 0 at the top, 1 once the hero has scrolled away (see homeFx.css).
+    const heroRef = useRef(null);
+    useScrollVar(heroRef, exitProgress, { name: "--hero", reduced: 0 });
+
+    const scrollOn = (e) => {
+        e.preventDefault();
+        const next = document.getElementById("intro");
+        if (next) next.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
 
     useEffect(() => {
       // Set a timeout to add the fade-in-active class after a short delay
@@ -67,7 +78,7 @@ function Landing() {
     };
 
     return (
-        <div className={"landing-container-div" + (count ? " has-wallpaper" : "")} id="landing">
+        <div ref={heroRef} className={"landing-container-div fx-hero" + (count ? " has-wallpaper" : "")} id="landing">
             {count > 0 && (
                 <div className="landing-slides">
                     {slide.prev !== null && slide.prev < count && slide.prev !== slide.cur && layer(slide.prev, slide)}
@@ -86,7 +97,7 @@ function Landing() {
                     justifyContent="space-between"
                     alignItems="center"
                 >
-                    <Grid item sm='6'>
+                    <Grid item sm='6' className="fx-hero-text">
                         <div className="landing-heading1"><span className="landing-heading-letter">தி</span>த்திக்கும் தமிழில் நித்திலம் சொரிய
                             எத்திக்கும் அதிர்ந்திட சங்கே முழங்கு!</div>
                     </Grid>
@@ -98,6 +109,10 @@ function Landing() {
                     </Grid>
                 </Grid>
             </Container>}
+            <div className="fx-hero-mist" aria-hidden="true" />
+            <a href="#intro" className="fx-cue" onClick={scrollOn} aria-label="கீழே தொடர">
+                <span />
+            </a>
         </div>
     );
 }
