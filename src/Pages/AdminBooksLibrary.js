@@ -167,7 +167,9 @@ export default function BooksLibrary() {
                 <div className="ab-body">
                   <strong className="ab-title">{r.title || "(untitled)"}</strong>
                   <span className="ab-meta">
-                    {[categoryLabel(r.category), r.year, r.author].filter(Boolean).join(" · ")}
+                    {[categoryLabel(r.category), r.year, r.author, r.page_count ? `${r.page_count} pages` : ""]
+                      .filter(Boolean)
+                      .join(" · ")}
                   </span>
                   <span className="ab-tags">
                     <span className="ab-tag">
@@ -282,7 +284,7 @@ function BookEditor({ initial, sortOrder = 0, onSaved, onCancel }) {
     }
     try {
       const up = await upload(file, "pdf");
-      set({ pdf_url: up.url, pdf_public_id: up.publicId });
+      set({ pdf_url: up.url, pdf_public_id: up.publicId, page_count: up.pages || 0 });
       setPdfName(`${file.name} · ${formatBytes(up.bytes || file.size)}`);
     } catch (err) {
       const big = file.size > BIG_PDF ? ` This PDF is ${formatBytes(file.size)} - for big books use a Google Drive link instead.` : "";
@@ -328,7 +330,7 @@ function BookEditor({ initial, sortOrder = 0, onSaved, onCancel }) {
     try {
       const body =
         draft.source === "drive"
-          ? { ...draft, drive_file_id: driveId, pdf_url: "", pdf_public_id: "" }
+          ? { ...draft, drive_file_id: driveId, pdf_url: "", pdf_public_id: "", page_count: 0 }
           : { ...draft, drive_file_id: "" };
       const saved = await saveBook(initial ? { ...body, id: initial.id } : body, sortOrder);
       const keep = [saved.pdf_public_id, saved.cover_public_id];
