@@ -235,6 +235,7 @@ import Modal from "../../../Components/Modal";
 import Login from "../../../Components/Login";
 import Signup from "../../../Components/Signup";
 import { useAuth } from "../../../providers/AuthProvider";
+import { useScrolledPast } from "../../../shared/scrollFx/scrollFx";
 
 const drawerWidth = 240;
 
@@ -251,6 +252,8 @@ function Navbar(props) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showModal, setModal] = useState(undefined);
   const auth = useAuth();
+  // Once the page moves, the bar turns frosted and a little slimmer (navbar.css).
+  const scrolled = useScrolledPast(24);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -295,7 +298,7 @@ function Navbar(props) {
 
   return (
     <Box sx={{ display: "flex", height: "64px" }} className="navbar-container">
-      <AppBar component="nav" className="appBar">
+      <AppBar component="nav" className={`appBar ${scrolled ? "is-scrolled" : ""}`}>
         <Container maxWidth="xl">
           <Toolbar sx={{ height: "64px" }}>
             <IconButton
