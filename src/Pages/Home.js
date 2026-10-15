@@ -8,6 +8,8 @@ import MembersBanner from '../Components/Home/Event/MembersBanner'
 import Gallery from '../Components/Home/Gallery/gallery'
 import Timeline from '../Components/Home/Timeline/Timeline'
 import Contact from '../Components/Home/Contact/contact'
+import LotusProgress from '../Components/Home/LotusProgress'
+import '../Components/Home/homeFx.css'
 import { Helmet } from 'react-helmet'
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -47,6 +49,7 @@ function Home() {
             <div id="contact">
                 <Contact />
             </div>
+            <LotusProgress />
         </>)
 }
 export default Home
