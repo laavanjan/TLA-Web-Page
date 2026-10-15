@@ -3,6 +3,7 @@ import "./contact.css";
 import { FaEnvelope, FaFacebook, FaYoutube, FaPhoneAlt, FaUser, FaPaperPlane, FaTag, FaCommentDots, FaInstagram } from "react-icons/fa";
 import emailjs from "@emailjs/browser";
 import { fetchContactConfig, getCachedContactConfig } from "../../../shared/contactConfig";
+import Reveal from "../../../shared/Reveal/Reveal";
 
 function Contact() {
     const [formData, setFormData] = useState({
@@ -76,16 +77,17 @@ function Contact() {
         <div className="contact-section" id="contact">
             <div className="contact-inner">
 
-                <div className="contact-heading-wrap">
+                {/* Each block fades up into view, like the History page (shared/Reveal). */}
+                <Reveal className="contact-heading-wrap">
                     <div className="contact-kicker">தொடர்புகள்</div>
                     <h2 className="contact-main-heading">எங்களை தொடர்பு கொள்ளுங்கள்</h2>
                     <p className="contact-sub">கேள்விகள், அனுசரணை, அல்லது ஆர்வத்துக்கு நாங்கள் இங்கே இருக்கிறோம்</p>
-                </div>
+                </Reveal>
 
                 <div className="cf-layout-grid">
 
                     {/* Form */}
-                    <div className="contact-form-card">
+                    <Reveal className="contact-form-card" style={{ transitionDelay: "120ms" }}>
                         <form onSubmit={handleSubmit} noValidate>
 
                             <div className="cf-row">
@@ -148,12 +150,12 @@ function Contact() {
                             </div>
 
                         </form>
-                    </div>
+                    </Reveal>
 
                     {/* Info panel */}
                     <div className="contact-info-panel">
 
-                        <div className="contact-info-card">
+                        <Reveal className="contact-info-card" style={{ transitionDelay: "240ms" }}>
                             <p className="contact-info-card-title">தொடர்பு விவரங்கள்</p>
 
                             <a className="contact-info-item" href={`mailto:${contactCfg.email}`}>
@@ -174,9 +176,9 @@ function Contact() {
                                     </span>
                                 </div>
                             </div>
-                        </div>
+                        </Reveal>
 
-                        <div className="contact-social-card">
+                        <Reveal className="contact-social-card" style={{ transitionDelay: "360ms" }}>
                             <p className="contact-social-title">சமூக ஊடகங்கள்</p>
                             <div className="contact-social-row">
                                 <button className="contact-social-btn" onClick={() => goSocial(contactCfg.facebookUrl)}>
@@ -192,7 +194,7 @@ function Contact() {
                                     இன்ஸ்டாகிராம்
                                 </button>
                             </div>
-                        </div>
+                        </Reveal>
 
                     </div>
                 </div>
