@@ -1,5 +1,6 @@
-// Signs Cloudinary uploads and deletes for the team-page admin (/admin/teams)
-// and the event-page admin (/admin/events).
+// Signs Cloudinary uploads and deletes for the team-page admin (/admin/teams),
+// the event-page admin (/admin/events), the home page wallpapers and the books
+// admin (/admin/books).
 //
 // The Cloudinary API secret lives only here (as a Supabase secret). The
 // browser asks this function for a short-lived signature, then uploads the
@@ -9,6 +10,7 @@
 //   POST { action: "sign",   eventId: "ppl", count: 3 }     (event page photos)
 //     -> { cloudName, uploads: [{ apiKey, timestamp, signature, params }, …] }
 //   POST { action: "sign",   wallpapers: true, count: 1 } (home page wallpapers, main admins only)
+//   POST { action: "sign",   books: true, kind: "pdf" | "cover", count: 1 } (book PDFs / covers, main admins only)
 //   POST { action: "delete", publicIds: ["tla/teams/1/abc…", "tla/events/ppl/abc…", …] }
 //     -> { deleted: [...], failed: [...] }
 //
@@ -31,14 +33,19 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const ROOT = "tla/teams";
 const EVENT_ROOT = "tla/events";
 const WALLPAPER_ROOT = "tla/wallpapers";
+const BOOK_ROOT = "tla/books";
 const MAX_SIGN = 30; // signatures per request
 const MAX_DELETE = 60; // public ids per request
 const ALLOWED_FORMATS = "jpg,jpeg,png,webp,gif,avif,heic,heif";
+// Book PDFs go up as Cloudinary "image" assets so the first page can be
+// turned into a cover picture (pg_1).
+const PDF_FORMATS = "pdf";
 // Only ever delete what this feature uploaded: tla/teams/<teamId>/<random id>
 // or tla/events/<eventId>/<random id>.
 const TEAM_ID_RE = /^tla\/teams\/(\d{1,3})\/[A-Za-z0-9_-]{8,64}$/;
 const EVENT_ID_RE = /^tla\/events\/([a-z0-9][a-z0-9-]{0,48})\/[A-Za-z0-9_-]{8,64}$/;
 const WALLPAPER_ID_RE = /^tla\/wallpapers\/[A-Za-z0-9_-]{8,64}$/;
+const BOOK_ID_RE = /^tla\/books\/[A-Za-z0-9_-]{8,64}$/;
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,48}$/;
 
 const CORS = {
@@ -124,7 +131,13 @@ async function signUploads(who: Access, body: Record<string, unknown>) {
   // A team page upload names a teamId, an event page upload an eventId.
   let folder: string;
   let tag: string;
-  if (body.wallpapers === true) {
+  let formats = ALLOWED_FORMATS;
+  if (body.books === true) {
+    if (!who.isAdmin) return json({ error: "Only main admins can add books." }, 403);
+    folder = BOOK_ROOT;
+    tag = "tla-books";
+    if (body.kind === "pdf") formats = PDF_FORMATS;
+  } else if (body.wallpapers === true) {
     if (!who.isAdmin) return json({ error: "Only main admins can change the home page wallpapers." }, 403);
     folder = WALLPAPER_ROOT;
     tag = "tla-wallpapers";
@@ -150,7 +163,7 @@ async function signUploads(who: Access, body: Record<string, unknown>) {
       // create that single file inside this team's / event's folder.
       const params = {
         public_id: `${folder}/${randomId()}`,
-        allowed_formats: ALLOWED_FORMATS,
+        allowed_formats: formats,
         tags: tag,
         timestamp,
       };
