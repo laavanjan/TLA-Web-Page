@@ -16,6 +16,21 @@
   background: #fff;
 }
 
+.book-viewer-loading {
+  background: linear-gradient(100deg, #1c2433 30%, #263149 50%, #1c2433 70%);
+  background-size: 300% 100%;
+  animation: book-viewer-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes book-viewer-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
 .book-viewer-wrap .frame-actions a.frame-btn {
   text-decoration: none;
   display: inline-flex;
