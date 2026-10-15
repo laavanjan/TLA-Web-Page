@@ -36,6 +36,7 @@ import { fetchContactConfig } from "../shared/contactConfig";
 import { fetchWallpapers } from "../shared/wallpapers";
 import { fetchSiteStatus, isMaintenanceOn, formatReopen } from "../shared/siteStatus";
 import { fetchBookConfig, isSubmissionOpen } from "../book/bookConfig";
+import { fetchBooks } from "../book/books";
 import { DESIGNS } from "../assets/frame/designs";
 import { supabase } from "../helpers/supabaseClient";
 import "./Frame.css";
@@ -83,6 +84,9 @@ function useDashboardData(admin) {
       fetchBookConfig()
         .then((c) => set("book", c))
         .catch(() => set("book", null));
+      fetchBooks()
+        .then((list) => set("books", list))
+        .catch(() => set("books", null));
       fetchContactConfig()
         .then((c) => set("contact", c))
         .catch(() => set("contact", null));
@@ -129,11 +133,13 @@ function Status({ value }) {
   );
 }
 
-function bookStatus(book) {
-  if (book === undefined) return LOADING;
-  if (!book) return null;
-  if (!isSubmissionOpen(book)) return { tone: "off", text: "Closed" };
-  return { tone: "ok", text: book.deadline ? `Open · closes ${shortDate(book.deadline)}` : "Open · no deadline" };
+function bookStatus(book, books) {
+  if (book === undefined || books === undefined) return LOADING;
+  const count = books ? `${books.length} book${books.length === 1 ? "" : "s"}` : "";
+  if (!book) return count ? { tone: "info", text: count } : null;
+  const prefix = count ? `${count} · ` : "";
+  if (!isSubmissionOpen(book)) return { tone: "off", text: `${prefix}submissions closed` };
+  return { tone: "ok", text: `${prefix}submissions open${book.deadline ? ` · closes ${shortDate(book.deadline)}` : ""}` };
 }
 
 function joinStatus(apps, joinOpen) {
@@ -550,9 +556,9 @@ export default function Admin() {
                       to="/admin/books"
                       icon={FaBookOpen}
                       tone="amber"
-                      title="Book submissions"
-                      desc="Open or close submissions, deadline and form options."
-                      status={bookStatus(data.book)}
+                      title="Books"
+                      desc="Add books as a PDF or Drive link, and run book submissions."
+                      status={bookStatus(data.book, data.books)}
                       index={n++}
                     />
                     <Card
