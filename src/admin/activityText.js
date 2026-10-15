@@ -16,6 +16,7 @@ import {
   FaLockOpen,
   FaImages,
   FaIdCard,
+  FaBookOpen,
 } from "react-icons/fa";
 
 export const ACTIONS = {
@@ -34,6 +35,11 @@ export const ACTIONS = {
   wallpaper_removed: { icon: FaTrash, verb: "deleted a home page wallpaper", group: "site" },
   wallpaper_hidden: { icon: FaImages, verb: "hid a home page wallpaper", group: "site" },
   wallpaper_shown: { icon: FaImages, verb: "showed a home page wallpaper again", group: "site" },
+  book_added: { icon: FaBookOpen, verb: "added the book", group: "site" },
+  book_updated: { icon: FaBookOpen, verb: "edited the book", group: "site" },
+  book_removed: { icon: FaTrash, verb: "deleted the book", group: "site" },
+  book_hidden: { icon: FaEyeSlash, verb: "hid the book", group: "site" },
+  book_shown: { icon: FaEye, verb: "showed the book again", group: "site" },
   member_added: { icon: FaIdCard, verb: "added the member", group: "members" },
   member_updated: { icon: FaIdCard, verb: "edited the member", group: "members" },
   member_removed: { icon: FaTrash, verb: "removed the member", group: "members" },
@@ -60,6 +66,7 @@ export function activityObject(e, teamTitle, eventTitle = (id) => id) {
   if (e.action === "event_publish" || e.action === "event_removed") return eventTitle((e.details || {}).event_id);
   if (e.action === "event_layout") return "";
   if (e.action.startsWith("member_")) return (e.details || {}).name || "";
+  if (e.action.startsWith("book_")) return (e.details || {}).title || "";
   if (e.target_email && e.action !== "password_changed") return e.target_email;
   return "";
 }
