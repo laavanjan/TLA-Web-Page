@@ -32,7 +32,7 @@ export async function signUploads(scope, count, { kind } = {}) {
 
 export const signatureFresh = (s) => Date.now() - s.fetchedAt < SIGNATURE_TTL_MS;
 
-// -> Promise<{ url, publicId, width, height, bytes, format }>
+// -> Promise<{ url, publicId, width, height, bytes, format, pages }> (pages: PDFs only)
 export function uploadSigned(blob, signed, { onProgress, signal, filename = "image" } = {}) {
   return new Promise((resolve, reject) => {
     const form = new FormData();
@@ -61,6 +61,7 @@ export function uploadSigned(blob, signed, { onProgress, signal, filename = "ima
           height: body.height || 0,
           bytes: body.bytes || blob.size,
           format: body.format || "",
+          pages: body.pages || 0,
         });
       } else {
         reject(new Error((body && body.error && body.error.message) || `Upload failed (HTTP ${xhr.status}).`));
