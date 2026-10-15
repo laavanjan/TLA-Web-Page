@@ -9,6 +9,7 @@
   position: relative;
   width: 100%;
   display: flex;
+  touch-action: manipulation;
   flex-direction: column;
   align-items: center;
   gap: 18px;
