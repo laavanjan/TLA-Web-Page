@@ -240,6 +240,11 @@
   gap: 11px;
 }
 
+.bk :focus-visible {
+  outline: 2px solid var(--bk-gold-soft);
+  outline-offset: 4px;
+}
+
 .bk-eyebrow {
   display: inline-flex;
   align-items: center;
