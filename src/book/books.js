@@ -10,9 +10,11 @@ import { supabase } from "../helpers/supabaseClient";
 import { deleteImages } from "../shared/cloudinaryUpload";
 
 const TABLE = "books";
-const COLUMNS =
-  "id, slug, title, author, year, category, description, source, drive_file_id, pdf_url, pdf_public_id, doc_link, cover_url, cover_public_id, visibility, sort_order, created_at, updated_at";
+// "*" rather than a column list, so a column added by a later books.sql (e.g.
+// page_count) never breaks reading before the SQL has been run.
+const COLUMNS = "*";
 const LS_KEY = "tla_books_v1";
+const PAGES_KEY = "tla_book_pages_v1";
 
 export const CATEGORIES = [
   ["tla", "TLA publication"],
@@ -81,6 +83,7 @@ export function normalizeBook(r) {
     doc_link: str(o.doc_link),
     cover_url: str(o.cover_url),
     cover_public_id: str(o.cover_public_id),
+    page_count: Number.isInteger(Number(o.page_count)) && Number(o.page_count) > 0 ? Number(o.page_count) : 0,
     visibility: VISIBILITIES.some(([v]) => v === o.visibility) ? o.visibility : "listed",
     sort_order: Number.isFinite(Number(o.sort_order)) ? Number(o.sort_order) : 0,
     created_at: o.created_at || null,
@@ -118,6 +121,11 @@ export function docDownloadUrl(b) {
   if (id) return `https://drive.google.com/uc?export=download&id=${id}`;
   return isHttp(link) ? link : null;
 }
+
+// Page `n` (1-based) of an uploaded PDF as a picture, `width` pixels wide.
+// Cloudinary draws it from the PDF on first request and caches it after.
+export const pdfPageImage = (b, n, width) =>
+  cloudinaryVariant(b.pdf_url, `pg_${n},w_${width},c_limit,q_auto,f_auto`).replace(/\.pdf$/i, ".jpg");
 
 // The cover picture, or the PDF's first page when there isn't one.
 export function coverUrl(b) {
@@ -243,6 +251,76 @@ export function useBook(slug) {
   return book;
 }
 
+// How many pages an uploaded PDF has -> 0 while unknown. Saved on upload;
+// for books uploaded before that, asks Cloudinary (a page past the end fails
+// to load) and remembers the answer in this browser.
+function pageExists(b, n) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = pdfPageImage(b, n, 8);
+  });
+}
+
+async function probePageCount(b) {
+  if (!(await pageExists(b, 1))) return 0;
+  let lo = 1; // known to exist
+  let hi = 2;
+  while (hi <= 4096 && (await pageExists(b, hi))) {
+    lo = hi;
+    hi *= 2;
+  }
+  while (hi - lo > 1) {
+    const mid = Math.floor((lo + hi) / 2);
+    if (await pageExists(b, mid)) lo = mid;
+    else hi = mid;
+  }
+  return lo;
+}
+
+function readPages() {
+  try {
+    return JSON.parse(localStorage.getItem(PAGES_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
+export function usePageCount(book) {
+  const key = book && book.source === "upload" ? book.pdf_url : "";
+  const saved = book ? book.page_count : 0;
+  const [count, setCount] = useState(() => saved || (key && readPages()[key]) || 0);
+
+  useEffect(() => {
+    if (!key) return undefined;
+    if (saved) {
+      setCount(saved);
+      return undefined;
+    }
+    const known = readPages()[key];
+    if (known) {
+      setCount(known);
+      return undefined;
+    }
+    let alive = true;
+    probePageCount({ pdf_url: key }).then((n) => {
+      if (!alive || !n) return;
+      setCount(n);
+      try {
+        localStorage.setItem(PAGES_KEY, JSON.stringify({ ...readPages(), [key]: n }));
+      } catch {
+        /* ignore */
+      }
+    });
+    return () => {
+      alive = false;
+    };
+  }, [key, saved]);
+
+  return count;
+}
+
 // ---- Writing (main admins) -----------------------------------------------------------------
 
 const EDITABLE = [
@@ -259,6 +337,7 @@ const EDITABLE = [
   "doc_link",
   "cover_url",
   "cover_public_id",
+  "page_count",
   "visibility",
 ];
 
@@ -279,10 +358,15 @@ export async function saveBook(book, sortOrder) {
   EDITABLE.forEach((k) => {
     body[k] = typeof clean[k] === "string" ? clean[k].trim() : clean[k];
   });
-  const query = book.id
-    ? supabase.from(TABLE).update(body).eq("id", book.id)
-    : supabase.from(TABLE).insert({ ...body, sort_order: sortOrder });
-  const { data, error } = await query.select(COLUMNS);
+  const write = (b) =>
+    (book.id ? supabase.from(TABLE).update(b).eq("id", book.id) : supabase.from(TABLE).insert({ ...b, sort_order: sortOrder })).select(COLUMNS);
+  let { data, error } = await write(body);
+  if (error && error.code === "PGRST204" && /page_count/.test(error.message || "")) {
+    // books.sql's page_count column not added yet - save without it.
+    const rest = { ...body };
+    delete rest.page_count;
+    ({ data, error } = await write(rest));
+  }
   if (error) throw saveError(error);
   needRow(data);
   return normalizeBook(data[0]);
