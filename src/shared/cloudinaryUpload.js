@@ -11,16 +11,21 @@ const callFn = (body) => callEdgeFunction(FN, body);
 
 // Pass this as `scope` for the home page wallpapers (main admins only).
 export const WALLPAPER_SCOPE = "@wallpapers";
+// ...and this for book PDFs and covers (main admins only); say which with `kind`.
+export const BOOK_SCOPE = "@books";
+
+const scopeBody = (scope, kind) => {
+  if (scope === WALLPAPER_SCOPE) return { wallpapers: true };
+  if (scope === BOOK_SCOPE) return { books: true, kind };
+  return typeof scope === "string" ? { eventId: scope } : { teamId: scope };
+};
 
 // `scope` is a team id (number) for team pages or an event id (string, e.g.
 // "thaipongal") for event pages; uploads land in that team's / event's folder.
+// For BOOK_SCOPE, `kind` is "pdf" (the book itself) or "cover" (a picture).
 // -> [{ cloudName, apiKey, signature, params, fetchedAt }]
-export async function signUploads(scope, count) {
-  const data = await callFn({
-    action: "sign",
-    ...(scope === WALLPAPER_SCOPE ? { wallpapers: true } : typeof scope === "string" ? { eventId: scope } : { teamId: scope }),
-    count,
-  });
+export async function signUploads(scope, count, { kind } = {}) {
+  const data = await callFn({ action: "sign", ...scopeBody(scope, kind), count });
   const fetchedAt = Date.now();
   return data.uploads.map((u) => ({ ...u, cloudName: data.cloudName, fetchedAt }));
 }
