@@ -109,3 +109,8 @@ values
    'தமிழ் இலக்கிய மன்றம் — TLA 26 நூல். Read and download the TLA 26 book.',
    'drive', '1tVvDgXaQXHyEvBQOUYnu5O0oIjpdZDbS', '', '', 'unlisted', 1)
 on conflict (slug) do nothing;
+
+-- ---- Page count (added later; safe to re-run) ---------------------------------------------
+-- How many pages an uploaded PDF has (Cloudinary reports it on upload); the
+-- book page uses it for the page-turning reader. 0 = not known yet.
+alter table public.books add column if not exists page_count integer not null default 0;
