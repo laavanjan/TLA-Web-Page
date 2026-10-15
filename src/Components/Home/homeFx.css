@@ -137,15 +137,18 @@
   transform: translate(-50%, -50%) rotate(calc(var(--k) * -40deg));
 }
 
-/* each line is drawn from its start once --k passes its own --d */
+/* each line is drawn from its start once --k passes its own --d.
+   --t (how much of it is drawn) is kept in its own variable: the build's CSS
+   minifier can't parse a clamp() nested inside calc(). */
 .fx-kolam .k-lines path {
+  --t: clamp(0, calc((var(--k) - var(--d)) * 5), 1);
   fill: none;
   stroke: currentColor;
   stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-dasharray: 1px 1px;
-  stroke-dashoffset: calc((1 - clamp(0, (var(--k) - var(--d)) * 5, 1)) * 1px);
+  stroke-dashoffset: calc(1px - var(--t) * 1px);
 }
 
 /* the pulli (dots) pop in after the lines around them */
@@ -153,7 +156,7 @@
   fill: rgba(200, 147, 47, 0.6);
   transform-box: fill-box;
   transform-origin: center;
-  transform: scale(clamp(0, (var(--k) - var(--d)) * 8, 1));
+  transform: scale(clamp(0, calc((var(--k) - var(--d)) * 8), 1));
 }
 
 @media (max-width: 700px) {
