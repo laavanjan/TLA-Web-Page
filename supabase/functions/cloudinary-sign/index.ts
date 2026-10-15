@@ -191,11 +191,13 @@ async function destroy(publicId: string) {
 async function deleteImages(who: Access, publicIds: unknown) {
   if (!Array.isArray(publicIds) || publicIds.length === 0) return json({ deleted: [], failed: [] });
   if (publicIds.length > MAX_DELETE) return json({ error: `At most ${MAX_DELETE} images per request.` }, 400);
-  const bad = publicIds.filter((p) => typeof p !== "string" || !(TEAM_ID_RE.test(p) || EVENT_ID_RE.test(p) || WALLPAPER_ID_RE.test(p)));
-  if (bad.length) return json({ error: "Refusing to delete images outside tla/teams/, tla/events/ and tla/wallpapers/.", bad }, 400);
+  const bad = publicIds.filter(
+    (p) => typeof p !== "string" || !(TEAM_ID_RE.test(p) || EVENT_ID_RE.test(p) || WALLPAPER_ID_RE.test(p) || BOOK_ID_RE.test(p))
+  );
+  if (bad.length) return json({ error: "Refusing to delete images outside tla/teams/, tla/events/, tla/wallpapers/ and tla/books/.", bad }, 400);
   // tla/teams/<teamId>/… or tla/events/<eventId>/… - the third path segment says whose it is.
   const mine = (p: string) =>
-    p.startsWith("tla/wallpapers/")
+    p.startsWith("tla/wallpapers/") || p.startsWith("tla/books/")
       ? who.isAdmin
       : p.startsWith("tla/teams/") ? who.canEdit(Number(p.split("/")[2])) : who.canEditEvent(p.split("/")[2]);
   const notYours = publicIds.filter((p) => !mine(p as string));
