@@ -8,3 +8,10 @@
     opacity: 1;
     transform: translateY(0);
 }
+
+@media (prefers-reduced-motion: reduce) {
+    .reveal {
+        transition: none;
+        transform: none;
+    }
+}
