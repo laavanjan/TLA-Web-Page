@@ -5,16 +5,11 @@ import { Link, useParams } from "react-router-dom";
 import LotusDivider from "./LotusDivider";
 import "./Frame.css";
 import "./BookViewer.css";
-import { BOOKS } from "./booksData";
+import { useBook, pdfViewUrl, pdfDownloadUrl, docDownloadUrl } from "../book/books";
 
-const drivePreviewUrl = (fileId) =>
-  `https://drive.google.com/file/d/${fileId}/preview`;
-const driveDownloadUrl = (fileId) =>
-  `https://drive.google.com/uc?export=download&id=${fileId}`;
-// Native Google Docs (as opposed to a file uploaded to Drive) are fetched
-// through the export endpoint, not the uc?export=download one.
-const docsExportUrl = (fileId, format) =>
-  `https://docs.google.com/document/d/${fileId}/export?format=${format}`;
+// Touch screens (phones, tablets) can't show a PDF inside a page.
+const isTouch = () =>
+  typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
 
 const DownloadIcon = () => (
   <svg
@@ -36,7 +31,22 @@ const DownloadIcon = () => (
 
 export default function BookViewer() {
   const { slug } = useParams();
-  const book = BOOKS[slug];
+  const book = useBook(slug);
+
+  if (book === undefined) {
+    return (
+      <div className="frame-page">
+        <header className="frame-topbar">
+          <span className="frame-brand">தமிழ் இலக்கிய மன்றம்</span>
+          <LotusDivider />
+          <span className="frame-subtitle">நூல்</span>
+        </header>
+        <div className="book-viewer-wrap">
+          <div className="book-viewer-iframe book-viewer-loading" aria-label="Loading" />
+        </div>
+      </div>
+    );
+  }
 
   if (!book) {
     return (
@@ -57,23 +67,23 @@ export default function BookViewer() {
     );
   }
 
-  const pdfPreviewUrl = drivePreviewUrl(book.pdfFileId);
-  const pdfDownloadUrl = driveDownloadUrl(book.pdfFileId);
-  const docDownloadUrl = book.docFileId
-    ? docsExportUrl(book.docFileId, "docx")
-    : null;
+  const subtitle = `${book.title} · நூல்`;
+  const description = book.description || `தமிழ் இலக்கிய மன்றம் — ${book.title} நூல்.`;
+  const pdfPreviewUrl = pdfViewUrl(book, { phone: isTouch() });
+  const pdfDownload = pdfDownloadUrl(book);
+  const docDownload = docDownloadUrl(book);
 
   return (
     <div className="frame-page">
       <Helmet>
         <title>{book.title} - நூல் | தமிழ் இலக்கிய மன்றம்</title>
-        <meta name="description" content={book.description} />
+        <meta name="description" content={description} />
       </Helmet>
 
       <header className="frame-topbar">
         <span className="frame-brand">தமிழ் இலக்கிய மன்றம்</span>
         <LotusDivider />
-        <span className="frame-subtitle">{book.subtitle}</span>
+        <span className="frame-subtitle">{subtitle}</span>
       </header>
 
       <div className="book-viewer-wrap">
@@ -86,7 +96,7 @@ export default function BookViewer() {
 
         <div className="frame-actions">
           <a
-            href={pdfDownloadUrl}
+            href={pdfDownload}
             className="frame-btn frame-btn-primary"
             target="_blank"
             rel="noopener noreferrer"
@@ -94,9 +104,9 @@ export default function BookViewer() {
             <DownloadIcon />
             PDF பதிவிறக்க
           </a>
-          {docDownloadUrl && (
+          {docDownload && (
             <a
-              href={docDownloadUrl}
+              href={docDownload}
               className="frame-btn frame-btn-ghost"
               target="_blank"
               rel="noopener noreferrer"
