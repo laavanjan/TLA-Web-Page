@@ -22,3 +22,28 @@
     border-bottom: 3px solid #022345;
     transition: 0.5s !important;
 }
+/* Once the page has moved (useScrolledPast in navbar.js): frosted, slimmer. */
+.appBar {
+    transition: background-color 0.35s ease, box-shadow 0.35s ease !important;
+}
+
+.appBar.is-scrolled {
+    background: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: saturate(1.5) blur(14px);
+    -webkit-backdrop-filter: saturate(1.5) blur(14px);
+    box-shadow: 0 8px 28px rgba(2, 35, 69, 0.1) !important;
+}
+
+.appBar .MuiToolbar-root,
+.appBar .MuiToolbar-root img {
+    transition: height 0.35s ease, min-height 0.35s ease;
+}
+
+.appBar.is-scrolled .MuiToolbar-root {
+    height: 56px !important;
+    min-height: 56px !important;
+}
+
+.appBar.is-scrolled .MuiToolbar-root img {
+    height: 42px;
+}
