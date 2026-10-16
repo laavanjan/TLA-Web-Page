@@ -29,10 +29,10 @@ function Home() {
     return (
         <>
             <Helmet>
-                <title>தமிழ் இலக்கிய மன்றம்</title>
+                <title>தமிழ் இலக்கிய மன்றம் | Tamil Literary Association, University of Moratuwa</title>
                 <meta
                     name="description"
-                    content="மொறட்டுவை தமிழ் இலக்கியமன்றமானது தமிழ் மாணாக்கர் தம் ஆளுமை விருத்தி மற்றும் தமிழ் மக்கள் சார் வளர்ச்சிக்காக அயராது உதவிக் கரங்களை நீட்டும் ஒரு பல்கலைகழக குழுமமாகும்"
+                    content="Tamil Literary Association (TLA) of the University of Moratuwa, Sri Lanka — organisers of Tamilaruvi, the Sorkanai debate series and community help projects. மொறட்டுவைப் பல்கலைக்கழக தமிழ் இலக்கிய மன்றம்."
                 />
                 <meta
                     name="keywords"
