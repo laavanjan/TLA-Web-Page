@@ -11,6 +11,9 @@ import {
   normalizeFaq,
   normalizeLink,
   newFaqId,
+  inLanguage,
+  catLabel,
+  faqContext,
 } from "./faqs";
 
 describe("built-in questions (the fallback, and what faq.sql seeds)", () => {
@@ -47,6 +50,51 @@ describe("built-in questions (the fallback, and what faq.sql seeds)", () => {
       .filter(Boolean)
       .map((m) => m[1]);
     expect(seeded).toEqual(BUILT_IN_FAQS.map((f) => f.id));
+  });
+});
+
+describe("English mode", () => {
+  test("every built-in question, topic and link has English", () => {
+    BUILT_IN_FAQS.forEach((f) => {
+      expect(f.q_en.trim()).not.toBe("");
+      expect(f.a_en.trim()).not.toBe("");
+      f.links.forEach((l) => expect((l.label_en || "").trim()).not.toBe(""));
+      expect(unknownTokens([f.a_en, ...f.links.map((l) => l.label_en)].join(" "))).toEqual([]);
+    });
+    FAQ_CATEGORIES.forEach((c) => expect(catLabel(c.id, "en")).not.toBe(c.label));
+  });
+
+  test("Tamil mode shows the Tamil", () => {
+    const f = BUILT_IN_FAQS[0];
+    expect(inLanguage(f, "ta")).toMatchObject({ q: f.q, a: f.a, english: false });
+  });
+
+  test("a question's own English is used", () => {
+    const f = normalizeFaq({ id: "x-1", q: "கே", a: "ப", q_en: "Q", a_en: "A", links: [{ label: "இ", label_en: "Link", to: "/" }] });
+    expect(inLanguage(f, "en")).toMatchObject({ q: "Q", a: "A", english: true });
+    expect(inLanguage(f, "en").links[0].text).toBe("Link");
+  });
+
+  test("a stored copy without English borrows the built-in English while its Tamil is unchanged", () => {
+    const base = BUILT_IN_FAQS.find((f) => f.id === "sotkanai");
+    const row = normalizeFaq({ ...base, q_en: "", a_en: "", links: base.links.map(({ label, to, href }) => ({ label, to, href })) });
+    expect(inLanguage(row, "en")).toMatchObject({ q: base.q_en, a: base.a_en, english: true });
+    expect(inLanguage(row, "en").links[0].text).toBe(base.links[0].label_en);
+  });
+
+  test("once the Tamil is edited, an old English copy isn't borrowed - the Tamil is shown", () => {
+    const base = BUILT_IN_FAQS.find((f) => f.id === "sotkanai");
+    const row = normalizeFaq({ ...base, a: base.a + " (புதிய தகவல்)", q_en: "", a_en: "" });
+    expect(inLanguage(row, "en")).toMatchObject({ q: row.q, a: row.a, english: false });
+  });
+
+  test("{members} has an English fallback", () => {
+    expect(faqContext({ phoneNumber: "1" }, "", "en").members).toBe("Hundreds of");
+    expect(faqContext({ phoneNumber: "1" }, "821", "en").members).toBe("821");
+  });
+
+  test("a link keeps its English label", () => {
+    expect(normalizeLink({ label: "A", label_en: "B", to: "/x" })).toEqual({ label: "A", label_en: "B", to: "/x" });
   });
 });
 
