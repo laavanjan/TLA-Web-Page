@@ -1,27 +1,407 @@
-.footer-container {
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    /* margin-top: 30px; */
+/* Site footer (footer.js). Classes only, no bare p / h tags: the site has
+   global `p` and `h1`-`h3` rules that would leak in. */
+
+.ft {
+  --ft-navy: #04182f;
+  --ft-navy-2: #021024;
+  --ft-gold: #e6b422;
+  --ft-gold-soft: #ffd76e;
+  --ft-ink: #e9eef7;
+  --ft-muted: #9fb0c8;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  color: var(--ft-ink);
+  background: linear-gradient(180deg, var(--ft-navy) 0%, var(--ft-navy-2) 100%);
+  font-family: "Mukta Malar", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Nirmala UI", sans-serif;
+  letter-spacing: normal;
+  -webkit-font-smoothing: antialiased;
 }
 
-.footer-text{
-    background-color: #DFE5E8;
+/* a row of gold pulli (kolam dots) along the top edge */
+.ft::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background:
+    radial-gradient(circle at 6px 2px, rgba(255, 215, 110, 0.85) 1.6px, transparent 2.2px) 0 0 / 14px 4px repeat-x,
+    linear-gradient(90deg, transparent, rgba(230, 180, 34, 0.5), transparent) 0 3px / 100% 1px no-repeat;
+  z-index: 2;
+}
+
+.ft-glow {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 80% at 0% 0%, rgba(230, 180, 34, 0.12), transparent 60%),
+    radial-gradient(50% 70% at 100% 100%, rgba(64, 120, 200, 0.12), transparent 60%);
+}
+
+/* the kolam from the home page, faint, in the corner, drawing itself (--k) */
+.ft .fx-kolam {
+  display: block;
+  position: absolute;
+  top: auto;
+  left: auto;
+  right: -170px;
+  bottom: -230px;
+  z-index: -1;
+  width: 640px;
+  height: 640px;
+  color: rgba(255, 215, 110, 0.12);
+  transform: rotate(calc(var(--k, 1) * 30deg));
+  pointer-events: none;
+}
+
+.ft .fx-kolam path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+}
+
+.ft .fx-kolam .k-dots circle {
+  fill: rgba(255, 215, 110, 0.32);
+}
+
+/* ---- Columns ---- */
+
+.ft-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 64px 24px 44px;
+  display: grid;
+  grid-template-columns: minmax(260px, 1.6fr) minmax(140px, 1fr) minmax(140px, 1fr) minmax(240px, 1.3fr);
+  gap: 40px 48px;
+}
+
+.ft-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.ft .ft-logo-row,
+.ft .ft-logo-row:hover {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.ft-logo {
+  flex: 0 0 auto;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  padding: 4px;
+  background: linear-gradient(135deg, #ffe596, #e6b422 60%, #b8860b);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.ft-logo img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: contain;
+  background: #fff;
+  display: block;
+}
+
+.ft-name-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ft-name {
+  font-family: "Heading", serif;
+  font-size: 26px;
+  line-height: 1.2;
+  background: linear-gradient(90deg, #fff3cf, #ffd76e 60%, #e6b422);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.ft-uni {
+  font-size: 13.5px;
+  color: var(--ft-muted);
+}
+
+.ft-about {
+  max-width: 380px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #c8d3e3;
+}
+
+.ft-motto {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ft-gold-soft);
+}
+
+.ft-social {
+  display: flex;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.ft .ft-social-btn,
+.ft .ft-social-btn:hover {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 215, 110, 0.3);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ft-ink);
+  font-size: 16px;
+  text-decoration: none;
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.ft .ft-social-btn:hover {
+  transform: translateY(-3px);
+  background: linear-gradient(135deg, #ffe596, #e6b422);
+  border-color: transparent;
+  color: #04182f;
+}
+
+.ft-col ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.ft-col li {
+  margin: 0;
+}
+
+.ft-head {
+  display: block;
+  margin-bottom: 18px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+.ft-head::after {
+  content: "";
+  display: block;
+  width: 28px;
+  height: 2px;
+  margin-top: 10px;
+  border-radius: 2px;
+  background: var(--ft-gold);
+}
+
+.ft .ft-link,
+.ft .ft-link:hover {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ft-muted);
+  font-size: 15px;
+  line-height: 1.4;
+  text-decoration: none;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.ft .ft-link:hover {
+  color: var(--ft-gold-soft);
+  transform: translateX(3px);
+}
+
+.ft-detail {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--ft-muted);
+  font-size: 14.5px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.ft-detail svg {
+  flex: 0 0 auto;
+  margin-top: 4px;
+  color: var(--ft-gold);
+  font-size: 13px;
+}
+
+.ft-detail small {
+  color: #7d8ea8;
+  font-size: 13px;
+}
+
+.ft .ft-contact .ft-link:hover {
+  transform: none;
+}
+
+.ft-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.ft .ft-btn,
+.ft .ft-btn:hover {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 215, 110, 0.35);
+  background: transparent;
+  color: var(--ft-ink);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.ft .ft-btn:hover {
+  transform: translateY(-2px);
+  border-color: var(--ft-gold-soft);
+  background: rgba(230, 180, 34, 0.1);
+}
+
+.ft .ft-btn.is-primary,
+.ft .ft-btn.is-primary:hover {
+  border-color: transparent;
+  background: linear-gradient(135deg, #ffe596, #e6b422 60%, #c9960f);
+  color: #04182f;
+  box-shadow: 0 10px 24px rgba(230, 180, 34, 0.25);
+}
+
+/* ---- Bottom bar ---- */
+
+.ft-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.ft-bottom-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
+
+.ft-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 13.5px;
+  color: var(--ft-muted);
+}
+
+.ft-copy-en {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 12.5px;
+  color: #7d8ea8;
+  letter-spacing: 0.3px;
+}
+
+.ft-top {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ft-ink);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.ft-top:hover {
+  border-color: var(--ft-gold-soft);
+  color: var(--ft-gold-soft);
+}
+
+.ft-top svg {
+  font-size: 11px;
+}
+
+.ft a:focus-visible,
+.ft button:focus-visible {
+  outline: 2px solid var(--ft-gold-soft);
+  outline-offset: 3px;
+}
+
+/* ---- Narrower screens ---- */
+
+@media (max-width: 1000px) {
+  .ft-inner {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ft-brand,
+  .ft-contact {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 600px) {
+  .ft-inner {
+    padding: 48px 20px 32px;
+    gap: 32px 20px;
+  }
+
+  .ft-name {
+    font-size: 22px;
+  }
+
+  .ft .fx-kolam {
+    width: 460px;
+    height: 460px;
+    right: -180px;
+    bottom: -170px;
+  }
+
+  .ft-bottom-inner {
+    flex-direction: column;
+    align-items: center;
     text-align: center;
-    padding: 10px 30px;
-    font-family: "Heading";
-    color:#002146;
-    font-size: 16px;
-    word-spacing: normal;
-    font-weight: 500;
+    /* room for the floating உதவி button in the corner */
+    padding-bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+
+  .ft-copy {
+    align-items: center;
+  }
 }
 
-/* English name: the "Heading" font has no proper Latin glyphs. */
-.footer-text-en {
-    margin-top: 4px;
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-    font-size: 13px;
-    font-weight: 400;
-    letter-spacing: 0.3px;
-    color: #4a5d73;
+@media (prefers-reduced-motion: reduce) {
+  .ft .ft-link,
+  .ft .ft-btn,
+  .ft .ft-social-btn {
+    transition: none;
+  }
 }
