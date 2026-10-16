@@ -35,6 +35,7 @@ import AdminTeams from "./Pages/AdminTeams";
 import AdminEvents from "./Pages/AdminEvents";
 import AdminMaintenance from "./Pages/AdminMaintenance";
 import AdminWallpapers from "./Pages/AdminWallpapers";
+import AdminFaq from "./Pages/AdminFaq";
 import AdminMembers from "./Pages/AdminMembers";
 import AdminLogin from "./Pages/AdminLogin";
 import RequireAdmin from "./Pages/RequireAdmin";
@@ -216,6 +217,14 @@ function Router() {
       element: (
         <RequireAdmin>
           <AdminWallpapers />
+        </RequireAdmin>
+      ),
+    },
+    {
+      path: "admin/faq",
+      element: (
+        <RequireAdmin>
+          <AdminFaq />
         </RequireAdmin>
       ),
     },
