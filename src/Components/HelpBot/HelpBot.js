@@ -4,7 +4,7 @@
 // chat reply, with links to the right page and related questions to try next.
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { FaCommentDots, FaTimes, FaSearch, FaRedoAlt, FaArrowRight, FaExternalLinkAlt, FaChevronUp, FaChevronRight } from "react-icons/fa";
+import { FaTimes, FaSearch, FaRedoAlt, FaArrowRight, FaExternalLinkAlt, FaChevronUp, FaChevronRight } from "react-icons/fa";
 import {
   useFaqs,
   useFaqContext,
@@ -153,8 +153,13 @@ export default function HelpBot() {
         aria-label="TLA உதவி - கேள்விகளுக்குப் பதில்கள்"
         aria-expanded={open}
       >
-        <FaCommentDots />
-        <span className="hb-launcher-label">உதவி</span>
+        <span className="hb-launcher-icon" aria-hidden="true">
+          த<i className="hb-online" />
+        </span>
+        <span className="hb-launcher-text">
+          <span className="hb-launcher-label">உதவி</span>
+          <span className="hb-launcher-hint">கேள்விகள் &amp; பதில்கள்</span>
+        </span>
       </button>
 
       {open && (

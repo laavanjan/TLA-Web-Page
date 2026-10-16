@@ -24,21 +24,46 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  height: 54px;
-  padding: 0 20px 0 18px;
-  border: 0;
+  height: 56px;
+  padding: 0 22px 0 7px;
+  border: 1px solid rgba(255, 215, 110, 0.45);
   border-radius: 999px;
-  background: linear-gradient(135deg, var(--hb-navy-2), var(--hb-navy));
+  background: linear-gradient(135deg, #0b3a6b, var(--hb-navy) 60%);
   color: #fff;
-  font-size: 20px;
   cursor: pointer;
-  box-shadow: 0 12px 30px rgba(2, 35, 69, 0.35), 0 0 0 3px rgba(255, 215, 110, 0.35);
+  box-shadow: 0 10px 28px rgba(2, 35, 69, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.12);
   transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+/* A soft gold ring pulses a few times to draw the eye, then stops. */
+.hb-launcher::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  box-shadow: 0 0 0 0 rgba(255, 215, 110, 0.55);
+  animation: hb-pulse 2.4s ease-out 1s 3;
+  pointer-events: none;
+}
+
+@keyframes hb-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 215, 110, 0.55);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 12px rgba(255, 215, 110, 0);
+  }
 }
 
 .hb-launcher:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 36px rgba(2, 35, 69, 0.42), 0 0 0 3px rgba(255, 215, 110, 0.6);
+  box-shadow: 0 14px 34px rgba(2, 35, 69, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.hb-launcher:focus-visible {
+  outline: 2px solid var(--hb-gold-soft);
+  outline-offset: 3px;
 }
 
 .hb-launcher.is-hidden {
@@ -47,9 +72,46 @@
   transform: scale(0.8);
 }
 
+/* Gold "த" coin, the same as the panel header's avatar. */
+.hb-launcher-icon {
+  position: relative;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ffe596, #e6b422);
+  color: var(--hb-navy);
+  font-family: "Heading", serif;
+  font-size: 21px;
+  font-weight: 700;
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.25s ease;
+}
+
+.hb-launcher:hover .hb-launcher-icon {
+  transform: rotate(-8deg) scale(1.05);
+}
+
+.hb-launcher-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.15;
+}
+
 .hb-launcher-label {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 800;
+}
+
+.hb-launcher-hint {
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 /* ---- Panel ---- */
@@ -531,7 +593,17 @@
     left: 14px;
     bottom: calc(14px + env(safe-area-inset-bottom));
     height: 50px;
-    padding: 0 16px;
+    padding: 0 18px 0 6px;
+  }
+
+  .hb-launcher-icon {
+    width: 38px;
+    height: 38px;
+    font-size: 19px;
+  }
+
+  .hb-launcher-hint {
+    display: none;
   }
 
   .hb-panel {
@@ -549,6 +621,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .hb-launcher::after,
   .hb-panel,
   .hb-bubble,
   .hb-typing i {
