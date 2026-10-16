@@ -14,6 +14,14 @@ import {
   POPULAR_IDS as POPULAR,
   NOT_FOUND_ID,
 } from "../../shared/faq/faqs";
+// Mukta Malar's Tamil, made for screens and bundled with the site (Windows'
+// built-in Tamil font is thin and uneven at chat sizes). Only its Tamil part is
+// loaded: English and numbers fall through to the system UI font, which sits
+// better beside it. Browsers fetch only the weights a page actually uses.
+import "@fontsource/mukta-malar/tamil-400.css";
+import "@fontsource/mukta-malar/tamil-500.css";
+import "@fontsource/mukta-malar/tamil-600.css";
+import "@fontsource/mukta-malar/tamil-700.css";
 import "./helpBot.css";
 
 const CATEGORIES = [{ id: "popular", label: "பிரபலமானவை" }, ...FAQ_CATEGORIES];
@@ -30,6 +38,41 @@ const norm = (s) =>
   String(s || "")
     .toLowerCase()
     .normalize("NFC");
+
+// An answer as short paragraphs and proper bullet lists (lines starting with
+// "•" or "-"), with "straight" quotes turned into “curly” ones.
+const BULLET = /^\s*[•\-–]\s+/;
+function formatAnswer(text) {
+  const blocks = [];
+  String(text)
+    .replace(/"([^"\n]+)"/g, "“$1”")
+    .split("\n")
+    .forEach((raw) => {
+      const line = raw.trim();
+      if (!line) return;
+      if (BULLET.test(line)) {
+        const last = blocks[blocks.length - 1];
+        const item = line.replace(BULLET, "");
+        if (last && last.list) last.items.push(item);
+        else blocks.push({ list: true, items: [item] });
+      } else {
+        blocks.push({ list: false, text: line });
+      }
+    });
+  return blocks.map((b, i) =>
+    b.list ? (
+      <ul key={i} className="hb-ul">
+        {b.items.map((item, k) => (
+          <li key={k}>{item}</li>
+        ))}
+      </ul>
+    ) : (
+      <div key={i} className="hb-para">
+        {b.text}
+      </div>
+    )
+  );
+}
 
 // Every typed word must appear in the question, its topic or its search words.
 function searchFaqs(faqs, query) {
@@ -199,7 +242,7 @@ export default function HelpBot() {
                   <div className="hb-msg is-bot">
                     {m.answered ? (
                       <div className="hb-bubble">
-                        <div className="hb-answer">{fill(f.a, ctx)}</div>
+                        <div className="hb-answer">{formatAnswer(fill(f.a, ctx))}</div>
                         {f.links && f.links.length > 0 && <div className="hb-links">{f.links.map(renderLink)}</div>}
                       </div>
                     ) : (

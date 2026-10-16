@@ -10,8 +10,14 @@
   --hb-ink: #1d2433;
   --hb-muted: #6b7385;
   --hb-line: rgba(2, 35, 69, 0.1);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Tamil", "Helvetica Neue", Arial, sans-serif;
+  /* Tamil from the bundled Mukta Malar (see HelpBot.js); English and numbers
+     from the system UI font. */
+  font-family: "Mukta Malar", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans Tamil", "Nirmala UI", sans-serif;
   letter-spacing: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-synthesis: none;
 }
 
 /* ---- Floating button (bottom-left, clear of the home page lotus) ---- */
@@ -103,8 +109,8 @@
 }
 
 .hb-launcher-label {
-  font-size: 16px;
-  font-weight: 800;
+  font-size: 17px;
+  font-weight: 700;
 }
 
 .hb-launcher-hint {
@@ -175,8 +181,9 @@
 }
 
 .hb-title {
-  font-size: 16px;
-  font-weight: 800;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 .hb-sub {
@@ -241,10 +248,10 @@
 
 .hb-bubble {
   max-width: 88%;
-  padding: 10px 14px;
+  padding: 11px 15px;
   border-radius: 16px;
-  font-size: 14.5px;
-  line-height: 1.65;
+  font-size: 15.5px;
+  line-height: 1.6;
   animation: hb-pop 0.2s ease-out;
 }
 
@@ -265,11 +272,43 @@
 .hb-msg.is-user .hb-bubble {
   background: var(--hb-navy);
   color: #fff;
+  font-weight: 500;
   border-bottom-right-radius: 4px;
 }
 
-.hb-answer {
-  white-space: pre-line;
+/* Answers: short paragraphs and gold-dot bullet lists with a hanging indent. */
+.hb-answer > * + * {
+  margin-top: 8px;
+}
+
+.hb-para {
+  margin: 0;
+}
+
+.hb-ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hb-ul li {
+  position: relative;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.hb-ul li::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0.72em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--hb-gold);
 }
 
 .hb-links {
@@ -289,8 +328,8 @@
   border: 1px solid rgba(200, 147, 47, 0.45);
   background: rgba(255, 215, 110, 0.14);
   color: #7a5410;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 13.5px;
+  font-weight: 600;
   text-decoration: none;
 }
 
@@ -346,7 +385,7 @@
 }
 
 .hb-related > span {
-  font-size: 12px;
+  font-size: 12.5px;
   color: var(--hb-muted);
   font-weight: 600;
 }
@@ -359,9 +398,10 @@
   background: transparent;
   color: var(--hb-navy);
   font-family: inherit;
-  font-size: 13.5px;
+  font-size: 14.5px;
+  font-weight: 500;
   text-align: left;
-  line-height: 1.5;
+  line-height: 1.45;
   cursor: pointer;
 }
 
@@ -435,7 +475,7 @@
   background: transparent;
   color: var(--hb-ink);
   font-family: inherit;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .hb-search input::placeholder {
@@ -469,7 +509,7 @@
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   color: var(--hb-navy);
   font-family: inherit;
-  font-size: 12.5px;
+  font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
@@ -526,7 +566,8 @@
   background: #fff;
   color: var(--hb-ink);
   font-family: inherit;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 500;
   line-height: 1.45;
   text-align: left;
   cursor: pointer;
