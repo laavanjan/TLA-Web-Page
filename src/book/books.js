@@ -3,8 +3,8 @@
 //
 // A book's PDF is either a Google Drive file (`source: "drive"`, opened through
 // Drive's own viewer) or a PDF uploaded to Cloudinary (`source: "upload"`). An
-// optional Word document is any Drive / Google Docs link. With no cover picture
-// the first page of the PDF is used.
+// optional Word document is any Drive / Google Docs link. The cover is the
+// PDF's first page unless the admin picked an uploaded picture (`cover_choice`).
 import { useEffect, useState } from "react";
 import { supabase } from "../helpers/supabaseClient";
 import { deleteImages } from "../shared/cloudinaryUpload";
@@ -83,6 +83,7 @@ export function normalizeBook(r) {
     doc_link: str(o.doc_link),
     cover_url: str(o.cover_url),
     cover_public_id: str(o.cover_public_id),
+    cover_choice: o.cover_choice === "upload" ? "upload" : "page",
     page_count: Number.isInteger(Number(o.page_count)) && Number(o.page_count) > 0 ? Number(o.page_count) : 0,
     visibility: VISIBILITIES.some(([v]) => v === o.visibility) ? o.visibility : "listed",
     sort_order: Number.isFinite(Number(o.sort_order)) ? Number(o.sort_order) : 0,
@@ -127,12 +128,43 @@ export function docDownloadUrl(b) {
 export const pdfPageImage = (b, n, width) =>
   cloudinaryVariant(b.pdf_url, `pg_${n},w_${width},c_limit,q_auto,f_auto`).replace(/\.pdf$/i, ".jpg");
 
-// The cover picture, or the PDF's first page when there isn't one.
-export function coverUrl(b) {
-  if (b.cover_url) return b.cover_url;
-  if (b.source === "upload" && b.pdf_url) return cloudinaryVariant(b.pdf_url, "pg_1,w_600,c_limit,q_auto").replace(/\.pdf$/i, ".jpg");
-  if (b.drive_file_id) return `https://drive.google.com/thumbnail?id=${b.drive_file_id}&sz=w600`;
+// The PDF's first page as a picture. A Drive thumbnail only loads while the
+// file is shared "Anyone with the link".
+function firstPageUrl(b, width) {
+  if (b.source === "upload" && b.pdf_url) return pdfPageImage(b, 1, width);
+  if (b.source !== "upload" && b.drive_file_id) return `https://drive.google.com/thumbnail?id=${b.drive_file_id}&sz=w${width}`;
   return "";
+}
+
+// The uploaded picture is used only when the admin chose it and it exists.
+export const usesFirstPage = (b) => !(b.cover_choice === "upload" && b.cover_url);
+
+// What the book shows as its cover: the PDF's first page or the uploaded
+// picture, whichever the admin chose (the other one when that is missing).
+export function coverUrl(b, width = 600) {
+  if (!usesFirstPage(b)) return b.cover_url;
+  return firstPageUrl(b, width) || b.cover_url;
+}
+
+// The other picture, tried when the chosen one fails to load (e.g. a Drive
+// file that isn't shared publicly). "" when there is none.
+export function coverFallback(b, width = 600) {
+  const main = coverUrl(b, width);
+  const other = usesFirstPage(b) ? b.cover_url : firstPageUrl(b, width);
+  return other && other !== main ? other : "";
+}
+
+// [src, onError] for a cover <img>: switches to coverFallback once if the
+// chosen picture can't be loaded.
+export function useCover(b, width = 600) {
+  const main = b ? coverUrl(b, width) : "";
+  const fallback = b ? coverFallback(b, width) : "";
+  const [failed, setFailed] = useState("");
+  const src = failed === main && fallback ? fallback : main;
+  const onError = () => {
+    if (failed !== main && fallback) setFailed(main);
+  };
+  return [src, onError];
 }
 
 // ---- Built-in fallback ---------------------------------------------------------------------
@@ -337,6 +369,7 @@ const EDITABLE = [
   "doc_link",
   "cover_url",
   "cover_public_id",
+  "cover_choice",
   "page_count",
   "visibility",
 ];
@@ -361,10 +394,14 @@ export async function saveBook(book, sortOrder) {
   const write = (b) =>
     (book.id ? supabase.from(TABLE).update(b).eq("id", book.id) : supabase.from(TABLE).insert({ ...b, sort_order: sortOrder })).select(COLUMNS);
   let { data, error } = await write(body);
-  if (error && error.code === "PGRST204" && /page_count/.test(error.message || "")) {
-    // books.sql's page_count column not added yet - save without it.
-    const rest = { ...body };
-    delete rest.page_count;
+  // A column from a later part of books.sql (page_count, cover_choice) that
+  // hasn't been added yet - save without it.
+  const rest = { ...body };
+  for (let tries = 0; tries < 2 && error && error.code === "PGRST204"; tries += 1) {
+    const msg = error.message || "";
+    const missing = ["page_count", "cover_choice"].find((k) => k in rest && msg.includes(k));
+    if (!missing) break;
+    delete rest[missing];
     ({ data, error } = await write(rest));
   }
   if (error) throw saveError(error);
