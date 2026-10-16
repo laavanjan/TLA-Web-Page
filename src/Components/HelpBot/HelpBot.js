@@ -2,6 +2,7 @@
 // No AI and no API keys: visitors choose a topic or search, tap a question,
 // and get the prepared answer (the `faqs` table, edited at /admin/faq) as a
 // chat reply, with links to the right page and related questions to try next.
+// A த | EN switch shows everything in Tamil or English (remembered per visitor).
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaTimes, FaSearch, FaRedoAlt, FaArrowRight, FaExternalLinkAlt, FaChevronUp, FaChevronRight } from "react-icons/fa";
@@ -9,6 +10,8 @@ import {
   useFaqs,
   useFaqContext,
   fillTokens as fill,
+  inLanguage,
+  catLabel,
   FAQ_CATEGORIES,
   BUILT_IN_FAQS,
   POPULAR_IDS as POPULAR,
@@ -24,12 +27,66 @@ import "@fontsource/mukta-malar/tamil-600.css";
 import "@fontsource/mukta-malar/tamil-700.css";
 import "./helpBot.css";
 
-const CATEGORIES = [{ id: "popular", label: "பிரபலமானவை" }, ...FAQ_CATEGORIES];
-const CAT_LABEL = Object.fromEntries(FAQ_CATEGORIES.map((c) => [c.id, c.label]));
+const CATEGORIES = [{ id: "popular" }, ...FAQ_CATEGORIES];
 // What "எம்மைத் தொடர்பு கொள்ள" answers when a search finds nothing; the
 // built-in copy if admins removed it.
 const BUILT_IN_NOT_FOUND = BUILT_IN_FAQS.find((f) => f.id === NOT_FOUND_ID);
 const TYPING_MS = 450;
+
+// Everything the assistant itself says, in both languages.
+const UI = {
+  ta: {
+    launcherAria: "TLA உதவி - கேள்விகளுக்குப் பதில்கள்",
+    label: "உதவி",
+    hint: "கேள்விகள் & பதில்கள்",
+    title: "TLA உதவி",
+    sub: "கேள்வியைத் தெரிவு செய்யுங்கள் · உடனே பதில்",
+    restart: "மீண்டும் தொடங்கு",
+    close: "மூடு",
+    greeting: "வணக்கம்! 🙏 தமிழ் இலக்கிய மன்றம் பற்றி அறிய விரும்புவதைக் கீழே தெரிவு செய்யுங்கள், அல்லது தேடுங்கள்.",
+    typing: "பதில் தயாராகிறது",
+    related: "தொடர்புடைய கேள்விகள்",
+    search: "கேள்வியைத் தேடுங்கள்… (எ.கா. சொற்கணை, join)",
+    searchAria: "கேள்வியைத் தேடுங்கள்",
+    topics: "தலைப்புகள்",
+    popular: "பிரபலமானவை",
+    more: "மேலும் கேள்விகள்",
+    none: "பொருத்தமான கேள்வி இல்லை.",
+    contactUs: "எம்மைத் தொடர்பு கொள்ள",
+    noEnglish: "",
+    langAria: "மொழி",
+  },
+  en: {
+    launcherAria: "TLA Help - answers to your questions",
+    label: "Help",
+    hint: "Questions & answers",
+    title: "TLA Help",
+    sub: "Pick a question · instant answer",
+    restart: "Start again",
+    close: "Close",
+    greeting: "Hello! 🙏 Pick what you'd like to know about the Tamil Literary Association below, or search.",
+    typing: "Writing an answer",
+    related: "Related questions",
+    search: "Search questions… (e.g. Sotkanai, join)",
+    searchAria: "Search questions",
+    topics: "Topics",
+    popular: "Popular",
+    more: "More questions",
+    none: "No matching question.",
+    contactUs: "Contact us",
+    noEnglish: "This answer is only in Tamil for now.",
+    langAria: "Language",
+  },
+};
+
+const LANG_KEY = "tla_helpbot_lang";
+function readLang() {
+  try {
+    return localStorage.getItem(LANG_KEY) === "en" ? "en" : "ta";
+  } catch {
+    return "ta";
+  }
+}
 
 const reducedMotion = () =>
   typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -74,12 +131,13 @@ function formatAnswer(text) {
   );
 }
 
-// Every typed word must appear in the question, its topic or its search words.
+// Every typed word must appear in the question (Tamil or English), its topic
+// or its search words - whichever language is showing.
 function searchFaqs(faqs, query) {
   const words = norm(query).split(/\s+/).filter(Boolean);
   if (!words.length) return null;
   return faqs.filter((f) => {
-    const hay = norm(`${f.q} ${CAT_LABEL[f.cat]} ${f.kw || ""}`);
+    const hay = norm(`${f.q} ${inLanguage(f, "en").q} ${catLabel(f.cat, "ta")} ${catLabel(f.cat, "en")} ${f.kw || ""}`);
     return words.every((w) => hay.includes(w));
   });
 }
@@ -100,13 +158,24 @@ export default function HelpBot() {
   const [thread, setThread] = useState([]);
   // The question list folds away once a question is asked, so the answer has room.
   const [listOpen, setListOpen] = useState(true);
+  const [lang, setLangState] = useState(readLang);
+  const t = UI[lang];
+  const setLang = (l) => {
+    setLangState(l);
+    try {
+      localStorage.setItem(LANG_KEY, l);
+    } catch {
+      /* ignore */
+    }
+  };
+  const show = (f) => inLanguage(f, lang);
   const bodyRef = useRef(null);
   const searchRef = useRef(null);
   const keySeq = useRef(0);
 
   // The questions, contact details and member count are fetched the first time it opens.
   const faqs = useFaqs(open);
-  const ctx = useFaqContext(open);
+  const ctx = useFaqContext(open, lang);
   const byId = useMemo(() => new Map(faqs.map((f) => [f.id, f])), [faqs]);
   // Topics with no questions left are left out.
   const categories = useMemo(() => CATEGORIES.filter((c) => c.id === "popular" || faqs.some((f) => f.cat === c.id)), [faqs]);
@@ -164,7 +233,7 @@ export default function HelpBot() {
   const busy = thread.some((m) => !m.answered);
 
   const renderLink = (l, i) => {
-    const label = fill(l.label, ctx);
+    const label = fill(l.text, ctx);
     if (l.to) {
       return (
         <Link key={i} to={l.to} className="hb-link" onClick={() => setOpen(false)}>
@@ -193,47 +262,58 @@ export default function HelpBot() {
         type="button"
         className={`hb-launcher ${open ? "is-hidden" : ""}`}
         onClick={() => setOpen(true)}
-        aria-label="TLA உதவி - கேள்விகளுக்குப் பதில்கள்"
+        aria-label={t.launcherAria}
         aria-expanded={open}
       >
         <span className="hb-launcher-icon" aria-hidden="true">
           த<i className="hb-online" />
         </span>
         <span className="hb-launcher-text">
-          <span className="hb-launcher-label">உதவி</span>
-          <span className="hb-launcher-hint">கேள்விகள் &amp; பதில்கள்</span>
+          <span className="hb-launcher-label">{t.label}</span>
+          <span className="hb-launcher-hint">{t.hint}</span>
         </span>
       </button>
 
       {open && (
-        <div className={`hb-panel ${thread.length === 0 ? "is-fresh" : ""}`} role="dialog" aria-label="TLA உதவி">
+        <div
+          className={`hb-panel ${thread.length === 0 ? "is-fresh" : ""}`}
+          role="dialog"
+          aria-label={t.title}
+          lang={lang === "en" ? "en" : "ta"}
+        >
           <div className="hb-head">
             <span className="hb-avatar" aria-hidden="true">
               த<i className="hb-online" />
             </span>
             <div className="hb-head-text">
-              <span className="hb-title">TLA உதவி</span>
-              <span className="hb-sub">கேள்வியைத் தெரிவு செய்யுங்கள் · உடனே பதில்</span>
+              <span className="hb-title">{t.title}</span>
+              <span className="hb-sub">{t.sub}</span>
+            </div>
+            <div className="hb-lang" role="group" aria-label={t.langAria}>
+              <button type="button" className={lang === "ta" ? "is-on" : ""} aria-pressed={lang === "ta"} onClick={() => setLang("ta")} lang="ta">
+                த
+              </button>
+              <button type="button" className={lang === "en" ? "is-on" : ""} aria-pressed={lang === "en"} onClick={() => setLang("en")} lang="en">
+                EN
+              </button>
             </div>
             {thread.length > 0 && (
-              <button type="button" className="hb-icon" onClick={reset} aria-label="மீண்டும் தொடங்கு" title="மீண்டும் தொடங்கு">
+              <button type="button" className="hb-icon" onClick={reset} aria-label={t.restart} title={t.restart}>
                 <FaRedoAlt />
               </button>
             )}
-            <button type="button" className="hb-icon" onClick={() => setOpen(false)} aria-label="மூடு" title="மூடு">
+            <button type="button" className="hb-icon" onClick={() => setOpen(false)} aria-label={t.close} title={t.close}>
               <FaTimes />
             </button>
           </div>
 
           <div className="hb-body" ref={bodyRef} aria-live="polite">
             <div className="hb-msg is-bot">
-              <div className="hb-bubble">
-                வணக்கம்! 🙏 தமிழ் இலக்கிய மன்றம் பற்றி அறிய விரும்புவதைக் கீழே தெரிவு செய்யுங்கள், அல்லது தேடுங்கள்.
-              </div>
+              <div className="hb-bubble">{t.greeting}</div>
             </div>
 
             {thread.map((m) => {
-              const f = m.faq;
+              const f = show(m.faq);
               return (
                 <React.Fragment key={m.key}>
                   <div className="hb-msg is-user">
@@ -242,11 +322,12 @@ export default function HelpBot() {
                   <div className="hb-msg is-bot">
                     {m.answered ? (
                       <div className="hb-bubble">
+                        {lang === "en" && !f.english && <div className="hb-note">{t.noEnglish}</div>}
                         <div className="hb-answer">{formatAnswer(fill(f.a, ctx))}</div>
                         {f.links && f.links.length > 0 && <div className="hb-links">{f.links.map(renderLink)}</div>}
                       </div>
                     ) : (
-                      <div className="hb-bubble hb-typing" aria-label="பதில் தயாராகிறது">
+                      <div className="hb-bubble hb-typing" aria-label={t.typing}>
                         <i />
                         <i />
                         <i />
@@ -259,10 +340,10 @@ export default function HelpBot() {
 
             {related.length > 0 && (
               <div className="hb-related">
-                <span>தொடர்புடைய கேள்விகள்</span>
+                <span>{t.related}</span>
                 {related.map((f) => (
                   <button type="button" key={f.id} className="hb-chip-q" onClick={() => ask(f)}>
-                    {f.q}
+                    {show(f).q}
                   </button>
                 ))}
               </div>
@@ -280,13 +361,13 @@ export default function HelpBot() {
                   setQuery(e.target.value);
                   setListOpen(true);
                 }}
-                placeholder="கேள்வியைத் தேடுங்கள்… (எ.கா. சொற்கணை, join)"
-                aria-label="கேள்வியைத் தேடுங்கள்"
+                placeholder={t.search}
+                aria-label={t.searchAria}
               />
             </div>
 
             {!found && (
-              <div className="hb-cats" role="tablist" aria-label="தலைப்புகள்">
+              <div className="hb-cats" role="tablist" aria-label={t.topics}>
                 {categories.map((c) => (
                   <button
                     type="button"
@@ -299,7 +380,7 @@ export default function HelpBot() {
                       setListOpen(true);
                     }}
                   >
-                    {c.label}
+                    {c.id === "popular" ? t.popular : catLabel(c.id, lang)}
                   </button>
                 ))}
               </div>
@@ -307,15 +388,15 @@ export default function HelpBot() {
 
             {!listOpen ? (
               <button type="button" className="hb-more" onClick={() => setListOpen(true)}>
-                <FaChevronUp /> மேலும் கேள்விகள்
+                <FaChevronUp /> {t.more}
               </button>
             ) : (
               <div className="hb-list">
                 {list.length === 0 ? (
                   <div className="hb-empty">
-                    பொருத்தமான கேள்வி இல்லை.{" "}
+                    {t.none}{" "}
                     <button type="button" className="hb-inline" onClick={() => ask(byId.get(NOT_FOUND_ID) || BUILT_IN_NOT_FOUND)}>
-                      எம்மைத் தொடர்பு கொள்ள
+                      {t.contactUs}
                     </button>
                   </div>
                 ) : (
@@ -327,7 +408,7 @@ export default function HelpBot() {
                       onClick={() => ask(f)}
                       disabled={busy}
                     >
-                      <span>{f.q}</span>
+                      <span>{show(f).q}</span>
                       <FaChevronRight aria-hidden="true" />
                     </button>
                   ))
