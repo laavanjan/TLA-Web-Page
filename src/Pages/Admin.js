@@ -20,6 +20,7 @@ import {
   FaTools,
   FaImages,
   FaIdCard,
+  FaCommentDots,
 } from "react-icons/fa";
 
 import LotusDivider from "./LotusDivider";
@@ -34,6 +35,7 @@ import { fetchTeamJoinApplications } from "../shared/teamJoinApplications";
 import { fetchTeamJoinConfig } from "../shared/teamJoinConfig";
 import { fetchContactConfig } from "../shared/contactConfig";
 import { fetchWallpapers } from "../shared/wallpapers";
+import { fetchFaqs } from "../shared/faq/faqs";
 import { fetchSiteStatus, isMaintenanceOn, formatReopen } from "../shared/siteStatus";
 import { fetchBookConfig, isSubmissionOpen } from "../book/bookConfig";
 import { fetchBooks } from "../book/books";
@@ -96,6 +98,9 @@ function useDashboardData(admin) {
       fetchWallpapers()
         .then((w) => set("wallpapers", w))
         .catch(() => set("wallpapers", null));
+      fetchFaqs()
+        .then((list) => set("faqs", list))
+        .catch(() => set("faqs", null));
       supabase
         .from("members")
         .select("id", { count: "exact", head: true })
@@ -171,6 +176,13 @@ function wallpaperStatus(list) {
   const shown = list.filter((w) => w.is_visible).length;
   if (!shown) return { tone: "info", text: list.length ? `${list.length} hidden · default picture` : "Default picture" };
   return { tone: "ok", text: `${shown} showing${shown > 1 ? " · rotating" : ""}${list.length > shown ? ` · ${list.length - shown} hidden` : ""}` };
+}
+
+function faqStatus(list) {
+  if (list === undefined) return LOADING;
+  if (!list) return { tone: "off", text: "Not set up yet" };
+  const shown = list.filter((f) => f.is_visible).length;
+  return { tone: "info", text: `${shown} question${shown === 1 ? "" : "s"}${list.length > shown ? ` · ${list.length - shown} hidden` : ""}` };
 }
 
 function maintenanceStatus(site) {
@@ -577,6 +589,15 @@ export default function Admin() {
                       title="Home wallpapers"
                       desc="Add, hide, reorder and delete the sliding home page pictures."
                       status={wallpaperStatus(data.wallpapers)}
+                      index={n++}
+                    />
+                    <Card
+                      to="/admin/faq"
+                      icon={FaCommentDots}
+                      tone="teal"
+                      title="Help assistant"
+                      desc="The questions and answers in the site's உதவி button."
+                      status={faqStatus(data.faqs)}
                       index={n++}
                     />
                     <Card
