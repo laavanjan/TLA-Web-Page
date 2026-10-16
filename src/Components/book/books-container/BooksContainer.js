@@ -2,7 +2,8 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./booksContainer.css";
 import { Container } from "@material-ui/core";
-import { useListedBooks, coverUrl } from "../../../book/books";
+import { useListedBooks } from "../../../book/books";
+import CoverImg from "../../../book/CoverImg";
 
 // The books come from the Supabase `books` table, managed at /admin/books
 // (see src/book/books.js). Each card opens the book's /books/:slug page.
@@ -17,7 +18,7 @@ const BooksContainer = () => {
     const card = (book, extra) => (
         <div key={book.slug} className={loaded ? "book-card fade-in" : "book-card"} onClick={() => navigate(`/books/${book.slug}`)}>
             <div className="book-img-wrap">
-                <img src={coverUrl(book)} alt={book.title} className="book-img" loading="lazy" />
+                <CoverImg book={book} alt={book.title} className="book-img" loading="lazy" />
             </div>
             <p className="book-name">{book.title}</p>
             {extra}
