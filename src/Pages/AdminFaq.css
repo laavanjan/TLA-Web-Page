@@ -441,3 +441,71 @@
     white-space: normal;
   }
 }
+
+/* ---- English (AdminFaq.js) ---- */
+
+.af-tag.is-en {
+  color: #9fd3ff;
+  background: rgba(120, 190, 255, 0.14);
+  font-weight: 700;
+}
+
+.af-tag.is-muted {
+  color: #8f99ae;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.af-en {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 14px 14px;
+  border: 1px solid rgba(120, 190, 255, 0.22);
+  border-radius: 12px;
+  background: rgba(120, 190, 255, 0.04);
+  min-width: 0;
+}
+
+.af-en legend {
+  padding: 0 6px;
+}
+
+.af-preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.af-plang {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.af-plang button {
+  min-width: 32px;
+  height: 24px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #a6b0c4;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.af-plang button.is-on {
+  background: linear-gradient(135deg, #ffe596, #e6b422);
+  color: #1a1400;
+}
+
+.af-pnote {
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-style: italic;
+  opacity: 0.7;
+}
