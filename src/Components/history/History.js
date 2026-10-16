@@ -1,7 +1,7 @@
 import React from "react";
 import "./history.css";
 import Reveal from "../../shared/Reveal/Reveal";
-import { LiteYouTube } from "../teams/team-detail/media";
+import HistoryVideo from "./HistoryVideo";
 import img1 from "../../images/HistoryPage/1.jpeg";
 import img2 from "../../images/HistoryPage/2.jpeg";
 import img3 from "../../images/HistoryPage/3.jpeg";
@@ -14,11 +14,15 @@ const History = () => {
         <div className="history">
             <div class="container">
                 <h1>எமது வரலாறு</h1>
-                {/* Thamizharuvi's story on video. LiteYouTube shows the thumbnail
-                    and only loads YouTube on play; its .yt-lite styles are in
-                    teams/team-detail/teamDetail.css. */}
+                {/* Thamizharuvi's story on video: a designed poster that only
+                    loads YouTube on play (HistoryVideo.js, styles in history.css). */}
                 <Reveal className="history-video">
-                    <LiteYouTube id="XXHs_TSVlQE" title="Thamizharuvi 2026 | Thamizharuvi History" />
+                    <HistoryVideo
+                        id="XXHs_TSVlQE"
+                        kicker="காணொளி · TLA UOM"
+                        title="தமிழருவியின் வரலாறு"
+                        subtitle="Thamizharuvi 2026 · Thamizharuvi History"
+                    />
                 </Reveal>
                 <Reveal as="p" className="history-para">
                     மூவாயிரத்திற்கும் அதிகமான ஆண்டு வரலாற்றை உடைய எம் கண்ணியாம்
