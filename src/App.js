@@ -4,6 +4,7 @@ import "./App.css";
 import Router from "./Router";
 import Navbar from "./Components/Home/Navbar/navbar";
 import Footer from "./Components/Home/Footer/footer";
+import HelpBot from "./Components/HelpBot/HelpBot";
 import MaintenanceGate from "./Components/maintenance/MaintenanceGate";
 import ScrollToTop from "./Components/ScrollToTop";
 import { useEffect } from "react";
@@ -26,6 +27,7 @@ function App() {
       {!standalone && <Navbar />}
       <Router/>
       {!standalone && <Footer />}
+      {!standalone && <HelpBot />}
     </MaintenanceGate>
   );
 }
