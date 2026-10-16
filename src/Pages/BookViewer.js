@@ -15,7 +15,7 @@ import {
   pdfDownloadUrl,
   docDownloadUrl,
   pdfPageImage,
-  coverUrl,
+  useCover,
   driveViewLink,
 } from "../book/books";
 import "./Frame.css";
@@ -37,7 +37,8 @@ function BookPage({ book, pages }) {
   const [copied, setCopied] = useState(false);
   const readerRef = useRef(null);
   const uploaded = book.source === "upload";
-  const cover = uploaded && !book.cover_url ? pdfPageImage(book, 1, 800) : coverUrl(book);
+  // Shown big here, so a sharper picture; switches to the other picture if it can't load.
+  const [cover, onCoverError] = useCover(book, 800);
   const pdfDownload = pdfDownloadUrl(book);
   const docDownload = docDownloadUrl(book);
   const description = book.description || `${SITE} — ${book.title} நூல்.`;
@@ -101,7 +102,7 @@ function BookPage({ book, pages }) {
           <a href="#read" className="bk-object" onClick={startReading} aria-label="படிக்கத் தொடங்கு">
             <div className="bk-book3d" style={{ "--thick": `${thickness}px` }}>
               <div className="bk-book3d-cover">
-                {cover ? <img src={cover} alt={`${book.title} அட்டை`} /> : <span className="bk-book3d-blank">{book.title}</span>}
+                {cover ? <img src={cover} alt={`${book.title} அட்டை`} onError={onCoverError} /> : <span className="bk-book3d-blank">{book.title}</span>}
                 <span className="bk-book3d-crease" />
                 <span className="bk-book3d-gloss" />
               </div>
