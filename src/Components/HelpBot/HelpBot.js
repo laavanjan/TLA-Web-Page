@@ -4,7 +4,7 @@
 // chat reply, with links to the right page and related questions to try next.
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { FaCommentDots, FaTimes, FaSearch, FaRedoAlt, FaArrowRight, FaExternalLinkAlt, FaChevronUp } from "react-icons/fa";
+import { FaCommentDots, FaTimes, FaSearch, FaRedoAlt, FaArrowRight, FaExternalLinkAlt, FaChevronUp, FaChevronRight } from "react-icons/fa";
 import {
   useFaqs,
   useFaqContext,
@@ -158,14 +158,14 @@ export default function HelpBot() {
       </button>
 
       {open && (
-        <div className="hb-panel" role="dialog" aria-label="TLA உதவி">
+        <div className={`hb-panel ${thread.length === 0 ? "is-fresh" : ""}`} role="dialog" aria-label="TLA உதவி">
           <div className="hb-head">
             <span className="hb-avatar" aria-hidden="true">
-              த
+              த<i className="hb-online" />
             </span>
             <div className="hb-head-text">
               <span className="hb-title">TLA உதவி</span>
-              <span className="hb-sub">கேள்வியைத் தெரிவு செய்யுங்கள் - உடனே பதில்</span>
+              <span className="hb-sub">கேள்வியைத் தெரிவு செய்யுங்கள் · உடனே பதில்</span>
             </div>
             {thread.length > 0 && (
               <button type="button" className="hb-icon" onClick={reset} aria-label="மீண்டும் தொடங்கு" title="மீண்டும் தொடங்கு">
@@ -222,7 +222,7 @@ export default function HelpBot() {
           </div>
 
           <div className="hb-picker">
-            <label className="hb-search">
+            <div className="hb-search" onClick={() => searchRef.current && searchRef.current.focus()}>
               <FaSearch aria-hidden="true" />
               <input
                 ref={searchRef}
@@ -235,7 +235,7 @@ export default function HelpBot() {
                 placeholder="கேள்வியைத் தேடுங்கள்… (எ.கா. சொற்கணை, join)"
                 aria-label="கேள்வியைத் தேடுங்கள்"
               />
-            </label>
+            </div>
 
             {!found && (
               <div className="hb-cats" role="tablist" aria-label="தலைப்புகள்">
@@ -279,7 +279,8 @@ export default function HelpBot() {
                       onClick={() => ask(f)}
                       disabled={busy}
                     >
-                      {f.q}
+                      <span>{f.q}</span>
+                      <FaChevronRight aria-hidden="true" />
                     </button>
                   ))
                 )}
