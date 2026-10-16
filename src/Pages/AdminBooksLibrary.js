@@ -18,11 +18,11 @@ import {
   driveViewLink,
   slugify,
   slugError,
-  coverUrl,
   docDownloadUrl,
   CATEGORIES,
   VISIBILITIES,
 } from "../book/books";
+import CoverImg from "../book/CoverImg";
 import "./AdminMaintenance.css";
 import "./AdminBooksLibrary.css";
 
@@ -159,11 +159,10 @@ export default function BooksLibrary() {
 
         <ul className="ab-list">
           {(rows || []).map((r, i) => {
-            const cover = coverUrl(r);
             return (
               <li key={r.id} className={`ab-item is-${r.visibility}`}>
                 <span className="ab-num">{i + 1}</span>
-                <div className="ab-cover">{cover ? <img src={cover} alt="" loading="lazy" /> : <FaFilePdf />}</div>
+                <div className="ab-cover"><CoverImg book={r} loading="lazy" empty={<FaFilePdf />} /></div>
                 <div className="ab-body">
                   <strong className="ab-title">{r.title || "(untitled)"}</strong>
                   <span className="ab-meta">
@@ -258,7 +257,6 @@ function BookEditor({ initial, sortOrder = 0, onSaved, onCancel }) {
   const set = (patch) => setDraft((d) => ({ ...d, ...patch }));
   const driveId = parseDriveId(driveLink);
   const preview = { ...draft, drive_file_id: draft.source === "drive" ? driveId : "", pdf_url: draft.source === "upload" ? draft.pdf_url : "" };
-  const cover = coverUrl(preview);
 
   const upload = async (file, kind) => {
     setError("");
@@ -301,7 +299,8 @@ function BookEditor({ initial, sortOrder = 0, onSaved, onCancel }) {
     }
     try {
       const up = await upload(file, "cover");
-      set({ cover_url: up.url, cover_public_id: up.publicId });
+      // Uploading a picture means it should be shown.
+      set({ cover_url: up.url, cover_public_id: up.publicId, cover_choice: "upload" });
     } catch (err) {
       setError(`${file.name}: ${err.message || "upload failed"}`);
     }
@@ -496,21 +495,49 @@ function BookEditor({ initial, sortOrder = 0, onSaved, onCancel }) {
       </label>
 
       <span className="admin-label ab-gap">Cover</span>
+      {[
+        ["page", "The PDF's first page", "the book's own cover page (default)"],
+        ["upload", "A picture I upload", "e.g. a designed cover"],
+      ].map(([v, label, hint]) => (
+        <label key={v} className="admin-check-row">
+          <input
+            type="radio"
+            name={`cover-${initial ? initial.id : "new"}`}
+            checked={draft.cover_choice === v}
+            onChange={() => set({ cover_choice: v })}
+          />
+          <span>
+            <strong>{label}</strong> - {hint}
+          </span>
+        </label>
+      ))}
       <div className="ab-cover-row">
-        <div className="ab-cover ab-cover-lg">{cover ? <img src={cover} alt="" /> : <FaFilePdf />}</div>
+        <div className="ab-cover ab-cover-lg">
+          <CoverImg book={preview} empty={<FaFilePdf />} />
+        </div>
         <div className="ab-cover-actions">
-          <input ref={coverRef} type="file" accept="image/*" hidden onChange={(e) => onCover(e.target.files[0])} />
-          <button type="button" className="frame-btn frame-btn-ghost" onClick={() => coverRef.current && coverRef.current.click()} disabled={busy}>
-            <FaUpload /> {uploading === "cover" ? `Uploading… ${Math.round(progress * 100)}%` : draft.cover_url ? "Replace cover" : "Upload cover"}
-          </button>
-          {draft.cover_url && (
-            <button type="button" className="am-chip" onClick={() => set({ cover_url: "", cover_public_id: "" })} disabled={busy}>
-              Use the first page instead
-            </button>
+          {draft.cover_choice === "upload" ? (
+            <>
+              <input ref={coverRef} type="file" accept="image/*" hidden onChange={(e) => onCover(e.target.files[0])} />
+              <button type="button" className="frame-btn frame-btn-ghost" onClick={() => coverRef.current && coverRef.current.click()} disabled={busy}>
+                <FaUpload /> {uploading === "cover" ? `Uploading… ${Math.round(progress * 100)}%` : draft.cover_url ? "Replace picture" : "Upload picture"}
+              </button>
+              {draft.cover_url && (
+                <button type="button" className="am-chip" onClick={() => set({ cover_url: "", cover_public_id: "", cover_choice: "page" })} disabled={busy}>
+                  Remove picture
+                </button>
+              )}
+              <small className="am-hint">
+                {draft.cover_url ? "A portrait picture (about 3:4) looks best." : "No picture yet - the PDF's first page is shown until you upload one."}
+              </small>
+            </>
+          ) : (
+            <small className="am-hint">
+              Page 1 of the book is shown as its cover.
+              {draft.source === "drive" && " The Drive file must be shared as \"Anyone with the link\" for the page to show."}
+              {draft.cover_url && " Your uploaded picture is kept - pick \"A picture I upload\" to show it instead."}
+            </small>
           )}
-          <small className="am-hint">
-            {draft.cover_url ? "A portrait picture (about 3:4) looks best." : "No cover picked - the PDF's first page is used."}
-          </small>
         </div>
       </div>
 

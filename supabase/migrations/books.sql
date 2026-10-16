@@ -114,3 +114,11 @@ on conflict (slug) do nothing;
 -- How many pages an uploaded PDF has (Cloudinary reports it on upload); the
 -- book page uses it for the page-turning reader. 0 = not known yet.
 alter table public.books add column if not exists page_count integer not null default 0;
+
+-- ---- Cover choice (added later; safe to re-run) -------------------------------------------
+-- What the book shows as its cover on /books and its own page:
+--   'page'   = the PDF's first page (the default, also for books added before)
+--   'upload' = the cover picture uploaded in /admin/books (cover_url)
+alter table public.books add column if not exists cover_choice text not null default 'page';
+alter table public.books drop constraint if exists books_cover_choice_check;
+alter table public.books add constraint books_cover_choice_check check (cover_choice in ('page', 'upload'));
