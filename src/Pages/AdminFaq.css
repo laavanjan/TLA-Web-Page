@@ -1,0 +1,443 @@
+/* Help assistant questions admin page (AdminFaq.js) - builds on Admin.css and
+   the .am-chip / .am-hint styles from AdminMaintenance.css. Uses spans / divs,
+   not p / h3: the site has global bare p and h3 rules that would leak in. */
+
+.af {
+  --af-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Tamil", "Nirmala UI", "Helvetica Neue", Arial,
+    sans-serif;
+  color: #e7ebf3;
+}
+
+/* Questions are Tamil: a sans font draws it better than the admin monospace. */
+.af .admin-input {
+  font-family: var(--af-sans);
+  font-size: 14px;
+}
+
+.af .am-hint a {
+  color: #ffd76e;
+}
+
+.af .am-hint a svg {
+  font-size: 10px;
+}
+
+.af-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-top: 14px;
+}
+
+.af-toolbar .frame-btn,
+.af-editor .frame-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.af-search {
+  flex: 1 1 220px;
+  max-width: 360px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #7c8598;
+}
+
+.af-search:focus-within {
+  border-color: rgba(230, 180, 34, 0.7);
+}
+
+.af-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  padding: 10px 0;
+  color: #f4f6fb;
+  font-family: var(--af-sans);
+  font-size: 14px;
+  outline: none;
+}
+
+/* ---- Topics and their questions ---- */
+
+.af-group {
+  margin-top: 22px;
+}
+
+.af-group-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.af-group-name {
+  font-family: var(--af-sans);
+  font-size: 15.5px;
+  font-weight: 800;
+  color: #ffd76e;
+}
+
+.af-count {
+  padding: 1px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #b3bccd;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.af-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.af-item {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.af-item.is-editing {
+  border-color: rgba(230, 180, 34, 0.45);
+}
+
+.af-item.is-hidden .af-body {
+  opacity: 0.5;
+}
+
+.af-num {
+  flex: 0 0 auto;
+  width: 24px;
+  text-align: center;
+  color: #a6b0c4;
+  font-size: 14px;
+}
+
+.af-body {
+  flex: 1 1 260px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-family: var(--af-sans);
+}
+
+.af-q {
+  color: #f3f5fa;
+  font-size: 14.5px;
+  font-weight: 700;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.af-a {
+  color: #a6b0c4;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.af-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.af-tag {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #c6cede;
+  font-size: 11.5px;
+}
+
+.af-tag.is-off {
+  color: #ff9a9a;
+  background: rgba(255, 154, 154, 0.12);
+}
+
+.af-tag.is-gold {
+  color: #ffd76e;
+  background: rgba(230, 180, 34, 0.14);
+}
+
+.af-btns {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.af-btns .am-chip,
+.af-link-row .am-chip,
+.af-add-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.af-danger {
+  color: #ffb4b4;
+  border-color: rgba(255, 120, 120, 0.4);
+}
+
+.af-warn {
+  color: #ffcf7a;
+}
+
+/* ---- Add / edit form ---- */
+
+.af-editor {
+  flex: 1 1 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(230, 180, 34, 0.35);
+}
+
+.af-item .af-editor {
+  margin-top: 4px;
+}
+
+.af-editor-title {
+  color: #f3f5fa;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.af-editor-cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.af-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.af-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.af-field select.admin-input,
+.af-link-kind {
+  color-scheme: dark;
+  cursor: pointer;
+}
+
+.af-field select.admin-input option,
+.af-link-kind option {
+  background: #141a26;
+  color: #e7ebf3;
+}
+
+.af-tokens {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  color: #97a1b5;
+  font-size: 12px;
+}
+
+.af-token {
+  padding: 3px 9px;
+  border-radius: 7px;
+  border: 1px solid rgba(230, 180, 34, 0.35);
+  background: rgba(230, 180, 34, 0.08);
+  color: #ffd76e;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.af-token:hover {
+  background: rgba(230, 180, 34, 0.2);
+}
+
+.af-link {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.af-link-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.af-link-label,
+.af-link-target {
+  flex: 1 1 180px;
+}
+
+.af-link-kind {
+  flex: 0 1 170px;
+}
+
+.af-add-link {
+  align-self: flex-start;
+}
+
+.af .admin-check-row {
+  margin-top: 0;
+}
+
+.af-editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ---- Preview, drawn like the assistant's chat ---- */
+
+.af-preview {
+  position: sticky;
+  top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.af-chat {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #f6f2e8, #eef1f6);
+  font-family: var(--af-sans);
+}
+
+.af-msg {
+  display: flex;
+}
+
+.af-msg.is-user {
+  justify-content: flex-end;
+}
+
+.af-bubble {
+  max-width: 88%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-size: 14.5px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.af-msg.is-user .af-bubble {
+  background: #022345;
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.af-msg.is-bot .af-bubble {
+  background: #fff;
+  color: #1d2433;
+  border: 1px solid rgba(2, 35, 69, 0.1);
+  border-bottom-left-radius: 4px;
+}
+
+.af-answer {
+  white-space: pre-line;
+}
+
+.af-plinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.af-plink,
+.af-plink:hover {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(200, 147, 47, 0.45);
+  background: rgba(255, 215, 110, 0.14);
+  color: #7a5410;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.af-plink:hover {
+  background: rgba(255, 215, 110, 0.32);
+}
+
+.af-plink.is-bad {
+  border-style: dashed;
+  border-color: #d9534f;
+  background: rgba(217, 83, 79, 0.08);
+  color: #a32f2b;
+  cursor: help;
+}
+
+.af-plink svg {
+  font-size: 10px;
+}
+
+@media (max-width: 860px) {
+  .af-editor-cols {
+    grid-template-columns: 1fr;
+  }
+
+  .af-preview {
+    position: static;
+  }
+}
+
+@media (max-width: 600px) {
+  .af-btns {
+    width: 100%;
+  }
+
+  .af-a {
+    white-space: normal;
+  }
+}
