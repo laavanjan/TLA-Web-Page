@@ -4,6 +4,9 @@
 //
 // When the table can't be read (faq.sql not run yet, or Supabase is down) the
 // questions built into faqData.js are used, so the assistant always works.
+//
+// Each question can also be in English (q_en, a_en, a link's label_en) for the
+// assistant's English mode; see inLanguage().
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../../helpers/supabaseClient";
 import { fetchContactConfig, getCachedContactConfig } from "../contactConfig";
@@ -13,7 +16,7 @@ const TABLE = "faqs";
 // "*" rather than a column list, so a column added by a later faq.sql never
 // breaks reading before the SQL has been run.
 const COLUMNS = "*";
-const LS_KEY = "tla_faqs_v1";
+const LS_KEY = "tla_faqs_v2"; // v2: rows carry q_en / a_en
 
 export { FAQ_CATEGORIES };
 const CAT_IDS = FAQ_CATEGORIES.map((c) => c.id);
@@ -36,7 +39,7 @@ export const FAQ_TOKENS = [
 const TOKEN_NAMES = FAQ_TOKENS.map(([t]) => t);
 
 // Shown for {members} until the count has loaded.
-const MEMBERS_FALLBACK = "நூற்றுக்கணக்கான";
+const MEMBERS_FALLBACK = { ta: "நூற்றுக்கணக்கான", en: "Hundreds of" };
 
 // {email}, {members} … -> the live value. Unknown tokens stay as typed.
 export const fillTokens = (text, ctx) =>
@@ -46,7 +49,11 @@ export const fillTokens = (text, ctx) =>
 export const unknownTokens = (text) =>
   [...new Set((String(text || "").match(/\{(\w+)\}/g) || []).map((m) => m.slice(1, -1)))].filter((t) => !TOKEN_NAMES.includes(t));
 
-export const faqContext = (contact, members) => ({ ...contact, phone: contact.phoneNumber, members: members || MEMBERS_FALLBACK });
+export const faqContext = (contact, members, lang = "ta") => ({
+  ...contact,
+  phone: contact.phoneNumber,
+  members: members || MEMBERS_FALLBACK[lang] || MEMBERS_FALLBACK.ta,
+});
 
 // ---- Normalising ---------------------------------------------------------------------------
 
@@ -59,8 +66,9 @@ export const newFaqId = () => `q-${Date.now().toString(36)}${Math.random().toStr
 export function normalizeLink(l) {
   const o = l || {};
   const label = typeof o.label === "string" ? o.label : "";
-  if (typeof o.to === "string" && o.to) return { label, to: o.to };
-  return { label, href: typeof o.href === "string" ? o.href : "" };
+  const en = typeof o.label_en === "string" && o.label_en ? { label_en: o.label_en } : {};
+  if (typeof o.to === "string" && o.to) return { label, ...en, to: o.to };
+  return { label, ...en, href: typeof o.href === "string" ? o.href : "" };
 }
 
 // Whitelist + tidy so a bad row never breaks the assistant.
@@ -72,6 +80,8 @@ export function normalizeFaq(r) {
     cat: CAT_IDS.includes(o.cat) ? o.cat : CAT_IDS[0],
     q: str(o.q),
     a: str(o.a),
+    q_en: str(o.q_en),
+    a_en: str(o.a_en),
     links: Array.isArray(o.links) ? o.links.map(normalizeLink) : [],
     kw: str(o.kw),
     sort_order: Number.isFinite(Number(o.sort_order)) ? Number(o.sort_order) : 0,
@@ -83,6 +93,38 @@ export function normalizeFaq(r) {
 const byOrder = (a, b) => a.sort_order - b.sort_order || a.id.localeCompare(b.id);
 
 export const BUILT_IN_FAQS = FAQS.map((f, i) => normalizeFaq({ ...f, sort_order: i }));
+
+// ---- English mode --------------------------------------------------------------------------
+
+const BUILT_IN_BY_ID = new Map(BUILT_IN_FAQS.map((f) => [f.id, f]));
+// The English for each Tamil link label used in the built-in questions.
+const LINK_EN = new Map(BUILT_IN_FAQS.flatMap((f) => f.links.filter((l) => l.label_en).map((l) => [l.label, l.label_en])));
+
+export const catLabel = (cat, lang) => {
+  const c = FAQ_CATEGORIES.find((x) => x.id === cat);
+  if (!c) return "";
+  return lang === "en" && c.label_en ? c.label_en : c.label;
+};
+
+// A question as the visitor's language shows it: { q, a, links: [{ ...link,
+// text }], english }. English comes from the question itself, or - if an admin
+// hasn't changed its Tamil since - from the built-in copy, so English works
+// even before faq.sql's English columns exist. A question with no English is
+// shown in Tamil (english: false).
+export function inLanguage(f, lang) {
+  if (lang !== "en") return { q: f.q, a: f.a, links: f.links.map((l) => ({ ...l, text: l.label })), english: false };
+  const base = BUILT_IN_BY_ID.get(f.id);
+  const unchanged = !!base && base.q === f.q && base.a === f.a;
+  const q = f.q_en || (unchanged ? base.q_en : "");
+  const a = f.a_en || (unchanged ? base.a_en : "");
+  const english = !!(q.trim() && a.trim());
+  return {
+    q: english ? q : f.q,
+    a: english ? a : f.a,
+    links: f.links.map((l) => ({ ...l, text: l.label_en || LINK_EN.get(l.label) || l.label })),
+    english,
+  };
+}
 
 // ---- Reading -------------------------------------------------------------------------------
 
@@ -155,7 +197,7 @@ export function useFaqs(enabled = true) {
 
 // What the {tokens} are filled with: the contact settings and the member
 // count, loaded once `enabled` turns true.
-export function useFaqContext(enabled = true) {
+export function useFaqContext(enabled = true, lang = "ta") {
   const [contact, setContact] = useState(getCachedContactConfig);
   const [members, setMembers] = useState("");
 
@@ -171,7 +213,7 @@ export function useFaqContext(enabled = true) {
       });
   });
 
-  return useMemo(() => faqContext(contact, members), [contact, members]);
+  return useMemo(() => faqContext(contact, members, lang), [contact, members, lang]);
 }
 
 // ---- Writing (main admins) -----------------------------------------------------------------
@@ -185,7 +227,10 @@ function needRow(data) {
 const cleanLinks = (links) =>
   links
     .map(normalizeLink)
-    .map((l) => (l.to ? { label: l.label.trim(), to: l.to.trim() } : { label: l.label.trim(), href: l.href.trim() }))
+    .map((l) => {
+      const label = { label: l.label.trim(), ...(l.label_en && l.label_en.trim() ? { label_en: l.label_en.trim() } : {}) };
+      return l.to ? { ...label, to: l.to.trim() } : { ...label, href: l.href.trim() };
+    })
     .filter((l) => l.label && (l.to || l.href));
 
 // Adds the question when `isNew`, updates it otherwise; `sortOrder` (needed
@@ -196,15 +241,23 @@ export async function saveFaq(faq, { isNew = false, sortOrder } = {}) {
     cat: clean.cat,
     q: clean.q.trim(),
     a: clean.a.trim(),
+    q_en: clean.q_en.trim(),
+    a_en: clean.a_en.trim(),
     links: cleanLinks(clean.links),
     kw: clean.kw.trim(),
     is_visible: clean.is_visible,
   };
   if (sortOrder !== undefined) body.sort_order = sortOrder;
-  const req = isNew
-    ? supabase.from(TABLE).insert({ ...body, id: clean.id })
-    : supabase.from(TABLE).update(body).eq("id", clean.id);
-  const { data, error } = await req.select(COLUMNS);
+  const write = (b) =>
+    (isNew ? supabase.from(TABLE).insert({ ...b, id: clean.id }) : supabase.from(TABLE).update(b).eq("id", clean.id)).select(COLUMNS);
+  let { data, error } = await write(body);
+  if (error && error.code === "PGRST204" && /q_en|a_en/.test(error.message || "")) {
+    // The English columns aren't in the table yet (an older faq.sql) - save the rest.
+    const rest = { ...body };
+    delete rest.q_en;
+    delete rest.a_en;
+    ({ data, error } = await write(rest));
+  }
   if (error) throw new Error(error.message || "Could not save the question.");
   needRow(data);
   return normalizeFaq(data[0]);
