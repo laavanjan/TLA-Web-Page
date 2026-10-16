@@ -1,7 +1,8 @@
 // /admin/faq - the questions in the "TLA உதவி" assistant (the உதவி button on
 // every public page). Add, edit, hide, reorder and delete them, topic by
 // topic. While editing, a preview shows the answer the way visitors get it,
-// with {email}, {members} … filled in. Main admins only.
+// with {email}, {members} … filled in. Each question can also have English,
+// shown when visitors switch the assistant to EN. Main admins only.
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Helmet } from "react-helmet";
 import { Link } from "react-router-dom";
@@ -30,6 +31,7 @@ import {
   newFaqId,
   fillTokens,
   unknownTokens,
+  inLanguage,
   useFaqContext,
   FAQ_CATEGORIES,
   FAQ_TOKENS,
@@ -138,7 +140,7 @@ export default function AdminFaq() {
   };
 
   const words = norm(filter).split(/\s+/).filter(Boolean);
-  const matches = (r) => words.every((w) => norm(`${r.q} ${r.a} ${r.kw}`).includes(w));
+  const matches = (r) => words.every((w) => norm(`${r.q} ${r.a} ${r.q_en} ${r.a_en} ${r.kw}`).includes(w));
   const groups = FAQ_CATEGORIES.map((c) => {
     const all = (rows || []).filter((r) => r.cat === c.id);
     return { ...c, all, shown: words.length ? all.filter(matches) : all };
@@ -248,6 +250,15 @@ export default function AdminFaq() {
                             <span className="af-a">{fillTokens(firstLine(r.a), ctx)}</span>
                             <span className="af-tags">
                               {!r.is_visible && <span className="af-tag is-off">Hidden</span>}
+                              {inLanguage(r, "en").english ? (
+                                <span className="af-tag is-en" title="Has an English version">
+                                  EN
+                                </span>
+                              ) : (
+                                <span className="af-tag is-muted" title="Shown in Tamil when visitors pick EN">
+                                  No English
+                                </span>
+                              )}
                               {POPULAR_IDS.includes(r.id) && <span className="af-tag is-gold">In பிரபலமானவை</span>}
                               {locked && <span className="af-tag">Shown when a search finds nothing</span>}
                               {r.links.length > 0 && (
@@ -343,9 +354,12 @@ let linkSeq = 0;
 // the kind doesn't lose what was typed.
 const toRow = (l) => {
   linkSeq += 1;
-  return { key: linkSeq, label: l.label, kind: l.href ? "href" : "to", target: l.to || l.href || "" };
+  return { key: linkSeq, label: l.label, label_en: l.label_en || "", kind: l.href ? "href" : "to", target: l.to || l.href || "" };
 };
-const fromRow = (r) => (r.kind === "to" ? { label: r.label, to: r.target } : { label: r.label, href: r.target });
+const fromRow = (r) => {
+  const label = { label: r.label, ...(r.label_en.trim() ? { label_en: r.label_en } : {}) };
+  return r.kind === "to" ? { ...label, to: r.target } : { ...label, href: r.target };
+};
 
 const isHref = (t) => /^(https?:\/\/\S+|mailto:\S+|tel:\S+|\{\w+\})$/i.test(t.trim());
 
@@ -360,16 +374,32 @@ function linkError(r) {
   return "";
 }
 
-const EMPTY = { cat: FAQ_CATEGORIES[0].id, q: "", a: "", kw: "", links: [], is_visible: true };
+const EMPTY = { cat: FAQ_CATEGORIES[0].id, q: "", a: "", q_en: "", a_en: "", kw: "", links: [], is_visible: true };
+
+// The form starts with the question's English - or, for a built-in question
+// whose row has no English yet, the English the assistant already shows for it,
+// so saving keeps it.
+function startDraft(initial) {
+  const f = normalizeFaq(initial || EMPTY);
+  if (initial && !f.q_en && !f.a_en) {
+    const en = inLanguage(f, "en");
+    if (en.english) {
+      f.q_en = en.q;
+      f.a_en = en.a;
+    }
+    f.links = f.links.map((l, i) => (l.label_en || en.links[i].text === l.label ? l : { ...l, label_en: en.links[i].text }));
+  }
+  return { ...f, links: f.links.map(toRow) };
+}
 
 function FaqEditor({ initial, ctx, pages, nextOrder, onSaved, onCancel }) {
-  const [draft, setDraft] = useState(() => {
-    const f = normalizeFaq(initial || EMPTY);
-    return { ...f, links: f.links.map(toRow) };
-  });
+  const [draft, setDraft] = useState(() => startDraft(initial));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const answerRef = useRef(null);
+  const answerEnRef = useRef(null);
+  // Which answer box the Insert buttons type into: the last one used.
+  const tokenField = useRef("a");
   const locked = !!initial && initial.id === NOT_FOUND_ID;
 
   const set = (patch) => setDraft((d) => ({ ...d, ...patch }));
@@ -381,13 +411,15 @@ function FaqEditor({ initial, ctx, pages, nextOrder, onSaved, onCancel }) {
       return { ...d, links };
     });
 
-  // Puts {token} where the cursor is in the answer.
+  // Puts {token} where the cursor is in the answer box used last.
   const insertToken = (t) => {
-    const el = answerRef.current;
+    const field = tokenField.current;
+    const el = field === "a_en" ? answerEnRef.current : answerRef.current;
+    const value = draft[field];
     const text = `{${t}}`;
-    const start = el ? el.selectionStart : draft.a.length;
-    const end = el ? el.selectionEnd : draft.a.length;
-    set({ a: draft.a.slice(0, start) + text + draft.a.slice(end) });
+    const start = el ? el.selectionStart : value.length;
+    const end = el ? el.selectionEnd : value.length;
+    set({ [field]: value.slice(0, start) + text + value.slice(end) });
     requestAnimationFrame(() => {
       if (!el) return;
       el.focus();
@@ -395,11 +427,12 @@ function FaqEditor({ initial, ctx, pages, nextOrder, onSaved, onCancel }) {
     });
   };
 
-  const unknown = unknownTokens([draft.a, ...draft.links.map((l) => `${l.label} ${l.target}`)].join(" "));
+  const unknown = unknownTokens([draft.a, draft.a_en, ...draft.links.map((l) => `${l.label} ${l.label_en} ${l.target}`)].join(" "));
 
   const validate = () => {
     if (!draft.q.trim()) return "Type the question.";
     if (!draft.a.trim()) return "Type the answer.";
+    if (!draft.q_en.trim() !== !draft.a_en.trim()) return "Fill in both the English question and answer, or leave both empty.";
     const bad = draft.links.map(linkError).find(Boolean);
     return bad || "";
   };
@@ -467,6 +500,7 @@ function FaqEditor({ initial, ctx, pages, nextOrder, onSaved, onCancel }) {
               maxLength={3000}
               value={draft.a}
               onChange={(e) => set({ a: e.target.value })}
+              onFocus={() => (tokenField.current = "a")}
               placeholder="Each new line shows as a new line. Start a line with • for a list."
             />
             <span className="af-tokens">
@@ -489,6 +523,42 @@ function FaqEditor({ initial, ctx, pages, nextOrder, onSaved, onCancel }) {
             </small>
           </div>
 
+          <fieldset className="af-en">
+            <legend className="admin-label">English (optional)</legend>
+            <small className="am-hint">
+              Shown when visitors switch the assistant to EN. Leave both empty and they see the Tamil, with a note that the
+              answer is only in Tamil for now.
+            </small>
+            <label className="af-field">
+              <span className="admin-label">Question in English</span>
+              <input
+                className="admin-input admin-field"
+                value={draft.q_en}
+                maxLength={300}
+                onChange={(e) => set({ q_en: e.target.value })}
+                placeholder="When is Thamilaruvi held?"
+                lang="en"
+              />
+            </label>
+            <div className="af-field">
+              <label className="admin-label" htmlFor={`af-aen-${formId}`}>
+                Answer in English
+              </label>
+              <textarea
+                id={`af-aen-${formId}`}
+                ref={answerEnRef}
+                className="admin-input admin-field admin-textarea"
+                rows={6}
+                maxLength={3000}
+                value={draft.a_en}
+                onChange={(e) => set({ a_en: e.target.value })}
+                onFocus={() => (tokenField.current = "a_en")}
+                placeholder="Same layout as the Tamil: new lines, • for a list, and the Insert words work here too."
+                lang="en"
+              />
+            </div>
+          </fieldset>
+
           <div className="af-field">
             <span className="admin-label">Links under the answer</span>
             {draft.links.map((l, i) => {
@@ -503,6 +573,15 @@ function FaqEditor({ initial, ctx, pages, nextOrder, onSaved, onCancel }) {
                       onChange={(e) => setLink(l.key, { label: e.target.value })}
                       placeholder="Label, e.g. சொற்கணை"
                       aria-label="Link label"
+                    />
+                    <input
+                      className="admin-input af-link-label"
+                      value={l.label_en}
+                      maxLength={80}
+                      onChange={(e) => setLink(l.key, { label_en: e.target.value })}
+                      placeholder="English label, e.g. Sotkanai"
+                      aria-label="Link label in English"
+                      lang="en"
                     />
                     <select
                       className="admin-input af-link-kind"
@@ -553,7 +632,7 @@ function FaqEditor({ initial, ctx, pages, nextOrder, onSaved, onCancel }) {
               <button
                 type="button"
                 className="am-chip af-add-link"
-                onClick={() => set({ links: [...draft.links, toRow({ label: "", to: "" })] })}
+                onClick={() => set({ links: [...draft.links, toRow({ label: "", label_en: "", to: "" })] })}
               >
                 <FaPlus /> Add link
               </button>
@@ -609,23 +688,39 @@ function FaqEditor({ initial, ctx, pages, nextOrder, onSaved, onCancel }) {
   );
 }
 
-// The question and answer as a chat, the way the assistant shows them.
+// The question and answer as a chat, the way the assistant shows them, in
+// Tamil or English.
 function FaqPreview({ draft, ctx, unknown }) {
+  const [lang, setLang] = useState("ta");
   const links = draft.links.filter((l) => l.label.trim() && l.target.trim());
+  const english = lang === "en" && !!(draft.q_en.trim() && draft.a_en.trim());
+  const q = english ? draft.q_en.trim() : draft.q.trim();
+  const a = english ? draft.a_en.trim() : draft.a.trim();
   return (
     <div className="af-preview">
-      <span className="admin-label">Preview - what visitors see</span>
-      <div className="af-chat">
+      <div className="af-preview-head">
+        <span className="admin-label">Preview - what visitors see</span>
+        <span className="af-plang" role="group" aria-label="Preview language">
+          <button type="button" className={lang === "ta" ? "is-on" : ""} aria-pressed={lang === "ta"} onClick={() => setLang("ta")}>
+            த
+          </button>
+          <button type="button" className={lang === "en" ? "is-on" : ""} aria-pressed={lang === "en"} onClick={() => setLang("en")}>
+            EN
+          </button>
+        </span>
+      </div>
+      <div className="af-chat" lang={english ? "en" : "ta"}>
         <div className="af-msg is-user">
-          <div className="af-bubble">{draft.q.trim() || "கேள்வி…"}</div>
+          <div className="af-bubble">{q || (lang === "en" ? "Question…" : "கேள்வி…")}</div>
         </div>
         <div className="af-msg is-bot">
           <div className="af-bubble">
-            <div className="af-answer">{fillTokens(draft.a.trim(), ctx) || "பதில்…"}</div>
+            {lang === "en" && !english && <div className="af-pnote">This answer is only in Tamil for now.</div>}
+            <div className="af-answer">{fillTokens(a, ctx) || (lang === "en" ? "Answer…" : "பதில்…")}</div>
             {links.length > 0 && (
               <div className="af-plinks">
                 {links.map((l) => {
-                  const label = fillTokens(l.label.trim(), ctx);
+                  const label = fillTokens((lang === "en" && l.label_en.trim()) || l.label.trim(), ctx);
                   const href = l.kind === "to" ? l.target.trim() : fillTokens(l.target.trim(), ctx);
                   const ok = !linkError(l) && !/\{\w+\}/.test(href);
                   return (
