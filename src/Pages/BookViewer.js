@@ -45,6 +45,11 @@ function BookPage({ book, pages }) {
   const pdfDownload = pdfDownloadUrl(book);
   const docDownload = docDownloadUrl(book);
   const description = book.description || `${SITE} — ${book.title} நூல்.`;
+  // "a, b, c" (stray commas and spaces ignored) -> ["a", "b", "c"]
+  const authors = (book.author || "")
+    .split(/\s*[,،;]\s*/)
+    .map((n) => n.trim())
+    .filter(Boolean);
   const eyebrow = book.category === "student" ? "பல்கலைக்கழக மாணவர் வெளியீடு" : `${SITE} · வெளியீடு`;
   // A thicker book for more pages, within reason.
   const thickness = pages ? Math.round(Math.min(40, Math.max(10, pages * 0.32))) : 20;
@@ -121,22 +126,20 @@ function BookPage({ book, pages }) {
             </Link>
             <span className="bk-eyebrow">{eyebrow}</span>
             <h1 className="bk-title">{book.title}</h1>
-            {book.author && (
+            {authors.length > 0 && (
               // TLA publications list their editors; a student's book its author.
-              <div className="bk-author">
+              // A long list is laid out in aligned columns.
+              <div className={`bk-author ${authors.length > 3 ? "is-list" : ""}`}>
                 <span className="bk-author-label">
                   {book.category === "student" ? "எழுத்தாளர்" : "இதழாசிரியர்கள்"}
                   <small>{book.category === "student" ? " (Author)" : " (Editors)"}</small>:
                 </span>
                 <span className="bk-author-names">
-                  {book.author
-                    .split(/\s*[,،;]\s*/)
-                    .filter(Boolean)
-                    .map((name, i) => (
-                      <span key={i} className="bk-author-name">
-                        {name}
-                      </span>
-                    ))}
+                  {authors.map((name, i) => (
+                    <span key={i} className="bk-author-name">
+                      {name}
+                    </span>
+                  ))}
                 </span>
               </div>
             )}

@@ -317,11 +317,48 @@
   gap: 2px 0;
 }
 
-/* names separated by a small gold dot */
-.bk-author-name + .bk-author-name::before {
+/* up to 3 names: one line, separated by a small gold dot */
+.bk-author:not(.is-list) .bk-author-name + .bk-author-name::before {
   content: "•";
   margin: 0 10px;
   color: var(--bk-gold);
+}
+
+/* a longer list: the label on its own line, then the names in aligned
+   columns, each with its own gold dot */
+.bk-author.is-list {
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  width: 100%;
+  max-width: 640px;
+}
+
+.bk-author.is-list .bk-author-names {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  grid-auto-rows: min-content;
+  align-content: start;
+  gap: 6px 22px;
+}
+
+.bk-author.is-list .bk-author-name {
+  position: relative;
+  padding-left: 16px;
+  font-size: 16.5px;
+  line-height: 1.5;
+}
+
+.bk-author.is-list .bk-author-name::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.68em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--bk-gold);
 }
 
 .bk-facts {
@@ -681,5 +718,15 @@
   .bk-author,
   .bk-author-names {
     justify-content: center;
+  }
+
+  /* centred page: the column list stays left-aligned inside a centred box */
+  .bk-author.is-list {
+    margin: 0 auto;
+    text-align: left;
+  }
+
+  .bk-author.is-list .bk-author-label {
+    text-align: center;
   }
 }
