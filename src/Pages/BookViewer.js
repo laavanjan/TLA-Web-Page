@@ -128,8 +128,8 @@ function BookPage({ book, pages }) {
             <h1 className="bk-title">{book.title}</h1>
             {authors.length > 0 && (
               // TLA publications list their editors; a student's book its author.
-              // A long list is laid out in aligned columns.
-              <div className={`bk-author ${authors.length > 3 ? "is-list" : ""}`}>
+              // The names are laid out in aligned columns, however many there are.
+              <div className="bk-author is-list">
                 <span className="bk-author-label">
                   {book.category === "student" ? "எழுத்தாளர்" : "இதழாசிரியர்கள்"}
                   <small>{book.category === "student" ? " (Author)" : " (Editors)"}</small>:

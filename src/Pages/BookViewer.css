@@ -317,15 +317,8 @@
   gap: 2px 0;
 }
 
-/* up to 3 names: one line, separated by a small gold dot */
-.bk-author:not(.is-list) .bk-author-name + .bk-author-name::before {
-  content: "•";
-  margin: 0 10px;
-  color: var(--bk-gold);
-}
-
-/* a longer list: the label on its own line, then the names in aligned
-   columns, each with its own gold dot */
+/* the label on its own line, then the names in aligned columns, each with
+   its own gold dot */
 .bk-author.is-list {
   flex: 0 0 auto;
   flex-direction: column;
