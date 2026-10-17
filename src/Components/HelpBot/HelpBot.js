@@ -39,6 +39,7 @@ const UI = {
     launcherAria: "TLA உதவி - கேள்விகளுக்குப் பதில்கள்",
     label: "உதவி",
     hint: "கேள்விகள் & பதில்கள்",
+    teasers: ["கேள்விகள் & பதில்கள்", "தமிழருவி எப்போது?", "அணியில் இணைவது எப்படி?"],
     title: "TLA உதவி",
     sub: "கேள்வியைத் தெரிவு செய்யுங்கள் · உடனே பதில்",
     restart: "மீண்டும் தொடங்கு",
@@ -60,6 +61,7 @@ const UI = {
     launcherAria: "TLA Help - answers to your questions",
     label: "Help",
     hint: "Questions & answers",
+    teasers: ["Questions & answers", "When is Thamilaruvi?", "How do I join a team?"],
     title: "TLA Help",
     sub: "Pick a question · instant answer",
     restart: "Start again",
@@ -80,6 +82,71 @@ const UI = {
 };
 
 const LANG_KEY = "tla_helpbot_lang";
+
+// The button is just the gold த coin. Once per visit it unrolls to show its
+// name and a few teaser questions: after PEEK_AFTER_MS on a page, or sooner
+// if the visitor scrolls well down (looking for something). It rolls back
+// after PEEK_FOR_MS; hovering or tabbing to it unrolls it any time.
+const PEEK_KEY = "tla_helpbot_peeked";
+const PEEK_AFTER_MS = 12000;
+const PEEK_SCROLL = 0.55; // how far down the page counts as "looking"
+const PEEK_FOR_MS = 9000;
+const TEASER_MS = 3000;
+
+const sessionFlag = (key, set) => {
+  try {
+    if (set) sessionStorage.setItem(key, "1");
+    return sessionStorage.getItem(key) === "1";
+  } catch {
+    return false;
+  }
+};
+
+// true while the button is unrolled on its own.
+function usePeek(disabled) {
+  const [peek, setPeek] = useState(false);
+
+  useEffect(() => {
+    if (disabled || sessionFlag(PEEK_KEY)) return undefined;
+    let done = false;
+    let hideTimer = 0;
+    const show = () => {
+      if (done) return;
+      done = true;
+      sessionFlag(PEEK_KEY, true);
+      setPeek(true);
+      hideTimer = setTimeout(() => setPeek(false), PEEK_FOR_MS);
+      window.removeEventListener("scroll", onScroll);
+    };
+    const onScroll = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      if (max > 0 && window.scrollY / max > PEEK_SCROLL) show();
+    };
+    const showTimer = setTimeout(show, PEEK_AFTER_MS);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [disabled]);
+
+  return [peek, setPeek];
+}
+
+// Cycles through the teaser lines while `on`.
+function useTeaser(on, count) {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    if (!on) {
+      setI(0);
+      return undefined;
+    }
+    const t = setInterval(() => setI((n) => (n + 1) % count), TEASER_MS);
+    return () => clearInterval(t);
+  }, [on, count]);
+  return i;
+}
 function readLang() {
   try {
     return localStorage.getItem(LANG_KEY) === "en" ? "en" : "ta";
@@ -160,6 +227,9 @@ export default function HelpBot() {
   const [listOpen, setListOpen] = useState(true);
   const [lang, setLangState] = useState(readLang);
   const t = UI[lang];
+  // Never nudge someone who has already opened the chat.
+  const [peek, setPeek] = usePeek(open);
+  const teaser = useTeaser(peek, t.teasers.length);
   const setLang = (l) => {
     setLangState(l);
     try {
@@ -260,8 +330,12 @@ export default function HelpBot() {
     <>
       <button
         type="button"
-        className={`hb-launcher ${open ? "is-hidden" : ""}`}
-        onClick={() => setOpen(true)}
+        className={`hb-launcher ${open ? "is-hidden" : ""} ${peek ? "is-peek" : ""}`}
+        onClick={() => {
+          sessionFlag(PEEK_KEY, true);
+          setPeek(false);
+          setOpen(true);
+        }}
         aria-label={t.launcherAria}
         aria-expanded={open}
       >
@@ -270,7 +344,9 @@ export default function HelpBot() {
         </span>
         <span className="hb-launcher-text">
           <span className="hb-launcher-label">{t.label}</span>
-          <span className="hb-launcher-hint">{t.hint}</span>
+          <span className="hb-launcher-hint" key={peek ? teaser : "hint"}>
+            {peek ? t.teasers[teaser] : t.hint}
+          </span>
         </span>
       </button>
 
