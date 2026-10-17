@@ -122,8 +122,9 @@
     flex: 1;
     border: none;
     background: transparent;
-    font-family: 'Para' !important;
-    font-size: 19px;
+    /* what visitors type (emails, phone numbers) - same reason as .contact-info-value */
+    font-family: "Mukta Malar", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 16px;
     color: #022345;
     padding: 11px 12px 11px 0;
     outline: none;
@@ -273,10 +274,16 @@
     color: #9aa2ab;
 }
 
+/* Email and phone: 'Para' has no proper English letters or digits (they fell
+   back to a Times-style font), so English and numbers use the system UI font
+   and Tamil (a phone contact's name) the bundled Mukta Malar. */
 .contact-info-value {
-    font-family: 'Para' !important;
-    font-size: 19px;
+    font-family: "Mukta Malar", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.4;
     color: #022345;
+    overflow-wrap: anywhere;
 }
 
 /* Social card */
