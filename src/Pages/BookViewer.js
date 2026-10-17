@@ -16,6 +16,7 @@ import {
   docDownloadUrl,
   pdfPageImage,
   useCover,
+  shareImageUrl,
   driveViewLink,
 } from "../book/books";
 import "./Frame.css";
@@ -37,8 +38,10 @@ function BookPage({ book, pages }) {
   const [copied, setCopied] = useState(false);
   const readerRef = useRef(null);
   const uploaded = book.source === "upload";
-  // Shown big here, so a sharper picture; switches to the other picture if it can't load.
-  const [cover, onCoverError] = useCover(book, 800);
+  // The book's own page shows the PDF's first page (sharper, as it's big here),
+  // or the uploaded photo if the page can't load. Link previews use the photo.
+  const [cover, onCoverError] = useCover(book, 800, "page");
+  const shareImage = shareImageUrl(book);
   const pdfDownload = pdfDownloadUrl(book);
   const docDownload = docDownloadUrl(book);
   const description = book.description || `${SITE} — ${book.title} நூல்.`;
@@ -87,7 +90,7 @@ function BookPage({ book, pages }) {
         <meta name="description" content={description} />
         <meta property="og:title" content={book.title} />
         <meta property="og:description" content={description} />
-        {cover && /^https?:/.test(cover) && <meta property="og:image" content={cover} />}
+        {shareImage && /^https?:/.test(shareImage) && <meta property="og:image" content={shareImage} />}
       </Helmet>
 
       <section className="bk-hero">
@@ -118,7 +121,25 @@ function BookPage({ book, pages }) {
             </Link>
             <span className="bk-eyebrow">{eyebrow}</span>
             <h1 className="bk-title">{book.title}</h1>
-            {book.author && <div className="bk-author">{book.author}</div>}
+            {book.author && (
+              // TLA publications list their editors; a student's book its author.
+              <div className="bk-author">
+                <span className="bk-author-label">
+                  {book.category === "student" ? "எழுத்தாளர்" : "இதழாசிரியர்கள்"}
+                  <small>{book.category === "student" ? " (Author)" : " (Editors)"}</small>:
+                </span>
+                <span className="bk-author-names">
+                  {book.author
+                    .split(/\s*[,،;]\s*/)
+                    .filter(Boolean)
+                    .map((name, i) => (
+                      <span key={i} className="bk-author-name">
+                        {name}
+                      </span>
+                    ))}
+                </span>
+              </div>
+            )}
 
             <ul className="bk-facts">
               {book.year && (
