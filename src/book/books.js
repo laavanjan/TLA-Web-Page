@@ -3,8 +3,12 @@
 //
 // A book's PDF is either a Google Drive file (`source: "drive"`, opened through
 // Drive's own viewer) or a PDF uploaded to Cloudinary (`source: "upload"`). An
-// optional Word document is any Drive / Google Docs link. The cover is the
-// PDF's first page unless the admin picked an uploaded picture (`cover_choice`).
+// optional Word document is any Drive / Google Docs link.
+//
+// Covers: the card on /books shows the admin's uploaded photo (cover_url) and
+// the book's own page shows the PDF's first page; each falls back to the other
+// when its picture is missing or can't load. Link previews use the photo.
+// (The old `cover_choice` column is no longer used.)
 import { useEffect, useState } from "react";
 import { supabase } from "../helpers/supabaseClient";
 import { deleteImages } from "../shared/cloudinaryUpload";
@@ -136,29 +140,31 @@ function firstPageUrl(b, width) {
   return "";
 }
 
-// The uploaded picture is used only when the admin chose it and it exists.
-export const usesFirstPage = (b) => !(b.cover_choice === "upload" && b.cover_url);
-
-// What the book shows as its cover: the PDF's first page or the uploaded
-// picture, whichever the admin chose (the other one when that is missing).
-export function coverUrl(b, width = 600) {
-  if (!usesFirstPage(b)) return b.cover_url;
-  return firstPageUrl(b, width) || b.cover_url;
+// The two cover pictures in the order they're tried:
+//   "card" - the card on /books: the uploaded photo, else the first page
+//   "page" - the book's own page: the first page, else the photo
+function coverPair(b, width, kind) {
+  const photo = b.cover_url || "";
+  const page = firstPageUrl(b, width);
+  const [main, other] = kind === "page" ? [page, photo] : [photo, page];
+  return [main || other, main && other && other !== main ? other : ""];
 }
 
-// The other picture, tried when the chosen one fails to load (e.g. a Drive
+// The picture a book shows: kind "card" (default) or "page" (see coverPair).
+export const coverUrl = (b, width = 600, kind = "card") => coverPair(b, width, kind)[0];
+
+// The other picture, tried when the first one fails to load (e.g. a Drive
 // file that isn't shared publicly). "" when there is none.
-export function coverFallback(b, width = 600) {
-  const main = coverUrl(b, width);
-  const other = usesFirstPage(b) ? b.cover_url : firstPageUrl(b, width);
-  return other && other !== main ? other : "";
-}
+export const coverFallback = (b, width = 600, kind = "card") => coverPair(b, width, kind)[1];
 
-// [src, onError] for a cover <img>: switches to coverFallback once if the
-// chosen picture can't be loaded.
-export function useCover(b, width = 600) {
-  const main = b ? coverUrl(b, width) : "";
-  const fallback = b ? coverFallback(b, width) : "";
+// For link previews (WhatsApp, Facebook): the photo, else the first page.
+export const shareImageUrl = (b) => coverUrl(b, 1200, "card");
+
+// [src, onError] for a cover <img>: switches to the other picture once if the
+// first one can't be loaded.
+export function useCover(b, width = 600, kind = "card") {
+  const main = b ? coverUrl(b, width, kind) : "";
+  const fallback = b ? coverFallback(b, width, kind) : "";
   const [failed, setFailed] = useState("");
   const src = failed === main && fallback ? fallback : main;
   const onError = () => {
@@ -369,7 +375,6 @@ const EDITABLE = [
   "doc_link",
   "cover_url",
   "cover_public_id",
-  "cover_choice",
   "page_count",
   "visibility",
 ];
