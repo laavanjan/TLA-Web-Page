@@ -414,7 +414,7 @@ function BookEditor({ initial, sortOrder = 0, onSaved, onCancel }) {
           <input
             className="admin-input admin-field"
             value={draft.author}
-            maxLength={200}
+            maxLength={1500}
             onChange={(e) => set({ author: e.target.value })}
             placeholder={
               draft.category === "student"
