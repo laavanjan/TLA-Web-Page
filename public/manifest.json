@@ -1,17 +1,17 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "TLA UoM",
+  "name": "Tamil Literary Association, University of Moratuwa",
   "icons": [
   
     {
-      "src": "logo.png",
+      "src": "favicon-192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
       "src": "logo.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "315x315"
     }
   ],
   "start_url": ".",
