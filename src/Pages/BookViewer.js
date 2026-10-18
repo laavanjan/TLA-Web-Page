@@ -7,6 +7,7 @@ import { Link, useParams } from "react-router-dom";
 import { FaBookOpen, FaDownload, FaFileWord, FaShareAlt, FaArrowLeft, FaGoogleDrive } from "react-icons/fa";
 
 import LotusDivider from "./LotusDivider";
+import BookSuggestions from "./BookSuggestions";
 import FlipBook from "../Components/book/flipbook/FlipBook";
 import {
   useBook,
@@ -211,11 +212,9 @@ function BookPage({ book, pages }) {
             </a>
           </div>
         )}
-
-        <Link to="/books" className="bk-more">
-          <FaArrowLeft /> மற்ற நூல்கள்
-        </Link>
       </section>
+
+      <BookSuggestions slug={book.slug} />
     </div>
   );
 }
