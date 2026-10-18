@@ -329,6 +329,9 @@
 }
 
 .bk-author.is-list .bk-author-names {
+  /* a definite width, so the flex column measures the grid's height at the
+     real column count, not as one long single column (a gap below the list) */
+  width: 100%;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   grid-auto-rows: min-content;
