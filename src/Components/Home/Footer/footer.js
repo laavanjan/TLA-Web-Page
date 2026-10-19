@@ -167,7 +167,12 @@ function Footer() {
         <div className="ft-bottom-inner">
           <span className="ft-copy">
             © {year} தமிழ் இலக்கிய மன்றம் · அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை
-            <span className="ft-copy-en">Tamil Literary Association, University of Moratuwa</span>
+            <span className="ft-copy-en">
+              Tamil Literary Association, University of Moratuwa ·{" "}
+              <Link to="/privacy" className="ft-privacy">
+                Privacy
+              </Link>
+            </span>
           </span>
           <button type="button" className="ft-top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
             மேலே செல்ல <FaArrowUp aria-hidden="true" />

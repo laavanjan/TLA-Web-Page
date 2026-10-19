@@ -405,3 +405,13 @@
     transition: none;
   }
 }
+
+.ft-privacy {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.ft-privacy:hover {
+  color: var(--ft-gold-soft);
+}
