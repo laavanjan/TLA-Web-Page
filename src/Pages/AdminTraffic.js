@@ -9,7 +9,8 @@ import { FaSyncAlt, FaDatabase } from "react-icons/fa";
 
 import LotusDivider from "./LotusDivider";
 import { fetchTrafficDays, TrafficNotSetUp } from "../admin/trafficData";
-import { RANGES, rangeDates, totals } from "../admin/trafficMath";
+import { RANGES, rangeDates, totals, dailySeries } from "../admin/trafficMath";
+import StatTiles from "../Components/traffic/StatTiles";
 import "./Frame.css";
 import "./Admin.css";
 import "./AdminDashboard.css";
@@ -76,6 +77,12 @@ export default function AdminTraffic() {
   const [reloadKey, setReloadKey] = useState(0);
   const traffic = useTraffic(rangeId, reloadKey);
   const now = useMemo(() => totals(traffic.rows), [traffic.rows]);
+  const before = useMemo(() => totals(traffic.prevRows), [traffic.prevRows]);
+  const series = useMemo(
+    () => dailySeries(traffic.rows, traffic.dates.from, traffic.dates.to),
+    [traffic.rows, traffic.dates]
+  );
+  const rangeLabel = (RANGES.find((r) => r.id === rangeId) || RANGES[2]).label;
 
   const pickRange = useCallback((id) => {
     setRangeId(id);
@@ -153,6 +160,7 @@ export default function AdminTraffic() {
                 first day will look small.
               </p>
             )}
+            <StatTiles now={now} before={before} series={series} rangeLabel={rangeLabel} />
           </div>
         )}
       </div>
