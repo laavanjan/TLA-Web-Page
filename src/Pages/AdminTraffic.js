@@ -15,6 +15,7 @@ import VisitorsChart from "../Components/traffic/VisitorsChart";
 import LiveNow from "../Components/traffic/LiveNow";
 import Sources from "../Components/traffic/Sources";
 import TopPages from "../Components/traffic/TopPages";
+import BusiestTimes from "../Components/traffic/BusiestTimes";
 import "./Frame.css";
 import "./Admin.css";
 import "./AdminDashboard.css";
@@ -173,6 +174,7 @@ export default function AdminTraffic() {
               <Sources now={now} index={3} />
               <TopPages now={now} index={4} />
             </div>
+            <BusiestTimes rows={traffic.rows} index={5} />
           </div>
         )}
       </div>
