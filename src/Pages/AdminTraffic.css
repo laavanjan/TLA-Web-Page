@@ -1264,3 +1264,27 @@
   font-size: 12px !important;
   color: var(--tr-muted);
 }
+
+/* ---- Privacy note -------------------------------------------------------------------------- */
+.tr-privacy {
+  display: flex;
+  gap: 12px;
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 14px;
+  font-size: 12.5px !important;
+  line-height: 1.6;
+  color: var(--tr-muted);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--tr-line);
+}
+
+.tr-privacy svg {
+  flex: 0 0 auto;
+  margin-top: 3px;
+  color: #4ade80;
+}
+
+.tr-privacy a {
+  color: #ffd76e;
+}

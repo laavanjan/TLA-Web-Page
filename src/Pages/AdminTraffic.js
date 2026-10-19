@@ -5,7 +5,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Helmet } from "react-helmet";
 import { Link } from "react-router-dom";
-import { FaSyncAlt, FaDatabase } from "react-icons/fa";
+import { FaSyncAlt, FaDatabase, FaShieldAlt } from "react-icons/fa";
 
 import LotusDivider from "./LotusDivider";
 import { fetchTrafficDays, TrafficNotSetUp } from "../admin/trafficData";
@@ -191,6 +191,18 @@ export default function AdminTraffic() {
             </div>
             <Funnels dates={traffic.dates} index={8} />
             <Campaigns now={now} index={9} />
+            <p className="tr-privacy">
+              <FaShieldAlt aria-hidden="true" />
+              <span>
+                Everyone who visits is counted, not only members, but anonymously: no IP addresses, names or emails are stored,
+                and the visit id changes every day. Bots, admin and editor accounts, and browsers that send "Do Not Track" are
+                skipped. Single page views are deleted after 90 days; the daily totals are kept. Visitors can read this on the{" "}
+                <a href="/privacy" target="_blank" rel="noopener noreferrer">
+                  privacy page
+                </a>
+                .
+              </span>
+            </p>
           </div>
         )}
       </div>
