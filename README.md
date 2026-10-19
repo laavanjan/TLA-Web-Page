@@ -282,6 +282,34 @@ Run the tests with `npx react-scripts test --watchAll=false src/shared/siteStatu
 
 ---
 
+## Traffic analytics (`/admin/traffic`)
+
+Main admins can see who visits the website: daily visitors, who is on the site right now, where visitors come from (Google, Instagram, WhatsApp, TikTok, QR codes…), the most visited pages and books, the busiest days and hours, devices and countries, and how many visits go on to send a team join application or submit a book. A summary at the top says it in plain sentences, and the numbers can be downloaded as CSV for Excel.
+
+- **Everyone is counted**, not only members, but anonymously: no IP addresses, names or emails. The visit id is random and changes every day.
+- **Not counted:** bots and link previews, anyone signed in to the admin (admins and editors), the `/admin` pages, browsers that send Do Not Track / Global Privacy Control, and `localhost` (set `REACT_APP_ANALYTICS_DEV=1` to count it while testing).
+- **Kept:** single page views for 90 days (for the funnels and the live view); the daily totals in `analytics_daily` for good.
+- **Tagged links:** add `?utm_source=instagram&utm_campaign=thamilaruvi-2026` to a link and its visitors show up under that campaign. The Traffic page has a builder for these, and QR codes made at `/admin/qr` are tagged automatically.
+- **Country** comes from Vercel's `x-vercel-ip-country` header through `api/geo.js`; if that isn't reachable the browser's time zone gives a guess.
+- The public [privacy page](/privacy) explains all this to visitors and is linked from the footer.
+- There is no cookie banner: nothing is used for advertising and no one can be identified, but check with the committee whether one is wanted.
+
+**One-time setup:** Supabase → SQL Editor → run [`supabase/migrations/analytics.sql`](supabase/migrations/analytics.sql) (after `team_editors.sql`). It also schedules a nightly clean-up with `pg_cron`; if it prints a notice that `pg_cron` isn't available, turn it on under Database → Extensions and run the file again. Counting starts when the file is run, so the first day looks small.
+
+| File | Purpose |
+|------|---------|
+| `supabase/migrations/analytics.sql` | Tables, the tracking function, daily roll-up, live view, funnels, nightly job |
+| `src/analytics/tracker.js` | Sends page views and form events; skips bots, admins and Do Not Track |
+| `src/analytics/classify.js` · `device.js` · `identity.js` · `geo.js` | Source of a visit, device and browser, anonymous ids, country |
+| `api/geo.js` | Vercel function returning the visitor's country |
+| `src/admin/trafficData.js` · `trafficMath.js` · `trafficLabels.js` | Loading, adding up and naming the numbers |
+| `src/Pages/AdminTraffic.js` · `src/Components/traffic/` | The Traffic page and its panels |
+| `src/Pages/Privacy.js` | The public privacy page |
+
+Run the tests with `npx react-scripts test --watchAll=false src/analytics src/admin`.
+
+---
+
 ## Hackathon event configuration
 
 Go to `src/Components/events/hackthon/agenda/eventList.js` and edit the `events` object to update the agenda.
