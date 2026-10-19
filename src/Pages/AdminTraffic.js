@@ -12,6 +12,7 @@ import { fetchTrafficDays, TrafficNotSetUp } from "../admin/trafficData";
 import { RANGES, rangeDates, totals, dailySeries } from "../admin/trafficMath";
 import StatTiles from "../Components/traffic/StatTiles";
 import VisitorsChart from "../Components/traffic/VisitorsChart";
+import LiveNow from "../Components/traffic/LiveNow";
 import "./Frame.css";
 import "./Admin.css";
 import "./AdminDashboard.css";
@@ -162,7 +163,10 @@ export default function AdminTraffic() {
               </p>
             )}
             <StatTiles now={now} before={before} series={series} rangeLabel={rangeLabel} />
-            <VisitorsChart series={series} index={1} />
+            <div className="tr-grid tr-grid-hero">
+              <VisitorsChart series={series} index={1} />
+              <LiveNow index={2} />
+            </div>
           </div>
         )}
       </div>

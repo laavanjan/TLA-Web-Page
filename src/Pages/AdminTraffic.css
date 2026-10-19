@@ -439,3 +439,129 @@
 .tr-chart-note b {
   color: var(--tr-ink);
 }
+
+/* ---- Live now ----------------------------------------------------------------------- */
+.tr-live-count {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.tr-live-count strong {
+  font-size: 44px !important;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--tr-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.tr-live-count span:last-child {
+  font-size: 13.5px !important;
+  color: var(--tr-ink-2);
+}
+
+.tr-pulse {
+  position: relative;
+  align-self: center;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #5c667a;
+}
+
+.tr-pulse.is-on {
+  background: var(--tr-up);
+}
+
+.tr-pulse.is-on::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid var(--tr-up);
+  animation: tr-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes tr-ping {
+  from {
+    transform: scale(0.5);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+.tr-live-pages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tr-live-pages li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: 9px;
+  font-size: 13.5px !important;
+  color: var(--tr-ink-2);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tr-live-page {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tr-live-pages b {
+  color: var(--tr-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.tr-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tr-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px !important;
+  font-weight: 600;
+  color: var(--tr-ink-2);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--tr-line);
+}
+
+.tr-live-updated {
+  font-size: 11.5px !important;
+  color: var(--tr-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tr-pulse.is-on::after {
+    animation: none;
+  }
+}
+
+.tr-grid-hero {
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+}
+
+@media (max-width: 1000px) {
+  .tr-grid-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
