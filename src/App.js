@@ -12,6 +12,7 @@ import { useLocation } from "react-router-dom";
 import { useAuth } from "./providers/AuthProvider";
 import { currentUser } from "./helpers/server";
 import { trackPageView } from "./analytics/tracker";
+import RouteSeo from "./seo/RouteSeo";
 
 function App() {
   const auth = useAuth();
@@ -29,6 +30,7 @@ function App() {
   return (
     <MaintenanceGate>
       <ScrollToTop />
+      <RouteSeo />
       {!standalone && <Navbar />}
       <Router/>
       {!standalone && <Footer />}
