@@ -710,3 +710,38 @@
     animation: none;
   }
 }
+
+/* ---- Small tabs inside a card ------------------------------------------------------------ */
+.tr-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tr-tabs button {
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--tr-line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--tr-ink-2);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tr-tabs button:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.tr-tabs button.is-active {
+  border-color: transparent;
+  background: rgba(57, 135, 229, 0.22);
+  color: #cfe2fb;
+}
+
+.tr-tabs button:focus-visible,
+.tr-more:focus-visible {
+  outline: 2px solid var(--tr-gold);
+  outline-offset: 2px;
+}

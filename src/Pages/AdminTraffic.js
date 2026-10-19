@@ -14,6 +14,7 @@ import StatTiles from "../Components/traffic/StatTiles";
 import VisitorsChart from "../Components/traffic/VisitorsChart";
 import LiveNow from "../Components/traffic/LiveNow";
 import Sources from "../Components/traffic/Sources";
+import TopPages from "../Components/traffic/TopPages";
 import "./Frame.css";
 import "./Admin.css";
 import "./AdminDashboard.css";
@@ -170,6 +171,7 @@ export default function AdminTraffic() {
             </div>
             <div className="tr-grid">
               <Sources now={now} index={3} />
+              <TopPages now={now} index={4} />
             </div>
           </div>
         )}
