@@ -913,3 +913,122 @@
     animation: none;
   }
 }
+
+/* ---- Funnels --------------------------------------------------------------------------------- */
+.tr-funnels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+@media (max-width: 800px) {
+  .tr-funnels {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.tr-funnel h3 {
+  margin: 0 0 10px;
+  font-size: 14px !important;
+  font-weight: 800;
+  color: var(--tr-ink);
+}
+
+.tr-funnel ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tr-funnel-step {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 42px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+}
+
+.tr-funnel-bar {
+  position: absolute;
+  z-index: -1;
+  inset: 0 auto 0 0;
+  width: var(--w);
+  border-radius: 10px;
+  background: linear-gradient(90deg, rgba(201, 133, 0, 0.5), rgba(201, 133, 0, 0.22));
+  transform-origin: left;
+  animation: tr-grow 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.tr-funnel-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 13.5px !important;
+  font-weight: 600;
+  color: var(--tr-ink);
+}
+
+.tr-funnel-label b {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 11px;
+  color: #1a1400;
+  background: var(--tr-gold);
+}
+
+.tr-funnel-n {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 15px !important;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.tr-funnel-n small {
+  font-size: 12px !important;
+  font-weight: 600;
+  color: var(--tr-ink-2);
+}
+
+.tr-funnel-drop {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 0 5px 18px;
+  font-size: 11.5px !important;
+  font-weight: 600;
+  color: var(--tr-muted);
+}
+
+.tr-funnel-drop svg {
+  font-size: 9px;
+}
+
+.tr-funnel-drop.is-worst {
+  color: var(--tr-down);
+}
+
+.tr-loading-sm {
+  height: 120px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tr-funnel-bar {
+    animation: none;
+  }
+}

@@ -17,6 +17,7 @@ import Sources from "../Components/traffic/Sources";
 import TopPages from "../Components/traffic/TopPages";
 import BusiestTimes from "../Components/traffic/BusiestTimes";
 import Audience from "../Components/traffic/Audience";
+import Funnels from "../Components/traffic/Funnels";
 import "./Frame.css";
 import "./Admin.css";
 import "./AdminDashboard.css";
@@ -179,6 +180,7 @@ export default function AdminTraffic() {
             <div className="tr-grid">
               <Audience now={now} index={6} />
             </div>
+            <Funnels dates={traffic.dates} index={8} />
           </div>
         )}
       </div>
