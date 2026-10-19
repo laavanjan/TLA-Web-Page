@@ -2,7 +2,7 @@
 // built-in sections). Used by the public event routes and by the admin's
 // Preview tab.
 import React from "react";
-import { Helmet } from "react-helmet";
+import Seo from "../../seo/Seo";
 import { Container, Grid } from "@mui/material";
 import { SmartImage } from "../teams/team-detail/media";
 import {
@@ -126,6 +126,15 @@ function groupSections(sections) {
   return groups;
 }
 
+// The picture for link previews: an uploaded image as it is; the site's own
+// card illustrations have a 1200×630 version in public/og (scripts/og-images.py).
+function shareImage(page) {
+  const img = page.image || "";
+  if (/^https?:\/\//.test(img)) return img;
+  if (img.startsWith("asset:")) return `/og/${page.id}.jpg`;
+  return undefined;
+}
+
 const EventDetail = ({ page, preview = false }) => {
   const visible = page.sections.filter((s) => !s.hidden && hasContent(s));
   const intro = visible.find((s) => s.type === "intro");
@@ -135,11 +144,7 @@ const EventDetail = ({ page, preview = false }) => {
   return (
     <div className="team-detail-page event-page">
       {!preview && (
-        <Helmet>
-          <title>{`${page.title} | தமிழ் இலக்கிய மன்றம்`}</title>
-          <meta name="description" content={description} />
-          <meta name="keywords" content={`TLA, Tamil Literary Association, ${page.title}`} />
-        </Helmet>
+        <Seo title={page.title} description={description} path={page.path} image={shareImage(page)} type="article" />
       )}
 
       {intro ? (
