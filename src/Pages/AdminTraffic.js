@@ -19,6 +19,7 @@ import BusiestTimes from "../Components/traffic/BusiestTimes";
 import Audience from "../Components/traffic/Audience";
 import Funnels from "../Components/traffic/Funnels";
 import Campaigns from "../Components/traffic/Campaigns";
+import Highlights from "../Components/traffic/Highlights";
 import "./Frame.css";
 import "./Admin.css";
 import "./AdminDashboard.css";
@@ -168,6 +169,7 @@ export default function AdminTraffic() {
                 first day will look small.
               </p>
             )}
+            <Highlights now={now} before={before} rows={traffic.rows} rangeLabel={rangeLabel} />
             <StatTiles now={now} before={before} series={series} rangeLabel={rangeLabel} />
             <div className="tr-grid tr-grid-hero">
               <VisitorsChart series={series} index={1} />
