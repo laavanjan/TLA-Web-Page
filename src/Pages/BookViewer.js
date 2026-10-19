@@ -2,11 +2,11 @@
 // details and download buttons, then the reader. An uploaded PDF opens in the
 // page-turning reader (FlipBook); a Google Drive book in Drive's own viewer.
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Helmet } from "react-helmet";
 import { Link, useParams } from "react-router-dom";
 import { FaBookOpen, FaDownload, FaFileWord, FaShareAlt, FaArrowLeft, FaGoogleDrive } from "react-icons/fa";
 
 import LotusDivider from "./LotusDivider";
+import Seo from "../seo/Seo";
 import BookSuggestions from "./BookSuggestions";
 import FlipBook from "../Components/book/flipbook/FlipBook";
 import {
@@ -91,13 +91,14 @@ function BookPage({ book, pages }) {
 
   return (
     <div className="bk">
-      <Helmet>
-        <title>{`${book.title} - நூல் | ${SITE}`}</title>
-        <meta name="description" content={description} />
-        <meta property="og:title" content={book.title} />
-        <meta property="og:description" content={description} />
-        {shareImage && /^https?:/.test(shareImage) && <meta property="og:image" content={shareImage} />}
-      </Helmet>
+      <Seo
+        title={`${book.title} - நூல்`}
+        description={description}
+        path={`/books/${book.slug}`}
+        image={shareImage || undefined}
+        type="book"
+        noindex={book.visibility === "unlisted"}
+      />
 
       <section className="bk-hero">
         {cover && <div className="bk-ambient" style={{ backgroundImage: `url("${cover}")` }} aria-hidden="true" />}
