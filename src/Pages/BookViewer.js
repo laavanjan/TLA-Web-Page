@@ -7,6 +7,8 @@ import { FaBookOpen, FaDownload, FaFileWord, FaShareAlt, FaArrowLeft, FaGoogleDr
 
 import LotusDivider from "./LotusDivider";
 import Seo from "../seo/Seo";
+import { bookSchema, breadcrumbs } from "../seo/schema";
+import { PAGE_TITLES } from "../seo/RouteSeo";
 import BookSuggestions from "./BookSuggestions";
 import FlipBook from "../Components/book/flipbook/FlipBook";
 import {
@@ -98,6 +100,7 @@ function BookPage({ book, pages }) {
         image={shareImage || undefined}
         type="book"
         noindex={book.visibility === "unlisted"}
+        jsonLd={[bookSchema(book, shareImage), breadcrumbs(`/books/${book.slug}`, book.title, PAGE_TITLES)].filter(Boolean)}
       />
 
       <section className="bk-hero">
