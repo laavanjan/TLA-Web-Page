@@ -83,15 +83,37 @@ async function send(kind, name, pathname, title) {
   if (!trackingAllowed() || SKIP_PATHS.some((p) => path === p || path.startsWith(`${p}/`))) return;
   if (await isStaff()) return;
   const country = await visitorCountry();
+  const context = visitContext(path);
   const { error } = await supabase.rpc("track_page_view", {
     p_kind: kind,
     p_name: name,
     p_title: title || "",
     p_country: country,
-    ...visitContext(path),
+    ...context,
   });
   // analytics.sql not run yet, or offline: counting is never worth an error.
   if (error && process.env.NODE_ENV === "development") console.debug("analytics:", error.message); // eslint-disable-line no-console
+  if (!error && kind === "view") startHeartbeat(context.p_session);
+}
+
+// While the tab is open and visible, tell the site every 30 seconds that the
+// visitor is still here, for the "on the site right now" count. Stops when
+// the tab is hidden; the next view or a return to the tab starts it again.
+function startHeartbeat(session) {
+  const first = !heartbeat;
+  if (heartbeat) clearInterval(heartbeat.timer);
+  const beat = () => {
+    if (document.visibilityState !== "visible") return;
+    supabase
+      .rpc("analytics_ping", { p_session: session, p_path: cleanPath(window.location.pathname), p_title: document.title })
+      .then(() => {}, () => {});
+  };
+  heartbeat = { beat, timer: setInterval(beat, HEARTBEAT) };
+  if (first) {
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") heartbeat.beat();
+    });
+  }
 }
 
 // Called on every route change. The title is read a moment later, once the
