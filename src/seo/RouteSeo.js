@@ -4,8 +4,10 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
 import Seo from "./Seo";
-import { pages } from "./pages.json";
+import seoPages from "./pages.json";
 import { cleanPath } from "../analytics/classify";
+
+const { pages } = seoPages;
 
 export function pageMeta(pathname) {
   const path = cleanPath(pathname);
