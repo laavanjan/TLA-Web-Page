@@ -215,3 +215,85 @@ create policy "analytics_daily_admin_read"
   on public.analytics_daily for select
   using (public.is_admin());
 grant select on public.analytics_daily to authenticated;
+
+-- Counts → {"key": n, ...}, biggest first is up to the reader.
+create or replace function public.analytics_rollup_day(p_day date)
+returns void
+language plpgsql security definer set search_path = public
+as $$
+declare
+  t0 timestamptz := p_day::timestamp at time zone 'Asia/Colombo';
+  t1 timestamptz := (p_day + 1)::timestamp at time zone 'Asia/Colombo';
+begin
+  if not exists (select 1 from analytics_events where created_at >= t0 and created_at < t1) then
+    return;
+  end if;
+
+  create temporary table if not exists _day_events (like analytics_events) on commit drop;
+  truncate _day_events;
+  insert into _day_events select * from analytics_events where created_at >= t0 and created_at < t1;
+
+  insert into analytics_daily as d (
+    day, visitors, new_visitors, sessions, views, bounces,
+    sources, pages, titles, hours, devices, browsers, countries, campaigns, referrers, events, updated_at
+  )
+  select
+    p_day,
+    (select count(distinct visitor_id) from _day_events where kind = 'view'),
+    (select count(distinct visitor_id) from _day_events where kind = 'view' and not is_returning),
+    (select count(distinct session_id) from _day_events where kind = 'view'),
+    (select count(*) from _day_events where kind = 'view'),
+    (select count(*) from (
+      select session_id from _day_events where kind = 'view' group by session_id having count(*) = 1
+    ) s),
+    (select coalesce(jsonb_object_agg(k, n), '{}') from (
+      select source k, count(distinct visitor_id) n from _day_events where kind = 'view' group by 1) x),
+    (select coalesce(jsonb_object_agg(k, n), '{}') from (
+      select path k, count(*) n from _day_events where kind = 'view' group by 1) x),
+    (select coalesce(jsonb_object_agg(k, n), '{}') from (
+      select path k, max(title) n from _day_events where kind = 'view' and title <> '' group by 1) x),
+    (select coalesce(jsonb_object_agg(k, n), '{}') from (
+      select extract(hour from created_at at time zone 'Asia/Colombo')::int::text k, count(*) n
+      from _day_events where kind = 'view' group by 1) x),
+    (select coalesce(jsonb_object_agg(k, n), '{}') from (
+      select device k, count(distinct visitor_id) n from _day_events where kind = 'view' group by 1) x),
+    (select coalesce(jsonb_object_agg(k, n), '{}') from (
+      select browser k, count(distinct visitor_id) n from _day_events where kind = 'view' and browser <> '' group by 1) x),
+    (select coalesce(jsonb_object_agg(k, n), '{}') from (
+      select country k, count(distinct visitor_id) n from _day_events where kind = 'view' and country <> '' group by 1) x),
+    (select coalesce(jsonb_object_agg(k, n), '{}') from (
+      select utm_source || '|' || utm_medium || '|' || utm_campaign k, count(distinct visitor_id) n
+      from _day_events where kind = 'view' and utm_source <> '' group by 1) x),
+    (select coalesce(jsonb_object_agg(k, n), '{}') from (
+      select referrer_host k, count(distinct visitor_id) n from _day_events where kind = 'view' and referrer_host <> '' group by 1) x),
+    (select coalesce(jsonb_object_agg(k, n), '{}') from (
+      select name k, count(*) n from _day_events where kind = 'event' group by 1) x),
+    now()
+  on conflict (day) do update set
+    visitors = excluded.visitors, new_visitors = excluded.new_visitors, sessions = excluded.sessions,
+    views = excluded.views, bounces = excluded.bounces, sources = excluded.sources, pages = excluded.pages,
+    titles = excluded.titles, hours = excluded.hours, devices = excluded.devices, browsers = excluded.browsers,
+    countries = excluded.countries, campaigns = excluded.campaigns, referrers = excluded.referrers,
+    events = excluded.events, updated_at = now();
+end;
+$$;
+
+-- Brings yesterday and today up to date, and clears out what isn't needed:
+-- raw events after 90 days and live sessions idle for an hour. Run nightly by
+-- pg_cron (below) and before every report, so the numbers are always current.
+create or replace function public.analytics_rollup()
+returns void
+language plpgsql security definer set search_path = public
+as $$
+declare
+  today date := (now() at time zone 'Asia/Colombo')::date;
+begin
+  perform analytics_rollup_day(today - 1);
+  perform analytics_rollup_day(today);
+  delete from analytics_events where created_at < now() - interval '90 days';
+  delete from analytics_live where last_seen < now() - interval '1 hour';
+end;
+$$;
+
+revoke execute on function public.analytics_rollup_day(date) from public, anon, authenticated;
+revoke execute on function public.analytics_rollup() from public, anon, authenticated;
