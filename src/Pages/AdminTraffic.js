@@ -13,6 +13,7 @@ import { RANGES, rangeDates, totals, dailySeries } from "../admin/trafficMath";
 import StatTiles from "../Components/traffic/StatTiles";
 import VisitorsChart from "../Components/traffic/VisitorsChart";
 import LiveNow from "../Components/traffic/LiveNow";
+import Sources from "../Components/traffic/Sources";
 import "./Frame.css";
 import "./Admin.css";
 import "./AdminDashboard.css";
@@ -166,6 +167,9 @@ export default function AdminTraffic() {
             <div className="tr-grid tr-grid-hero">
               <VisitorsChart series={series} index={1} />
               <LiveNow index={2} />
+            </div>
+            <div className="tr-grid">
+              <Sources now={now} index={3} />
             </div>
           </div>
         )}
