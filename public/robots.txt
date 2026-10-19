@@ -1,5 +1,10 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Allow: /
+# The admin panel and sign-in pages are private.
+Disallow: /admin
+Disallow: /login
+Disallow: /signup
 
+# Made fresh on every build by scripts/seo-build.js
 Sitemap: https://tlauom.com/sitemap.xml
