@@ -26,7 +26,7 @@ create table if not exists public.analytics_events (
   name text not null default '',
   visitor_id uuid not null,
   session_id uuid not null,
-  returning boolean not null default false,
+  is_returning boolean not null default false,
   path text not null default '/',
   title text not null default '',
   referrer_host text not null default '',
@@ -92,7 +92,7 @@ begin
   end if;
 
   insert into analytics_events (
-    kind, name, visitor_id, session_id, returning, path, title, referrer_host, source,
+    kind, name, visitor_id, session_id, is_returning, path, title, referrer_host, source,
     utm_source, utm_medium, utm_campaign, device, browser, os, country
   ) values (
     p_kind,
