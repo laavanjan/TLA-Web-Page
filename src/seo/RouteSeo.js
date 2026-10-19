@@ -6,8 +6,16 @@ import { useLocation } from "react-router-dom";
 import Seo from "./Seo";
 import seoPages from "./pages.json";
 import { cleanPath } from "../analytics/classify";
+import { breadcrumbs } from "./schema";
 
 const { pages } = seoPages;
+
+// Page titles by address, for breadcrumb trails.
+export const PAGE_TITLES = Object.fromEntries(Object.entries(pages).filter(([, m]) => m.title).map(([p, m]) => [p, m.title]));
+
+// Pages listed in pages.json get their breadcrumbs here; pages that aren't
+// (a book, an event or team made in the admin) add their own.
+export const hasListedPage = (path) => !!pages[cleanPath(path)];
 
 export function pageMeta(pathname) {
   const path = cleanPath(pathname);
@@ -29,6 +37,7 @@ export default function RouteSeo() {
       type={meta.type}
       lang={meta.lang || "ta"}
       noindex={!!meta.noindex}
+      jsonLd={meta.title && !meta.noindex ? breadcrumbs(meta.path, meta.title, PAGE_TITLES) : null}
     />
   );
 }

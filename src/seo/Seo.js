@@ -2,6 +2,7 @@
 // title, description, canonical link, Open Graph / Twitter tags, language and
 // whether it should be indexed. Put one on a page and it wins over the
 // defaults set for every route in App.js (the deepest <Helmet> wins).
+// jsonLd: one structured-data object or a list of them (see schema.js).
 import React from "react";
 import { Helmet } from "react-helmet";
 import { SITE_NAME, SITE_NAME_EN, DEFAULT_IMAGE, absoluteUrl, clip } from "./site";
@@ -29,7 +30,11 @@ export default function Seo({ title, description, path, image, type = "website",
       <meta name="twitter:title" content={title || fullTitle} />
       {desc && <meta name="twitter:description" content={desc} />}
       <meta name="twitter:image" content={img} />
-      {jsonLd && <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>}
+      {[].concat(jsonLd || []).map((data, i) => (
+        <script key={i} type="application/ld+json">
+          {JSON.stringify(data)}
+        </script>
+      ))}
     </Helmet>
   );
 }
