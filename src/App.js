@@ -11,6 +11,7 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "./providers/AuthProvider";
 import { currentUser } from "./helpers/server";
+import { trackPageView } from "./analytics/tracker";
 
 function App() {
   const auth = useAuth();
@@ -21,6 +22,10 @@ function App() {
   useEffect(() => {
     currentUser().then(auth.loggedIn).catch(() => { });
   }, []);
+  // Count the visit for the admin's Traffic page (src/analytics/tracker.js).
+  useEffect(() => {
+    trackPageView(pathname);
+  }, [pathname]);
   return (
     <MaintenanceGate>
       <ScrollToTop />
