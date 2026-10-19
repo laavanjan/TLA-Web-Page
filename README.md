@@ -323,6 +323,17 @@ Every public page has its own title, description, canonical link (its one offici
 - **Adding a page:** add its address, title and description to `src/seo/pages.json`.
 - Tests: `npm run test:seo` (build step) and `npx react-scripts test --watchAll=false src/seo`.
 
+### Answers for Google and AI tools (AEO)
+
+- **`/faq`**: the help assistant's questions and answers (from `/admin/faq`) as a page, in Tamil with the English where it exists. It is **not linked** from the site's menus, so visitors keep using the உதவி button; search engines find it through the sitemap. Editing a question in `/admin/faq` updates this page too.
+- **Structured data** (hidden code describing what's already on a page, `src/seo/schema.js`):
+  - FAQ questions on `/faq` (Google only shows FAQ boxes for government and health sites, but the answers are still read and quoted).
+  - **Events**: only when the page has a **date and a venue**, in the intro or programme section, or on a competition. Admins: fill in both for an event to appear in Google's event listings. Dates like `2026-03-15`, `15/03/2026`, `15 March 2026` or `மார்ச் 15, 2026` all work.
+  - **Books**: title, author (or TLA), year, cover.
+  - **Breadcrumbs** on every page, and TLA's contact details (from `/admin/contact`) and address on the home page.
+- Check any page at [search.google.com/test/rich-results](https://search.google.com/test/rich-results).
+- Never mark up text that isn't on the page: Google treats that as spam.
+
 ### Google Search Console (one-time)
 
 1. Go to [search.google.com/search-console](https://search.google.com/search-console) → **Add property**.
