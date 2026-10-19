@@ -42,6 +42,7 @@ import RequireAdmin from "./Pages/RequireAdmin";
 import AdminEditors from "./Pages/AdminEditors";
 import AdminActivity from "./Pages/AdminActivity";
 import AdminTraffic from "./Pages/AdminTraffic";
+import Privacy from "./Pages/Privacy";
 
 function Router() {
   return useRoutes([
@@ -132,6 +133,10 @@ function Router() {
     {
       path: "contact",
       element: <Contact />,
+    },
+    {
+      path: "privacy",
+      element: <Privacy />,
     },
     {
       path: "vote",
