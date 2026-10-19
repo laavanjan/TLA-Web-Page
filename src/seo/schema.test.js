@@ -1,4 +1,4 @@
-import { breadcrumbs, parseEventDate, eventSchemas, bookSchema } from "./schema";
+import { breadcrumbs, parseEventDate, eventSchemas, bookSchema, organizationSchema } from "./schema";
 
 test("dates typed in Tamil or English are understood, unclear ones are skipped", () => {
   expect(parseEventDate("2026-03-15")).toBe("2026-03-15");
@@ -53,4 +53,10 @@ test("books name their author, or TLA when there is none", () => {
   expect(b).toMatchObject({ "@type": "Book", name: "TLA 26", datePublished: "2026", image: "https://tlauom.com/images/c.webp" });
   expect(b.author["@type"]).toBe("Organization");
   expect(bookSchema({ slug: "x", title: "X", author: "கவிஞர்" }).author).toEqual({ "@type": "Person", name: "கவிஞர்" });
+});
+
+test("the organisation carries the live contact details", () => {
+  const o = organizationSchema({ email: "a@b.com", phoneNumber: "076 843 2752", facebookUrl: "https://facebook.com/x", youtubeUrl: "" });
+  expect(o).toMatchObject({ "@id": "https://tlauom.com/#org", email: "a@b.com", telephone: "+94768432752", sameAs: ["https://facebook.com/x"] });
+  expect(organizationSchema({}).email).toBeUndefined();
 });

@@ -126,3 +126,30 @@ export function bookSchema(book, image) {
     inLanguage: "ta",
   };
 }
+
+// TLA itself, for the home page: adds the contact details from /admin/contact
+// and the university's address to the organisation in index.html (same @id,
+// so search engines merge the two).
+export function organizationSchema(contact = {}) {
+  const sameAs = [contact.facebookUrl, contact.youtubeUrl, contact.instagramUrl].filter((u) => /^https?:\/\//.test(u || ""));
+  const phone = String(contact.phoneNumber || "").replace(/[^\d+]/g, "");
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    ...ORG,
+    name: SITE_NAME_EN,
+    alternateName: ["தமிழ் இலக்கிய மன்றம்", "TLA UoM"],
+    url: `${SITE_URL}/`,
+    logo: `${SITE_URL}/logo.png`,
+    ...(contact.email ? { email: contact.email } : {}),
+    ...(phone ? { telephone: phone.startsWith("0") ? `+94${phone.slice(1)}` : phone } : {}),
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "University of Moratuwa, Katubedda",
+      addressLocality: "Moratuwa",
+      postalCode: "10400",
+      addressCountry: "LK",
+    },
+    ...(sameAs.length ? { sameAs } : {}),
+  };
+}

@@ -1,12 +1,13 @@
 // Default <head> tags for whatever page is open, from pages.json. Pages that
 // know more about themselves (a book, an event made in the admin, a team
 // page) render their own <Seo>, which wins. Admin pages are never indexed.
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import Seo from "./Seo";
 import seoPages from "./pages.json";
 import { cleanPath } from "../analytics/classify";
-import { breadcrumbs } from "./schema";
+import { breadcrumbs, organizationSchema } from "./schema";
+import { fetchContactConfig, getCachedContactConfig } from "../shared/contactConfig";
 
 const { pages } = seoPages;
 
@@ -25,9 +26,27 @@ export function pageMeta(pathname) {
   return { path, ...(pages[path] || { title: null, description: pages["/"].description }) };
 }
 
+// The contact details from /admin/contact, for the home page's organisation data.
+function useContact(enabled) {
+  const [contact, setContact] = useState(getCachedContactConfig);
+  useEffect(() => {
+    if (!enabled) return undefined;
+    let alive = true;
+    fetchContactConfig()
+      .then((c) => alive && setContact(c))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [enabled]);
+  return contact;
+}
+
 export default function RouteSeo() {
   const { pathname } = useLocation();
   const meta = pageMeta(pathname);
+  const home = meta.path === "/";
+  const contact = useContact(home);
   return (
     <Seo
       title={meta.title}
@@ -37,7 +56,9 @@ export default function RouteSeo() {
       type={meta.type}
       lang={meta.lang || "ta"}
       noindex={!!meta.noindex}
-      jsonLd={meta.title && !meta.noindex ? breadcrumbs(meta.path, meta.title, PAGE_TITLES) : null}
+      jsonLd={
+        home ? organizationSchema(contact) : meta.title && !meta.noindex ? breadcrumbs(meta.path, meta.title, PAGE_TITLES) : null
+      }
     />
   );
 }
