@@ -310,6 +310,34 @@ Run the tests with `npx react-scripts test --watchAll=false src/analytics src/ad
 
 ---
 
+## Search engines & share previews (SEO)
+
+Every public page has its own title, description, canonical link (its one official address), language and share picture, so Google shows the right text and WhatsApp/Facebook show the right preview.
+
+- **While the site runs:** `src/seo/RouteSeo.js` (in `App.js`) sets the tags for whatever page is open from [`src/seo/pages.json`](src/seo/pages.json). Books, events and team pages set their own with `<Seo>` from `src/seo/Seo.js`.
+- **At build time:** `npm run build` then runs `scripts/seo-build.js` (the `postbuild` script). It reads `pages.json` and the books, events and team pages from Supabase and writes:
+  - `build/<page>.html`: the site with that page's tags already in it, for crawlers that don't run JavaScript (WhatsApp, Facebook, most AI crawlers). `vercel.json` has `cleanUrls` on, so `/events/thamilaruvi` is served from `events/thamilaruvi.html`.
+  - `build/sitemap.xml`: every public page, including each book and every event made in the admin, made fresh on each deploy. Link-only (unlisted) books and the admin pages are left out.
+  If Supabase can't be reached it still does the fixed pages and never fails the build. **A new book or event appears in the sitemap after the next deploy.**
+- **Share pictures:** `public/og/*.jpg` (1200×630), made from the event illustrations by `python3 scripts/og-images.py`. Books use their cover.
+- **Adding a page:** add its address, title and description to `src/seo/pages.json`.
+- Tests: `npm run test:seo` (build step) and `npx react-scripts test --watchAll=false src/seo`.
+
+### Google Search Console (one-time)
+
+1. Go to [search.google.com/search-console](https://search.google.com/search-console) → **Add property**.
+2. **Domain** (`tlauom.com`, recommended): Google gives a TXT record. Add it at the domain's DNS provider (where the Vercel records are, see *Connecting the custom domain* above). Don't change the existing records.
+   **Or URL prefix** (`https://tlauom.com/`) with the **HTML tag** method: copy only the `content="…"` code, add it in Vercel → Project → Settings → Environment Variables as `GOOGLE_SITE_VERIFICATION`, redeploy, then press **Verify**.
+3. Then **Sitemaps** → enter `sitemap.xml` → **Submit**.
+4. Check back after a few days: **Performance** shows the searches that find the site, **Pages** shows anything Google couldn't read.
+
+### Speed
+
+- The admin panel, photo-frame editor and vote results load only when opened (`src/Router.js`), so the main JavaScript visitors download is about a third smaller.
+- Large pictures were recompressed (losslessly) or scaled down to a size that's still sharp on any screen.
+
+---
+
 ## Hackathon event configuration
 
 Go to `src/Components/events/hackthon/agenda/eventList.js` and edit the `events` object to update the agenda.
