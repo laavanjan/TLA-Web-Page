@@ -174,7 +174,11 @@ export default function AdminTraffic() {
             <Highlights now={now} before={before} rows={traffic.rows} rangeLabel={rangeLabel} />
             <StatTiles now={now} before={before} series={series} rangeLabel={rangeLabel} />
             <div className="tr-grid tr-grid-hero">
-              <VisitorsChart series={series} index={1} />
+              <VisitorsChart
+                series={series}
+                hours={rangeId === "today" ? (traffic.rows[0] || {}).hours || {} : null}
+                index={1}
+              />
               <LiveNow index={2} />
             </div>
             <div className="tr-grid">
