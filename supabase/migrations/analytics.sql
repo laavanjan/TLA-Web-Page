@@ -346,8 +346,8 @@ $$;
 grant execute on function public.analytics_live_now() to authenticated;
 
 -- Funnel: how many sessions reached each step, in order. Steps look like
--- [{"path": "/teams"}, {"path": "/teams/join"}, {"event": "team_join_submitted"}];
--- a path step also matches the pages under it. Uses raw events, so it covers
+-- [{"any": true}, {"path": "/teams/join"}, {"event": "team_join_submitted"}];
+-- "any" is any page, and a path step also matches the pages under it. Uses raw events, so it covers
 -- the last 90 days at most.
 create or replace function public.analytics_funnel(p_from date, p_to date, p_steps jsonb)
 returns jsonb
@@ -380,6 +380,7 @@ begin
     where e.created_at >= t0 and e.created_at < t1
       and (first or (f.session_id is not null and e.created_at >= f.at))
       and case
+        when step ? 'any' then e.kind = 'view'
         when step ? 'event' then e.kind = 'event' and e.name = step ->> 'event'
         else e.kind = 'view' and (
           e.path = step ->> 'path'
