@@ -202,6 +202,10 @@
       "title": null,
       "description": "",
       "noindex": true
+    },
+    "/faq": {
+      "title": "அடிக்கடி கேட்கப்படும் கேள்விகள் · FAQ",
+      "description": "தமிழ் இலக்கிய மன்றம் பற்றிய கேள்விகளும் பதில்களும் — நிகழ்வுகள், போட்டிகள், அணிகளில் இணைதல், நூல்கள், தொடர்பு. Questions and answers about the Tamil Literary Association, University of Moratuwa."
     }
   }
 }
