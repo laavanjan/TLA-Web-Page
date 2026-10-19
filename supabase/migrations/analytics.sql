@@ -117,3 +117,68 @@ $$;
 
 grant execute on function public.track_page_view(text, text, uuid, uuid, boolean, text, text, text, text, text, text, text, text, text, text, text)
   to anon, authenticated;
+
+-- ---- Who is on the site right now ----------------------------------------------------------
+-- One row per open session, refreshed by every page view and by a heartbeat
+-- the site sends every 30 seconds while the tab is visible. Rows older than
+-- an hour are cleared out by analytics_rollup().
+create table if not exists public.analytics_live (
+  session_id uuid primary key,
+  path text not null default '/',
+  title text not null default '',
+  source text not null default 'direct',
+  device text not null default 'desktop',
+  country text not null default '',
+  started_at timestamptz not null default now(),
+  last_seen timestamptz not null default now()
+);
+
+create index if not exists analytics_live_seen_idx on public.analytics_live (last_seen);
+
+alter table public.analytics_live enable row level security;
+revoke all on public.analytics_live from anon, authenticated;
+
+create or replace function public.analytics_ping(p_session uuid, p_path text, p_title text)
+returns void
+language plpgsql security definer set search_path = public
+as $$
+declare
+  clean_path text := left(coalesce(nullif(trim(p_path), ''), '/'), 200);
+begin
+  if p_session is null or clean_path not like '/%' or clean_path like '/admin%' then
+    return;
+  end if;
+  if exists (select 1 from admin_users where user_id = auth.uid()) then
+    return;
+  end if;
+  -- Only sessions that recorded a page view can ping, so the live count
+  -- can't be padded with made-up sessions.
+  update analytics_live
+  set path = clean_path, title = left(coalesce(trim(p_title), ''), 160), last_seen = now()
+  where session_id = p_session;
+end;
+$$;
+
+grant execute on function public.analytics_ping(uuid, text, text) to anon, authenticated;
+
+-- Page views keep the live row up to date as well.
+create or replace function public.touch_analytics_live()
+returns trigger
+language plpgsql security definer set search_path = public
+as $$
+begin
+  if new.kind <> 'view' then
+    return new;
+  end if;
+  insert into analytics_live (session_id, path, title, source, device, country)
+  values (new.session_id, new.path, new.title, new.source, new.device, new.country)
+  on conflict (session_id) do update
+    set path = excluded.path, title = excluded.title, last_seen = now();
+  return new;
+end;
+$$;
+
+drop trigger if exists analytics_events_live on public.analytics_events;
+create trigger analytics_events_live
+  after insert on public.analytics_events
+  for each row execute function public.touch_analytics_live();
