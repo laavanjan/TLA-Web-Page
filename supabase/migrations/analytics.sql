@@ -182,3 +182,36 @@ drop trigger if exists analytics_events_live on public.analytics_events;
 create trigger analytics_events_live
   after insert on public.analytics_events
   for each row execute function public.touch_analytics_live();
+
+-- ---- Daily totals (kept for good) ----------------------------------------------------------
+-- One row per day (Sri Lanka time) with the totals and the day's breakdowns.
+-- Raw events are deleted after 90 days, but these rows stay, so the charts
+-- and the CSV export keep the whole history.
+create table if not exists public.analytics_daily (
+  day date primary key,
+  visitors integer not null default 0,
+  new_visitors integer not null default 0,
+  sessions integer not null default 0,
+  views integer not null default 0,
+  bounces integer not null default 0,
+  sources jsonb not null default '{}'::jsonb,    -- source → visitors
+  pages jsonb not null default '{}'::jsonb,      -- path → views
+  titles jsonb not null default '{}'::jsonb,     -- path → page title
+  hours jsonb not null default '{}'::jsonb,      -- "0".."23" → views
+  devices jsonb not null default '{}'::jsonb,    -- mobile/tablet/desktop → visitors
+  browsers jsonb not null default '{}'::jsonb,   -- browser → visitors
+  countries jsonb not null default '{}'::jsonb,  -- country code → visitors
+  campaigns jsonb not null default '{}'::jsonb,  -- "source|medium|campaign" → visitors
+  referrers jsonb not null default '{}'::jsonb,  -- referring site → visitors
+  events jsonb not null default '{}'::jsonb,     -- form submissions etc. → count
+  updated_at timestamptz not null default now()
+);
+
+alter table public.analytics_daily enable row level security;
+revoke all on public.analytics_daily from anon, authenticated;
+
+drop policy if exists "analytics_daily_admin_read" on public.analytics_daily;
+create policy "analytics_daily_admin_read"
+  on public.analytics_daily for select
+  using (public.is_admin());
+grant select on public.analytics_daily to authenticated;
