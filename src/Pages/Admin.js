@@ -21,6 +21,7 @@ import {
   FaImages,
   FaIdCard,
   FaCommentDots,
+  FaChartLine,
 } from "react-icons/fa";
 
 import LotusDivider from "./LotusDivider";
@@ -41,6 +42,8 @@ import { fetchBookConfig, isSubmissionOpen } from "../book/bookConfig";
 import { fetchBooks } from "../book/books";
 import { DESIGNS } from "../assets/frame/designs";
 import { supabase } from "../helpers/supabaseClient";
+import { fetchTrafficDays, fetchLiveVisitors } from "../admin/trafficData";
+import { ymdIn } from "../admin/trafficMath";
 import "./Frame.css";
 import "./Admin.css";
 import "./AdminDashboard.css";
@@ -109,6 +112,10 @@ function useDashboardData(admin) {
         .from("admin_users")
         .select("role, disabled")
         .then(({ data, error }) => set("accounts", error ? null : data || []));
+      const today = ymdIn(new Date());
+      Promise.all([fetchTrafficDays(today, today), fetchLiveVisitors().catch(() => null)])
+        .then(([rows, live]) => set("traffic", { today: rows[0] ? rows[0].visitors : 0, live: live ? live.count : null }))
+        .catch(() => set("traffic", null));
       fetchActivity({ limit: 6 })
         .then((rows) => set("activity", rows))
         .catch(() => set("activity", null));
@@ -205,6 +212,14 @@ function activityStatus(activity) {
   if (activity === undefined) return LOADING;
   if (!activity || !activity[0]) return null;
   return { tone: "info", text: `Latest ${ago(activity[0].created_at)}` };
+}
+
+function trafficStatus(traffic) {
+  if (traffic === undefined) return LOADING;
+  if (!traffic) return { tone: "off", text: "Not set up yet" };
+  const today = `${traffic.today} visitor${traffic.today === 1 ? "" : "s"} today`;
+  if (traffic.live) return { tone: "ok", text: `${traffic.live} on the site now · ${today}` };
+  return { tone: "info", text: today };
 }
 
 function stickersStatus() {
@@ -660,6 +675,15 @@ export default function Admin() {
 
                 <Section label="Tools" icon={FaPalette}>
                   <div className="ad-grid ad-grid-2">
+                    <Card
+                      to="/admin/traffic"
+                      icon={FaChartLine}
+                      tone="gold"
+                      title="Traffic"
+                      desc="Visitors, where they come from and what they read."
+                      status={trafficStatus(data.traffic)}
+                      index={n++}
+                    />
                     <Card
                       to="/admin/qr"
                       icon={FaQrcode}
