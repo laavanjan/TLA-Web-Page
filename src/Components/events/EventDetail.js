@@ -3,6 +3,9 @@
 // Preview tab.
 import React from "react";
 import Seo from "../../seo/Seo";
+import { absoluteUrl } from "../../seo/site";
+import { eventSchemas, breadcrumbs } from "../../seo/schema";
+import { PAGE_TITLES, hasListedPage } from "../../seo/RouteSeo";
 import { Container, Grid } from "@mui/material";
 import { SmartImage } from "../teams/team-detail/media";
 import {
@@ -144,7 +147,17 @@ const EventDetail = ({ page, preview = false }) => {
   return (
     <div className="team-detail-page event-page">
       {!preview && (
-        <Seo title={page.title} description={description} path={page.path} image={shareImage(page)} type="article" />
+        <Seo
+          title={page.title}
+          description={description}
+          path={page.path}
+          image={shareImage(page)}
+          type="article"
+          jsonLd={[
+            ...eventSchemas(page, absoluteUrl(page.path)),
+            !hasListedPage(page.path) && breadcrumbs(page.path, page.title, PAGE_TITLES),
+          ].filter(Boolean)}
+        />
       )}
 
       {intro ? (
