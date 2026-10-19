@@ -20,6 +20,7 @@ import Audience from "../Components/traffic/Audience";
 import Funnels from "../Components/traffic/Funnels";
 import Campaigns from "../Components/traffic/Campaigns";
 import Highlights from "../Components/traffic/Highlights";
+import CsvDownload from "../Components/traffic/CsvDownload";
 import "./Frame.css";
 import "./Admin.css";
 import "./AdminDashboard.css";
@@ -127,6 +128,7 @@ export default function AdminTraffic() {
             ← Dashboard
           </Link>
           <div className="tr-top-actions">
+            <CsvDownload rows={traffic.rows} now={now} dates={traffic.dates} disabled={!ready} />
             <button
               type="button"
               className="tj-btn tj-btn-ghost"
