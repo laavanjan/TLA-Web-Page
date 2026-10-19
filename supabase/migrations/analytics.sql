@@ -398,3 +398,17 @@ end;
 $$;
 
 grant execute on function public.analytics_funnel(date, date, jsonb) to authenticated;
+
+-- ---- Nightly job ---------------------------------------------------------------------------
+-- Every night at 00:40 Sri Lanka time (19:10 UTC) finish yesterday's totals
+-- and clear out old data. If pg_cron can't be turned on, nothing breaks: the
+-- Traffic page brings the totals up to date whenever it is opened, but old
+-- raw events are then only cleared at those times.
+do $$
+begin
+  create extension if not exists pg_cron;
+  perform cron.schedule('analytics-rollup', '10 19 * * *', 'select public.analytics_rollup()');
+exception when others then
+  raise notice 'pg_cron is not available (%). Turn it on under Database → Extensions and run this file again.', sqlerrm;
+end;
+$$;
