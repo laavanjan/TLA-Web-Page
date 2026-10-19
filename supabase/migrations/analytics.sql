@@ -344,3 +344,57 @@ end;
 $$;
 
 grant execute on function public.analytics_live_now() to authenticated;
+
+-- Funnel: how many sessions reached each step, in order. Steps look like
+-- [{"path": "/teams"}, {"path": "/teams/join"}, {"event": "team_join_submitted"}];
+-- a path step also matches the pages under it. Uses raw events, so it covers
+-- the last 90 days at most.
+create or replace function public.analytics_funnel(p_from date, p_to date, p_steps jsonb)
+returns jsonb
+language plpgsql security definer set search_path = public
+as $$
+declare
+  t0 timestamptz := p_from::timestamp at time zone 'Asia/Colombo';
+  t1 timestamptz := (p_to + 1)::timestamp at time zone 'Asia/Colombo';
+  step jsonb;
+  counts jsonb := '[]'::jsonb;
+  first boolean := true;
+begin
+  if not public.is_admin() then
+    raise exception 'Only main admins can see traffic.' using errcode = '42501';
+  end if;
+  if jsonb_typeof(p_steps) <> 'array' or jsonb_array_length(p_steps) > 8 then
+    raise exception 'Bad funnel steps.';
+  end if;
+
+  create temporary table if not exists _funnel (session_id uuid primary key, at timestamptz) on commit drop;
+  create temporary table if not exists _funnel_next (session_id uuid primary key, at timestamptz) on commit drop;
+  truncate _funnel;
+
+  for step in select * from jsonb_array_elements(p_steps) loop
+    truncate _funnel_next;
+    insert into _funnel_next
+    select e.session_id, min(e.created_at)
+    from analytics_events e
+    left join _funnel f on f.session_id = e.session_id
+    where e.created_at >= t0 and e.created_at < t1
+      and (first or (f.session_id is not null and e.created_at >= f.at))
+      and case
+        when step ? 'event' then e.kind = 'event' and e.name = step ->> 'event'
+        else e.kind = 'view' and (
+          e.path = step ->> 'path'
+          or (step ->> 'path' <> '/' and starts_with(e.path, rtrim(step ->> 'path', '/') || '/'))
+        )
+      end
+    group by e.session_id;
+
+    truncate _funnel;
+    insert into _funnel select * from _funnel_next;
+    counts := counts || to_jsonb((select count(*) from _funnel));
+    first := false;
+  end loop;
+  return counts;
+end;
+$$;
+
+grant execute on function public.analytics_funnel(date, date, jsonb) to authenticated;
