@@ -24,6 +24,7 @@ import MakkalMantramVote from "./Pages/MakkalMantramVote";
 import Seniors from "./Pages/Seniors";
 import MembersPage from "./Pages/Members";
 import Privacy from "./Pages/Privacy";
+import Faq from "./Pages/Faq";
 
 // The admin panel, the photo-frame editor and the vote results screen are
 // downloaded only when opened, so visitors to the public pages don't load
@@ -142,6 +143,11 @@ function Router() {
     {
       path: "privacy",
       element: <Privacy />,
+    },
+    {
+      // Not linked from the menus: for search engines (see Pages/Faq.js).
+      path: "faq",
+      element: <Faq />,
     },
     {
       path: "vote",

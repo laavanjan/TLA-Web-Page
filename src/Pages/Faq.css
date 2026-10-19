@@ -1,0 +1,188 @@
+/* /faq: questions as an accordion, in the same navy and gold as /privacy.
+   Answers stay in the page while folded, so search engines read them. */
+.fq {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 120px 20px 64px;
+  box-sizing: border-box;
+  color: #1d2533;
+  font-family: "Mukta Malar", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Tamil", Arial, sans-serif;
+}
+
+.fq-head {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.fq-head-icon {
+  font-size: 34px;
+  color: #c98500;
+}
+
+.fq-head h1 {
+  margin: 10px 0 8px;
+  font-size: clamp(26px, 5vw, 38px);
+  color: #04182f;
+}
+
+.fq-head p {
+  margin: 0;
+  font-size: 15px;
+  color: #5a6578;
+}
+
+.fq-toc {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 26px;
+}
+
+.fq-toc a {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 7px 14px;
+  border-radius: 12px;
+  border: 1px solid #e6e9ef;
+  background: #fff;
+  color: #04182f;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.fq-toc a small {
+  font-size: 11px;
+  font-weight: 500;
+  color: #7a8597;
+}
+
+.fq-toc a:hover {
+  border-color: #e6b422;
+}
+
+.fq-section {
+  margin-top: 26px;
+  scroll-margin-top: 100px;
+}
+
+.fq-section h2 {
+  margin: 0 0 10px;
+  font-size: 20px;
+  color: #04182f;
+}
+
+.fq-section h2 small {
+  margin-left: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #7a8597;
+}
+
+.fq-item {
+  margin-bottom: 8px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #e6e9ef;
+  box-shadow: 0 4px 14px rgba(4, 24, 47, 0.05);
+  scroll-margin-top: 100px;
+}
+
+.fq-item summary {
+  cursor: pointer;
+  list-style: none;
+  position: relative;
+  padding: 14px 44px 14px 18px;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #04182f;
+}
+
+.fq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.fq-item summary::after {
+  content: "+";
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 22px;
+  font-weight: 400;
+  color: #c98500;
+}
+
+.fq-item[open] summary::after {
+  content: "–";
+}
+
+.fq-item summary:focus-visible {
+  outline: 2px solid #e6b422;
+  outline-offset: 2px;
+  border-radius: 14px;
+}
+
+.fq-answer {
+  padding: 0 18px 16px;
+  font-size: 15px;
+  line-height: 1.75;
+  color: #3a4456;
+}
+
+.fq-answer p {
+  margin: 0 0 8px;
+}
+
+.fq-answer ul {
+  margin: 0 0 8px;
+  padding-left: 20px;
+}
+
+.fq-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.fq-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(230, 180, 34, 0.14);
+  color: #7a5200;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.fq-links a svg {
+  font-size: 10px;
+}
+
+.fq-en {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed #e1e5ec;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 14.5px;
+  color: #4a5568;
+}
+
+.fq-en h3 {
+  margin: 0 0 4px;
+  font-size: 14.5px;
+  color: #04182f;
+}
+
+@media (max-width: 560px) {
+  .fq {
+    padding-top: 96px;
+  }
+}
