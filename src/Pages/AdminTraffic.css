@@ -843,3 +843,73 @@
     font-size: 8.5px !important;
   }
 }
+
+/* ---- Devices split bar ------------------------------------------------------------------------ */
+.tr-split {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tr-split-bar {
+  display: flex;
+  gap: 2px;
+  height: 18px;
+  border-radius: 9px;
+  overflow: hidden;
+}
+
+.tr-split-bar span {
+  flex-basis: 0;
+  min-width: 4px;
+  transform-origin: left;
+  animation: tr-grow 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.tr-split-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.tr-split-legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 13px !important;
+  color: var(--tr-ink-2);
+}
+
+.tr-split-legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.tr-split-legend span {
+  flex: 1;
+}
+
+.tr-split-legend b {
+  color: var(--tr-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.tr-split-legend small {
+  font-size: 11.5px !important;
+  color: var(--tr-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tr-split-bar span {
+    animation: none;
+  }
+}

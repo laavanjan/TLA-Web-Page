@@ -16,6 +16,7 @@ import LiveNow from "../Components/traffic/LiveNow";
 import Sources from "../Components/traffic/Sources";
 import TopPages from "../Components/traffic/TopPages";
 import BusiestTimes from "../Components/traffic/BusiestTimes";
+import Audience from "../Components/traffic/Audience";
 import "./Frame.css";
 import "./Admin.css";
 import "./AdminDashboard.css";
@@ -175,6 +176,9 @@ export default function AdminTraffic() {
               <TopPages now={now} index={4} />
             </div>
             <BusiestTimes rows={traffic.rows} index={5} />
+            <div className="tr-grid">
+              <Audience now={now} index={6} />
+            </div>
           </div>
         )}
       </div>
