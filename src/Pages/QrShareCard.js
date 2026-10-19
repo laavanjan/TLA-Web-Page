@@ -3,6 +3,20 @@ import { QRCodeCanvas } from "qrcode.react";
 
 // QR generator packaged as a self-contained card.
 // `baseUrl` overrides the default URL; all other props customise the copy.
+
+// Links to this site get ?utm_source=qr added (unless they already carry a
+// tag), so scans show up as "QR code / poster" on the Traffic page.
+function tagForScans(url) {
+  try {
+    const u = new URL(url);
+    if (typeof window === "undefined" || u.host !== window.location.host || u.searchParams.has("utm_source")) return url;
+    u.searchParams.set("utm_source", "qr");
+    u.searchParams.set("utm_medium", "print");
+    return u.toString();
+  } catch (e) {
+    return url;
+  }
+}
 export default function QrShareCard({
   baseUrl,
   title = "Share this frame",
@@ -18,7 +32,10 @@ export default function QrShareCard({
 
   const [url, setUrl] = useState(defaultUrl);
   const [copied, setCopied] = useState(false);
+  const [countScans, setCountScans] = useState(true);
   const qrWrapRef = useRef(null);
+  const qrValue = countScans ? tagForScans(url) : url;
+  const tagged = qrValue !== url;
 
   const getCanvas = () =>
     qrWrapRef.current && qrWrapRef.current.querySelector("canvas");
@@ -48,7 +65,7 @@ export default function QrShareCard({
     pdf.addImage(imgData, "PNG", x, y, qrSize, qrSize);
     pdf.setFontSize(11);
     pdf.setTextColor(80, 80, 80);
-    pdf.text(url, pageW / 2, y + qrSize + 10, { align: "center" });
+    pdf.text(url, pageW / 2, y + qrSize + 10, { align: "center" }); // the plain link reads better on paper
     pdf.save(`${downloadFilename}.pdf`);
   }, [downloadFilename, url]);
 
@@ -68,7 +85,7 @@ export default function QrShareCard({
       <div className="admin-qr-col">
         <div className="admin-qr" ref={qrWrapRef}>
           <QRCodeCanvas
-            value={url || " "}
+            value={qrValue || " "}
             size={220}
             level="H"
             includeMargin
@@ -102,6 +119,14 @@ export default function QrShareCard({
             {copied ? "✓" : "Copy"}
           </button>
         </div>
+
+        <label className="admin-qr-count">
+          <input type="checkbox" checked={countScans} onChange={(e) => setCountScans(e.target.checked)} />
+          <span>
+            Count scans on the Traffic page
+            {countScans && !tagged && <small> (only for links to this website)</small>}
+          </span>
+        </label>
 
         <div className="admin-download-row">
           <button

@@ -1428,3 +1428,24 @@ div.tj-field-toggle {
 .tj-dash {
   color: #5a6275;
 }
+
+/* QR card: "count scans" switch (adds ?utm_source=qr to the code) */
+.admin-qr-count {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: #c3cad8;
+  cursor: pointer;
+}
+
+.admin-qr-count input {
+  width: 16px;
+  height: 16px;
+  accent-color: #e6b422;
+}
+
+.admin-qr-count small {
+  color: #8d97ab;
+}
