@@ -391,3 +391,51 @@
   height: 32px;
   margin-top: 4px;
 }
+
+/* ---- Visitors chart ------------------------------------------------------------- */
+.tr-chart {
+  position: relative;
+  height: 280px;
+}
+
+@media (max-width: 640px) {
+  .tr-chart {
+    height: 220px;
+  }
+}
+
+.tr-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tr-ink-2);
+}
+
+.tr-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tr-legend i {
+  display: inline-block;
+  width: 16px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.tr-legend i.is-dashed {
+  background: repeating-linear-gradient(90deg, currentColor 0 5px, transparent 5px 8px);
+}
+
+.tr-chart-note {
+  margin: 0;
+  font-size: 12.5px !important;
+  color: var(--tr-muted);
+}
+
+.tr-chart-note b {
+  color: var(--tr-ink);
+}
