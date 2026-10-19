@@ -297,3 +297,50 @@ $$;
 
 revoke execute on function public.analytics_rollup_day(date) from public, anon, authenticated;
 revoke execute on function public.analytics_rollup() from public, anon, authenticated;
+
+-- ---- Reports (main admins only) ------------------------------------------------------------
+-- The Traffic page calls this first, then reads analytics_daily directly.
+create or replace function public.analytics_refresh()
+returns void
+language plpgsql security definer set search_path = public
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'Only main admins can see traffic.' using errcode = '42501';
+  end if;
+  perform analytics_rollup();
+end;
+$$;
+
+grant execute on function public.analytics_refresh() to authenticated;
+
+-- Visitors on the site in the last 5 minutes, and what they are looking at.
+create or replace function public.analytics_live_now()
+returns jsonb
+language plpgsql stable security definer set search_path = public
+as $$
+declare
+  result jsonb;
+begin
+  if not public.is_admin() then
+    raise exception 'Only main admins can see traffic.' using errcode = '42501';
+  end if;
+  with live as (
+    select * from analytics_live where last_seen > now() - interval '5 minutes'
+  )
+  select jsonb_build_object(
+    'count', (select count(*) from live),
+    'pages', (select coalesce(jsonb_agg(p order by p.n desc, p.path), '[]') from (
+      select path, max(title) as title, count(*) as n from live group by path limit 8) p),
+    'sources', (select coalesce(jsonb_object_agg(source, n), '{}') from (
+      select source, count(*) n from live group by source) s),
+    'devices', (select coalesce(jsonb_object_agg(device, n), '{}') from (
+      select device, count(*) n from live group by device) s),
+    'countries', (select coalesce(jsonb_object_agg(country, n), '{}') from (
+      select country, count(*) n from live where country <> '' group by country) s)
+  ) into result;
+  return result;
+end;
+$$;
+
+grant execute on function public.analytics_live_now() to authenticated;
