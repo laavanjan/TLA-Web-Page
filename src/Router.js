@@ -41,6 +41,7 @@ import AdminLogin from "./Pages/AdminLogin";
 import RequireAdmin from "./Pages/RequireAdmin";
 import AdminEditors from "./Pages/AdminEditors";
 import AdminActivity from "./Pages/AdminActivity";
+import AdminTraffic from "./Pages/AdminTraffic";
 
 function Router() {
   return useRoutes([
@@ -265,6 +266,14 @@ function Router() {
       element: (
         <RequireAdmin>
           <AdminActivity />
+        </RequireAdmin>
+      ),
+    },
+    {
+      path: "admin/traffic",
+      element: (
+        <RequireAdmin>
+          <AdminTraffic />
         </RequireAdmin>
       ),
     },
