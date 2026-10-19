@@ -51,7 +51,9 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "DISABLE_ESLINT_PLUGIN=true react-scripts build",
+    "postbuild": "node scripts/seo-build.js",
     "test": "react-scripts test",
+    "test:seo": "node --test scripts/seo",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
