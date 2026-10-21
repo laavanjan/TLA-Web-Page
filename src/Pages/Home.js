@@ -28,17 +28,16 @@ function Home() {
     return (
         <>
             <Helmet>
-                <title>தமிழ் இலக்கிய மன்றம் | Tamil Literary Association, University of Moratuwa</title>
+                <title>தமிழ் இலக்கிய மன்றம் | Tamil Literary Association, University of Moratuwa (TLA UoM)</title>
                 <meta
                     name="description"
                     content="Tamil Literary Association (TLA) of the University of Moratuwa, Sri Lanka — organisers of Tamilaruvi, the Sorkanai debate series and community help projects. மொறட்டுவைப் பல்கலைக்கழக தமிழ் இலக்கிய மன்றம்."
                 />
                 <meta
                     name="keywords"
-                    content="TLA, Tamil Literary Association, moratuwa, uom, university of moratuwa, tamil, tamizharuvi"
+                    content="TLA, TLA UoM, Tamil Literary Association, Thamizh Literary Association, moratuwa, uom, university of moratuwa, tamil, tamizharuvi"
                 />
             </Helmet>
-            <h1 className="visually-hidden">மொறட்டுவைப் பல்கலைக்கழக தமிழ் இலக்கிய மன்றம் (Tamil Literary Association, University of Moratuwa)</h1>
             <Landing />
             <Intro />
             <Event />

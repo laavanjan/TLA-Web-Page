@@ -35,6 +35,8 @@ function Intro() {
     useScrollVar(sectionRef, kolamProgress, { name: "--k" });
     useScrollVar(verseRef, verseProgress, { name: "--p" });
     const taglineIn = useInView(taglineRef, { threshold: 0.6 });
+    const nameRef = useRef(null);
+    const nameIn = useInView(nameRef, { threshold: 0.5 });
 
     return (
         <div ref={sectionRef} className="intro-container-div fx-intro" id="intro">
@@ -44,6 +46,17 @@ function Intro() {
                 <FxHeading>
                     <Heading>அறிமுகம்</Heading>
                 </FxHeading>
+                {/* The page's one real h1: the full name in both languages, so
+                    people (and search engines) can read who we are. The text is
+                    always visible; only the gold rules draw in. */}
+                <h1 ref={nameRef} className={`intro-name ${nameIn ? "is-in" : ""}`}>
+                    <span className="intro-name-ta">மொறட்டுவைப் பல்கலைக்கழக தமிழ் இலக்கிய மன்றம்</span>
+                    <span className="intro-name-en">
+                        <span>Tamil Literary Association</span>
+                        <i aria-hidden="true" />
+                        <span>University of Moratuwa</span>
+                    </span>
+                </h1>
                 <Grid
                     container
                     direction="column"
