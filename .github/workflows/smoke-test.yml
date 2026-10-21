@@ -1,0 +1,36 @@
+# After Vercel finishes a production deploy, opens the live site and checks
+# that the pages load (not Vercel's 404 page), and that the sitemap,
+# robots.txt and /api/geo answer. Runs on its own after every deploy; can also
+# be started by hand from the Actions tab. Changes nothing on Vercel.
+name: Live site check
+
+on:
+  deployment_status:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: Site to check
+        default: https://tlauom.com
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Live site check
+    # Only finished production deploys (Vercel reports each one to GitHub).
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.deployment_status.state == 'success' &&
+       github.event.deployment.environment == 'Production')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Give the new deploy a moment to reach every region
+        if: github.event_name == 'deployment_status'
+        run: sleep 30
+      - name: Check the live site
+        env:
+          SITE_URL: ${{ github.event.inputs.url || 'https://tlauom.com' }}
+        run: scripts/ci/smoke-test.sh "$SITE_URL"
