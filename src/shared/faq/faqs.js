@@ -35,6 +35,8 @@ export const FAQ_TOKENS = [
   ["facebookUrl", "Facebook link (Contact info)"],
   ["youtubeUrl", "YouTube link (Contact info)"],
   ["instagramUrl", "Instagram link (Contact info)"],
+  ["linkedinUrl", "LinkedIn link (Contact info)"],
+  ["xUrl", "X (Twitter) link (Contact info)"],
 ];
 const TOKEN_NAMES = FAQ_TOKENS.map(([t]) => t);
 

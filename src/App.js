@@ -7,10 +7,12 @@ import Footer from "./Components/Home/Footer/footer";
 import HelpBot from "./Components/HelpBot/HelpBot";
 import MaintenanceGate from "./Components/maintenance/MaintenanceGate";
 import ScrollToTop from "./Components/ScrollToTop";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "./providers/AuthProvider";
 import { currentUser } from "./helpers/server";
+import { trackPageView } from "./analytics/tracker";
+import RouteSeo from "./seo/RouteSeo";
 
 function App() {
   const auth = useAuth();
@@ -21,11 +23,19 @@ function App() {
   useEffect(() => {
     currentUser().then(auth.loggedIn).catch(() => { });
   }, []);
+  // Count the visit for the admin's Traffic page (src/analytics/tracker.js).
+  useEffect(() => {
+    trackPageView(pathname);
+  }, [pathname]);
   return (
     <MaintenanceGate>
       <ScrollToTop />
+      <RouteSeo />
       {!standalone && <Navbar />}
-      <Router/>
+      {/* Admin and photo-frame pages load on demand (Router.js); nothing shows for the moment it takes. */}
+      <Suspense fallback={null}>
+        <Router/>
+      </Suspense>
       {!standalone && <Footer />}
       {!standalone && <HelpBot />}
     </MaintenanceGate>

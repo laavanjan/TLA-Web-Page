@@ -13,6 +13,7 @@ import {
   FaTimes,
 } from "react-icons/fa";
 import "./submitForm.css";
+import { trackEvent } from "../../../analytics/tracker";
 import {
   ACCEPTED_DOC_TYPES,
   ACCEPTED_PDF_TYPES,
@@ -269,6 +270,7 @@ const SubmitForm = () => {
         throw new Error(result.message || "submission rejected");
       }
 
+      trackEvent("book_submitted");
       setStatus("success");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {

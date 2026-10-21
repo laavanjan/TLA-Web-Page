@@ -1,3 +1,4 @@
+import { lazy } from "react";
 import { useRoutes, Navigate } from "react-router-dom";
 
 import { EventRoute, CustomEventRoute, BrammamCompetitionRoute } from "./Components/events/EventRoute";
@@ -22,25 +23,32 @@ import Signup from "./Components/Signup";
 import MakkalMantramVote from "./Pages/MakkalMantramVote";
 import Seniors from "./Pages/Seniors";
 import MembersPage from "./Pages/Members";
-import MakkalMantramVoteResults from "./Pages/MakkalMantramVoteResults";
-import Frame from "./Pages/Frame";
-import Admin from "./Pages/Admin";
-import AdminQr from "./Pages/AdminQr";
-import AdminStickers from "./Pages/AdminStickers";
-import AdminAccount from "./Pages/AdminAccount";
-import AdminBooks from "./Pages/AdminBooks";
-import AdminContact from "./Pages/AdminContact";
-import AdminTeamJoin from "./Pages/AdminTeamJoin";
-import AdminTeams from "./Pages/AdminTeams";
-import AdminEvents from "./Pages/AdminEvents";
-import AdminMaintenance from "./Pages/AdminMaintenance";
-import AdminWallpapers from "./Pages/AdminWallpapers";
-import AdminFaq from "./Pages/AdminFaq";
-import AdminMembers from "./Pages/AdminMembers";
-import AdminLogin from "./Pages/AdminLogin";
-import RequireAdmin from "./Pages/RequireAdmin";
-import AdminEditors from "./Pages/AdminEditors";
-import AdminActivity from "./Pages/AdminActivity";
+import Privacy from "./Pages/Privacy";
+import Faq from "./Pages/Faq";
+
+// The admin panel, the photo-frame editor and the vote results screen are
+// downloaded only when opened, so visitors to the public pages don't load
+// them (or their chart, canvas and PDF libraries) up front.
+const MakkalMantramVoteResults = lazy(() => import("./Pages/MakkalMantramVoteResults"));
+const Frame = lazy(() => import("./Pages/Frame"));
+const Admin = lazy(() => import("./Pages/Admin"));
+const AdminQr = lazy(() => import("./Pages/AdminQr"));
+const AdminStickers = lazy(() => import("./Pages/AdminStickers"));
+const AdminAccount = lazy(() => import("./Pages/AdminAccount"));
+const AdminBooks = lazy(() => import("./Pages/AdminBooks"));
+const AdminContact = lazy(() => import("./Pages/AdminContact"));
+const AdminTeamJoin = lazy(() => import("./Pages/AdminTeamJoin"));
+const AdminTeams = lazy(() => import("./Pages/AdminTeams"));
+const AdminEvents = lazy(() => import("./Pages/AdminEvents"));
+const AdminMaintenance = lazy(() => import("./Pages/AdminMaintenance"));
+const AdminWallpapers = lazy(() => import("./Pages/AdminWallpapers"));
+const AdminFaq = lazy(() => import("./Pages/AdminFaq"));
+const AdminMembers = lazy(() => import("./Pages/AdminMembers"));
+const AdminLogin = lazy(() => import("./Pages/AdminLogin"));
+const RequireAdmin = lazy(() => import("./Pages/RequireAdmin"));
+const AdminEditors = lazy(() => import("./Pages/AdminEditors"));
+const AdminActivity = lazy(() => import("./Pages/AdminActivity"));
+const AdminTraffic = lazy(() => import("./Pages/AdminTraffic"));
 
 function Router() {
   return useRoutes([
@@ -131,6 +139,15 @@ function Router() {
     {
       path: "contact",
       element: <Contact />,
+    },
+    {
+      path: "privacy",
+      element: <Privacy />,
+    },
+    {
+      // Not linked from the menus: for search engines (see Pages/Faq.js).
+      path: "faq",
+      element: <Faq />,
     },
     {
       path: "vote",
@@ -265,6 +282,14 @@ function Router() {
       element: (
         <RequireAdmin>
           <AdminActivity />
+        </RequireAdmin>
+      ),
+    },
+    {
+      path: "admin/traffic",
+      element: (
+        <RequireAdmin>
+          <AdminTraffic />
         </RequireAdmin>
       ),
     },

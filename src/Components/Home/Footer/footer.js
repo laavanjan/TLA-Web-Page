@@ -13,8 +13,9 @@ import {
   FaMapMarkerAlt,
   FaArrowUp,
   FaUsers,
-  FaFeatherAlt,
+  FaLinkedinIn,
 } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 import Logo from "../../../images/Logo-Nav/logo.png";
 import Kolam from "../Intro/Kolam";
 import { fetchContactConfig, getCachedContactConfig } from "../../../shared/contactConfig";
@@ -63,6 +64,8 @@ function Footer() {
     [contact.facebookUrl, "Facebook", FaFacebookF],
     [contact.youtubeUrl, "YouTube", FaYoutube],
     [contact.instagramUrl, "Instagram", FaInstagram],
+    [contact.linkedinUrl, "LinkedIn", FaLinkedinIn],
+    [contact.xUrl, "X", FaXTwitter],
   ].filter(([url]) => url);
 
   return (
@@ -156,9 +159,6 @@ function Footer() {
             <Link to="/teams/join" className="ft-btn is-primary">
               <FaUsers aria-hidden="true" /> அணியில் இணையுங்கள்
             </Link>
-            <Link to="/books/submit" className="ft-btn">
-              <FaFeatherAlt aria-hidden="true" /> படைப்பைச் சமர்ப்பிக்க
-            </Link>
           </div>
         </div>
       </div>
@@ -167,7 +167,12 @@ function Footer() {
         <div className="ft-bottom-inner">
           <span className="ft-copy">
             © {year} தமிழ் இலக்கிய மன்றம் · அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை
-            <span className="ft-copy-en">Tamil Literary Association, University of Moratuwa</span>
+            <span className="ft-copy-en">
+              Tamil Literary Association, University of Moratuwa ·{" "}
+              <Link to="/privacy" className="ft-privacy">
+                Privacy
+              </Link>
+            </span>
           </span>
           <button type="button" className="ft-top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
             மேலே செல்ல <FaArrowUp aria-hidden="true" />

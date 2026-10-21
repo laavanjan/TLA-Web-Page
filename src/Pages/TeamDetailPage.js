@@ -1,5 +1,7 @@
 import React from "react";
-import { Helmet } from "react-helmet";
+import Seo from "../seo/Seo";
+import { breadcrumbs } from "../seo/schema";
+import { PAGE_TITLES, hasListedPage } from "../seo/RouteSeo";
 import { Navigate, useParams } from "react-router-dom";
 import TeamDetail from "../Components/teams/team-detail/TeamDetail";
 import { useTeamPages } from "../shared/teamPages";
@@ -14,13 +16,13 @@ function TeamDetailPage() {
 
   return (
     <>
-      <Helmet>
-        <title>
-          {page ? `${page.title} | தமிழ் இலக்கிய மன்றம்` : "அணி | தமிழ் இலக்கிய மன்றம்"}
-        </title>
-        <meta name="description" content={page ? page.tagline : "அணி விபரங்கள்"} />
-        <meta name="keywords" content="TLA, Tamil Literary Association, Team" />
-      </Helmet>
+      <Seo
+        title={page ? page.title : "அணி"}
+        description={page ? `${page.title} — ${page.tagline}. தமிழ் இலக்கிய மன்றம், மொறட்டுவைப் பல்கலைக்கழகம்.` : "அணி விபரங்கள்"}
+        path={`/teams/${teamId}`}
+        image={page && /^https?:\/\//.test(page.logo || "") ? page.logo : undefined}
+        jsonLd={page && !hasListedPage(`/teams/${teamId}`) ? breadcrumbs(`/teams/${teamId}`, page.title, PAGE_TITLES) : null}
+      />
       <TeamDetail page={page} />
     </>
   );

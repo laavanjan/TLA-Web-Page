@@ -282,6 +282,87 @@ Run the tests with `npx react-scripts test --watchAll=false src/shared/siteStatu
 
 ---
 
+## Traffic analytics (`/admin/traffic`)
+
+Main admins can see who visits the website: daily visitors, who is on the site right now, where visitors come from (Google, Instagram, WhatsApp, TikTok, QR codes…), the most visited pages and books, the busiest days and hours, devices and countries, and how many visits go on to send a team join application or submit a book. A summary at the top says it in plain sentences, and the numbers can be downloaded as CSV for Excel.
+
+- **Everyone is counted**, not only members, but anonymously: no IP addresses, names or emails. The visit id is random and changes every day.
+- **Not counted:** bots and link previews, anyone signed in to the admin (admins and editors), the `/admin` pages, browsers that send Do Not Track / Global Privacy Control, and `localhost` (set `REACT_APP_ANALYTICS_DEV=1` to count it while testing).
+- **Kept:** single page views for 90 days (for the funnels and the live view); the daily totals in `analytics_daily` for good.
+- **Tagged links:** add `?utm_source=instagram&utm_campaign=thamilaruvi-2026` to a link and its visitors show up under that campaign. The Traffic page has a builder for these, and QR codes made at `/admin/qr` are tagged automatically.
+- **Country** comes from Vercel's `x-vercel-ip-country` header through `api/geo.js`; if that isn't reachable the browser's time zone gives a guess.
+- The public [privacy page](/privacy) explains all this to visitors and is linked from the footer.
+- There is no cookie banner: nothing is used for advertising and no one can be identified, but check with the committee whether one is wanted.
+
+**One-time setup:** Supabase → SQL Editor → run [`supabase/migrations/analytics.sql`](supabase/migrations/analytics.sql) (after `team_editors.sql`). It also schedules a nightly clean-up with `pg_cron`; if it prints a notice that `pg_cron` isn't available, turn it on under Database → Extensions and run the file again. Counting starts when the file is run, so the first day looks small.
+
+| File | Purpose |
+|------|---------|
+| `supabase/migrations/analytics.sql` | Tables, the tracking function, daily roll-up, live view, funnels, nightly job |
+| `src/analytics/tracker.js` | Sends page views and form events; skips bots, admins and Do Not Track |
+| `src/analytics/classify.js` · `device.js` · `identity.js` · `geo.js` | Source of a visit, device and browser, anonymous ids, country |
+| `api/geo.js` | Vercel function returning the visitor's country |
+| `src/admin/trafficData.js` · `trafficMath.js` · `trafficLabels.js` | Loading, adding up and naming the numbers |
+| `src/Pages/AdminTraffic.js` · `src/Components/traffic/` | The Traffic page and its panels |
+| `src/Pages/Privacy.js` | The public privacy page |
+
+Run the tests with `npx react-scripts test --watchAll=false src/analytics src/admin`.
+
+---
+
+## Search engines & share previews (SEO)
+
+Every public page has its own title, description, canonical link (its one official address), language and share picture, so Google shows the right text and WhatsApp/Facebook show the right preview.
+
+- **While the site runs:** `src/seo/RouteSeo.js` (in `App.js`) sets the tags for whatever page is open from [`src/seo/pages.json`](src/seo/pages.json). Books, events and team pages set their own with `<Seo>` from `src/seo/Seo.js`.
+- **At build time:** `npm run build` then runs `scripts/seo-build.js` (the `postbuild` script). It reads `pages.json` and the books, events and team pages from Supabase and writes:
+  - `build/<page>.html`: the site with that page's tags already in it, for crawlers that don't run JavaScript (WhatsApp, Facebook, most AI crawlers). `vercel.json` has `cleanUrls` on, so `/events/thamilaruvi` is served from `events/thamilaruvi.html`.
+  - `build/sitemap.xml`: every public page, including each book and every event made in the admin, made fresh on each deploy. Link-only (unlisted) books and the admin pages are left out.
+  If Supabase can't be reached it still does the fixed pages and never fails the build. **A new book or event appears in the sitemap after the next deploy.**
+- **Share pictures:** `public/og/*.jpg` (1200×630), made from the event illustrations by `python3 scripts/og-images.py`. Books use their cover.
+- **Adding a page:** add its address, title and description to `src/seo/pages.json`.
+- Tests: `npm run test:seo` (build step) and `npx react-scripts test --watchAll=false src/seo`.
+
+### Answers for Google and AI tools (AEO)
+
+- **`/faq`**: the help assistant's questions and answers (from `/admin/faq`) as a page, in Tamil with the English where it exists. It is **not linked** from the site's menus, so visitors keep using the உதவி button; search engines find it through the sitemap. Editing a question in `/admin/faq` updates this page too.
+- **Structured data** (hidden code describing what's already on a page, `src/seo/schema.js`):
+  - FAQ questions on `/faq` (Google only shows FAQ boxes for government and health sites, but the answers are still read and quoted).
+  - **Events**: only when the page has a **date and a venue**, in the intro or programme section, or on a competition. Admins: fill in both for an event to appear in Google's event listings. Dates like `2026-03-15`, `15/03/2026`, `15 March 2026` or `மார்ச் 15, 2026` all work.
+  - **Books**: title, author (or TLA), year, cover.
+  - **Breadcrumbs** on every page, and TLA's contact details (from `/admin/contact`) and address on the home page.
+- Check any page at [search.google.com/test/rich-results](https://search.google.com/test/rich-results).
+- Never mark up text that isn't on the page: Google treats that as spam.
+
+### Google Search Console (one-time)
+
+1. Go to [search.google.com/search-console](https://search.google.com/search-console) → **Add property**.
+2. **Domain** (`tlauom.com`, recommended): Google gives a TXT record. Add it at the domain's DNS provider (where the Vercel records are, see *Connecting the custom domain* above). Don't change the existing records.
+   **Or URL prefix** (`https://tlauom.com/`) with the **HTML tag** method: copy only the `content="…"` code, add it in Vercel → Project → Settings → Environment Variables as `GOOGLE_SITE_VERIFICATION`, redeploy, then press **Verify**.
+3. Then **Sitemaps** → enter `sitemap.xml` → **Submit**.
+4. Check back after a few days: **Performance** shows the searches that find the site, **Pages** shows anything Google couldn't read.
+
+### Speed
+
+- The admin panel, photo-frame editor and vote results load only when opened (`src/Router.js`), so the main JavaScript visitors download is about a third smaller.
+- Large pictures were recompressed (losslessly) or scaled down to a size that's still sharp on any screen.
+
+---
+
+## Automatic checks (GitHub Actions)
+
+Two workflows in `.github/workflows` run on their own. Neither changes how Vercel deploys.
+
+- **CI** (`ci.yml`), on every push to `main` and every pull request:
+  - the app tests and the SEO build step tests
+  - a production build (`npm run build`, as Vercel runs it) and a check that the sitemap has the main pages
+  - every SQL file in `supabase/migrations` run on an empty Postgres, in the order in `supabase/ci/order.txt`, then the ones marked "Safe to re-run" a second time. **Add a new SQL file to `order.txt`**, or CI fails.
+- **Live site check** (`smoke-test.yml`), after every production deploy on Vercel: opens `tlauom.com` and checks that the main pages, `/admin`, the sitemap, `robots.txt` and `/api/geo` work (`scripts/ci/smoke-test.sh`). It can also be started by hand: GitHub → **Actions** → **Live site check** → **Run workflow**.
+
+A failed run shows a red ✗ next to the commit on GitHub, and GitHub emails whoever pushed it. Click the ✗ to see which check failed.
+
+---
+
 ## Hackathon event configuration
 
 Go to `src/Components/events/hackthon/agenda/eventList.js` and edit the `events` object to update the agenda.

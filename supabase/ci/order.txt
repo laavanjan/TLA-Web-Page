@@ -1,0 +1,18 @@
+# The order the migration files are run in (each file says what it needs to
+# come after). CI runs them in this order on an empty database, then runs the
+# ones marked "Safe to re-run" a second time. Add new files here.
+team_pages.sql
+contact_info.sql
+members.sql
+book_config.sql
+team_join.sql
+team_editors.sql
+team_hidden.sql
+team_custom.sql
+members_admin.sql
+books.sql
+event_pages.sql
+faq.sql
+homepage_wallpapers.sql
+site_status.sql
+analytics.sql

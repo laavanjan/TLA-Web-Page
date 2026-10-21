@@ -13,6 +13,8 @@ export const DEFAULT_CONTACT_CONFIG = {
   facebookUrl: "https://web.facebook.com/TLAuom",
   youtubeUrl: "https://www.youtube.com/@TLAUOM",
   instagramUrl: "https://www.instagram.com/tla_uom/",
+  linkedinUrl: "https://www.linkedin.com/company/tlauom/",
+  xUrl: "https://x.com/TLAuom",
 };
 
 // Whitelist + validate known keys so an unexpected response never pollutes or
@@ -28,6 +30,8 @@ export function mergeConfig(partial) {
     facebookUrl: str(p.facebookUrl, d.facebookUrl),
     youtubeUrl: str(p.youtubeUrl, d.youtubeUrl),
     instagramUrl: str(p.instagramUrl, d.instagramUrl),
+    linkedinUrl: str(p.linkedinUrl, d.linkedinUrl),
+    xUrl: str(p.xUrl, d.xUrl),
   };
 }
 

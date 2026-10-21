@@ -13,6 +13,7 @@ import {
   getCachedTeamJoinConfig,
 } from "../shared/teamJoinConfig";
 import { submitTeamJoinApplication } from "../shared/teamJoinApplications";
+import { trackEvent } from "../analytics/tracker";
 import { useTeamPages } from "../shared/teamPages";
 import { TeamsData } from "../Components/teams/teamsData";
 
@@ -132,6 +133,7 @@ export default function TeamJoinForm() {
     setStatus("sending");
     try {
       await submitTeamJoinApplication(name, answers);
+      trackEvent("team_join_submitted");
       setStatus("success");
     } catch (err) {
       setStatus("error");

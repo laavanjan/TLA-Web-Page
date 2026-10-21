@@ -51,7 +51,9 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "DISABLE_ESLINT_PLUGIN=true react-scripts build",
+    "postbuild": "node scripts/seo-build.js",
     "test": "react-scripts test",
+    "test:seo": "node --test scripts/seo/seo.test.js",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -77,5 +79,10 @@
     "@types/react-dom": "^18.2.21",
     "@types/react-helmet": "^6.1.0",
     "react-scripts": "^5.0.1"
+  },
+  "jest": {
+    "transformIgnorePatterns": [
+      "node_modules/(?!(axios|greet_name|react-vertical-timeline-component|@fontsource/mukta-malar)/)"
+    ]
   }
 }
