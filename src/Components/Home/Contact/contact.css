@@ -266,6 +266,7 @@
 .contact-info-text {
     display: flex;
     flex-direction: column;
+    min-width: 0;
 }
 
 .contact-info-label {
@@ -283,7 +284,15 @@
     font-weight: 600;
     line-height: 1.4;
     color: #022345;
-    overflow-wrap: anywhere;
+    /* Wrap between words (the email after its @). A single word is only split
+       if it can't fit on a line at all. */
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+
+/* A phone number always stays on one line. */
+.contact-info-nowrap {
+    white-space: nowrap;
 }
 
 /* Social card */
