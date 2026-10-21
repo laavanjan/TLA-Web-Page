@@ -13,7 +13,6 @@ import {
   FaMapMarkerAlt,
   FaArrowUp,
   FaUsers,
-  FaFeatherAlt,
   FaLinkedinIn,
 } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
@@ -159,9 +158,6 @@ function Footer() {
           <div className="ft-cta">
             <Link to="/teams/join" className="ft-btn is-primary">
               <FaUsers aria-hidden="true" /> அணியில் இணையுங்கள்
-            </Link>
-            <Link to="/books/submit" className="ft-btn">
-              <FaFeatherAlt aria-hidden="true" /> படைப்பைச் சமர்ப்பிக்க
             </Link>
           </div>
         </div>
