@@ -1,0 +1,87 @@
+# Checks every push to main and every pull request, alongside Vercel's own
+# deploy (it doesn't hold the deploy back; a red cross here means something
+# needs fixing). Steps:
+#   1. unit tests (app + SEO build step)
+#   2. a production build, the same command Vercel runs, and a look at its output
+#   3. every SQL file in supabase/migrations run on an empty Postgres
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  app:
+    name: Tests & build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Placeholders: the tests and build never reach Supabase. The real keys
+      # live in Vercel only.
+      REACT_APP_SUPABASE_URL: https://ci-placeholder.supabase.co
+      REACT_APP_SUPABASE_ANON_KEY: ci-placeholder
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install packages
+        run: npm ci --no-audit --no-fund
+
+      - name: App tests
+        run: npx react-scripts test --watchAll=false
+
+      - name: SEO build step tests
+        run: npm run test:seo
+
+      - name: Production build
+        run: npm run build
+
+      - name: Check the build output
+        run: |
+          test -f build/index.html
+          grep -q '<div id="root">' build/index.html
+          test -f build/sitemap.xml
+          for page in / /books /faq /privacy /events/thamilaruvi; do
+            grep -q "<loc>https://tlauom.com${page}</loc>" build/sitemap.xml || { echo "::error::$page missing from sitemap.xml"; exit 1; }
+          done
+          echo "Sitemap has $(grep -c '<loc>' build/sitemap.xml) pages."
+          ls -1 build/static/js/main.*.js
+
+  sql:
+    name: SQL migrations
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run every migration on an empty database
+        run: supabase/ci/check-migrations.sh
