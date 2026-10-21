@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./contact.css";
-import { FaEnvelope, FaFacebook, FaYoutube, FaPhoneAlt, FaUser, FaPaperPlane, FaTag, FaCommentDots, FaInstagram } from "react-icons/fa";
+import { FaEnvelope, FaFacebook, FaYoutube, FaPhoneAlt, FaUser, FaPaperPlane, FaTag, FaCommentDots, FaInstagram, FaLinkedin } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 import emailjs from "@emailjs/browser";
 import { fetchContactConfig, getCachedContactConfig } from "../../../shared/contactConfig";
 import Reveal from "../../../shared/Reveal/Reveal";
@@ -192,6 +193,14 @@ function Contact() {
                                 <button className="contact-social-btn" onClick={() => goSocial(contactCfg.instagramUrl)}>
                                     <FaInstagram />
                                     இன்ஸ்டாகிராம்
+                                </button>
+                                <button className="contact-social-btn" onClick={() => goSocial(contactCfg.linkedinUrl)}>
+                                    <FaLinkedin />
+                                    லிங்க்ட்இன்
+                                </button>
+                                <button className="contact-social-btn" onClick={() => goSocial(contactCfg.xUrl)}>
+                                    <FaXTwitter />
+                                    எக்ஸ்
                                 </button>
                             </div>
                         </Reveal>

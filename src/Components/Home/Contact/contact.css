@@ -324,10 +324,19 @@
     margin: 0 0 18px 0;
 }
 
+/* Five buttons: three on the first row, two wider ones on the second. */
 .contact-social-row {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 10px;
+}
+
+.contact-social-row > .contact-social-btn {
+    grid-column: span 2;
+}
+
+.contact-social-row > .contact-social-btn:nth-child(n + 4) {
+    grid-column: span 3;
 }
 
 .contact-social-btn {
