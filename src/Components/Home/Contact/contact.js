@@ -162,15 +162,7 @@ function Contact() {
                                 <div className="contact-info-icon"><FaEnvelope /></div>
                                 <div className="contact-info-text">
                                     <span className="contact-info-label">மின்னஞ்சல்</span>
-                                    {/* If it doesn't fit, it wraps after the @, not mid-word. */}
-                                    <span className="contact-info-value">
-                                        {String(contactCfg.email || "").split("@").map((part, i) => (
-                                            <React.Fragment key={i}>
-                                                {i > 0 && <>@<wbr /></>}
-                                                {part}
-                                            </React.Fragment>
-                                        ))}
-                                    </span>
+                                    <span className="contact-info-value contact-info-email" title={contactCfg.email}>{contactCfg.email}</span>
                                 </div>
                             </a>
 

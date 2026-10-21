@@ -266,7 +266,10 @@
 .contact-info-text {
     display: flex;
     flex-direction: column;
+    flex: 1;
     min-width: 0;
+    /* Lets the email size itself to this box (cqi units below). */
+    container-type: inline-size;
 }
 
 .contact-info-label {
@@ -288,6 +291,18 @@
        if it can't fit on a line at all. */
     overflow-wrap: break-word;
     word-break: normal;
+}
+
+/* The email always stays on one line: on a narrow card its text gets a
+   little smaller instead of wrapping (6.2% of the box width fits an address
+   of about 22 characters; never bigger than the other details). */
+.contact-info-email {
+    white-space: nowrap;
+    font-size: min(17px, 6.2cqi);
+    /* A much longer address set in /admin/contact ends in "…" rather than
+       spilling out of the card. */
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* A phone number always stays on one line. */
