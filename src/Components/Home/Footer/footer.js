@@ -14,7 +14,9 @@ import {
   FaArrowUp,
   FaUsers,
   FaFeatherAlt,
+  FaLinkedinIn,
 } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 import Logo from "../../../images/Logo-Nav/logo.png";
 import Kolam from "../Intro/Kolam";
 import { fetchContactConfig, getCachedContactConfig } from "../../../shared/contactConfig";
@@ -63,6 +65,8 @@ function Footer() {
     [contact.facebookUrl, "Facebook", FaFacebookF],
     [contact.youtubeUrl, "YouTube", FaYoutube],
     [contact.instagramUrl, "Instagram", FaInstagram],
+    [contact.linkedinUrl, "LinkedIn", FaLinkedinIn],
+    [contact.xUrl, "X", FaXTwitter],
   ].filter(([url]) => url);
 
   return (
