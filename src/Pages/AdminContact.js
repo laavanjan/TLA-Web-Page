@@ -141,6 +141,26 @@ export default function AdminContact() {
               spellCheck={false}
             />
 
+            <span className="admin-label" style={{ marginTop: 14 }}>
+              LinkedIn URL
+            </span>
+            <input
+              className="admin-input admin-field"
+              value={cfg.linkedinUrl}
+              onChange={(e) => set({ linkedinUrl: e.target.value })}
+              spellCheck={false}
+            />
+
+            <span className="admin-label" style={{ marginTop: 14 }}>
+              X (Twitter) URL
+            </span>
+            <input
+              className="admin-input admin-field"
+              value={cfg.xUrl}
+              onChange={(e) => set({ xUrl: e.target.value })}
+              spellCheck={false}
+            />
+
             {msg.text && (
               <p className={msg.type === "ok" ? "admin-ok" : "admin-error"}>
                 {msg.text}
