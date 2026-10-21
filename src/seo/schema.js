@@ -131,7 +131,7 @@ export function bookSchema(book, image) {
 // and the university's address to the organisation in index.html (same @id,
 // so search engines merge the two).
 export function organizationSchema(contact = {}) {
-  const sameAs = [contact.facebookUrl, contact.youtubeUrl, contact.instagramUrl].filter((u) => /^https?:\/\//.test(u || ""));
+  const sameAs = [contact.facebookUrl, contact.youtubeUrl, contact.instagramUrl, contact.linkedinUrl, contact.xUrl].filter((u) => /^https?:\/\//.test(u || ""));
   const phone = String(contact.phoneNumber || "").replace(/[^\d+]/g, "");
   return {
     "@context": "https://schema.org",
