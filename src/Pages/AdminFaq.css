@@ -509,3 +509,46 @@
   font-style: italic;
   opacity: 0.7;
 }
+
+/* ---- AI answer check (AnswerCheck in AdminFaq.js) ---- */
+
+.af-aeo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 207, 122, 0.35);
+  border-left: 3px solid #ffcf7a;
+  border-radius: 8px;
+  background: rgba(255, 207, 122, 0.06);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.af-aeo-title {
+  color: #ffcf7a;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.af-aeo ul {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.af-aeo.is-ready {
+  border-color: rgba(120, 220, 160, 0.35);
+  border-left-color: #78dca0;
+  background: rgba(120, 220, 160, 0.06);
+}
+
+.af-aeo.is-ready .af-aeo-title {
+  color: #78dca0;
+}
+
+.af-aeo.is-ready .af-aeo-title::before {
+  content: "✓ ";
+}

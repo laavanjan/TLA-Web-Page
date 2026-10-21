@@ -21,6 +21,7 @@ import {
 } from "react-icons/fa";
 
 import LotusDivider from "./LotusDivider";
+import { answerTips } from "../shared/faq/answerCheck";
 import {
   fetchFaqs,
   saveFaq,
@@ -559,6 +560,8 @@ function FaqEditor({ initial, ctx, pages, nextOrder, onSaved, onCancel }) {
             </div>
           </fieldset>
 
+          <AnswerCheck draft={draft} />
+
           <div className="af-field">
             <span className="admin-label">Links under the answer</span>
             {draft.links.map((l, i) => {
@@ -690,6 +693,26 @@ function FaqEditor({ initial, ctx, pages, nextOrder, onSaved, onCancel }) {
 
 // The question and answer as a chat, the way the assistant shows them, in
 // Tamil or English.
+// How quotable the answer is for AI answer engines (see answerCheck.js).
+function AnswerCheck({ draft }) {
+  const tips = answerTips(draft);
+  if (!String(draft.a || "").trim()) return null;
+  return (
+    <div className={`af-aeo ${tips.length ? "" : "is-ready"}`} role="status" aria-live="polite">
+      <span className="af-aeo-title">{tips.length ? "AI answer check" : "Ready for AI answers"}</span>
+      {tips.length ? (
+        <ul>
+          {tips.map((t) => (
+            <li key={t}>{t}</li>
+          ))}
+        </ul>
+      ) : (
+        <small>Short, self-contained and in both languages - answer engines can quote it as it is.</small>
+      )}
+    </div>
+  );
+}
+
 function FaqPreview({ draft, ctx, unknown }) {
   const [lang, setLang] = useState("ta");
   const links = draft.links.filter((l) => l.label.trim() && l.target.trim());
