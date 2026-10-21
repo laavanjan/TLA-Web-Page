@@ -123,4 +123,37 @@ async function loadRoutes(env = process.env) {
   return buildRoutes({ books, events, teams });
 }
 
-module.exports = { buildRoutes, loadRoutes, bookImage };
+// How many members there are (for {members} in answers) -> "" when unknown.
+async function memberCount(env = process.env) {
+  const url = env.REACT_APP_SUPABASE_URL;
+  const key = env.REACT_APP_SUPABASE_ANON_KEY;
+  if (!url || !key) return "";
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT);
+  try {
+    const res = await fetch(`${url.replace(/\/+$/, "")}/rest/v1/members?select=id&limit=1`, {
+      headers: { apikey: key, Authorization: `Bearer ${key}`, Prefer: "count=exact" },
+      signal: controller.signal,
+    });
+    const total = Number(((res.headers.get("content-range") || "").split("/")[1] || "").trim());
+    return res.ok && total > 0 ? total.toLocaleString("en-US") : "";
+  } catch {
+    return "";
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// What the answer pages need: the help assistant's questions, the contact
+// details (/admin/contact) and the member count.
+async function loadAnswers(env = process.env) {
+  const [faqs, contactRows, members] = await Promise.all([
+    readTable(env, "faqs", "*"),
+    readTable(env, "contact_info", "id,data"),
+    memberCount(env),
+  ]);
+  const row = contactRows.find((r) => r && r.id === 1) || contactRows[0];
+  return { faqs, contact: (row && row.data) || {}, members };
+}
+
+module.exports = { buildRoutes, loadRoutes, loadAnswers, bookImage };
