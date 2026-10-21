@@ -349,6 +349,20 @@ Every public page has its own title, description, canonical link (its one offici
 
 ---
 
+## Automatic checks (GitHub Actions)
+
+Two workflows in `.github/workflows` run on their own. Neither changes how Vercel deploys.
+
+- **CI** (`ci.yml`), on every push to `main` and every pull request:
+  - the app tests and the SEO build step tests
+  - a production build (`npm run build`, as Vercel runs it) and a check that the sitemap has the main pages
+  - every SQL file in `supabase/migrations` run on an empty Postgres, in the order in `supabase/ci/order.txt`, then the ones marked "Safe to re-run" a second time. **Add a new SQL file to `order.txt`**, or CI fails.
+- **Live site check** (`smoke-test.yml`), after every production deploy on Vercel: opens `tlauom.com` and checks that the main pages, `/admin`, the sitemap, `robots.txt` and `/api/geo` work (`scripts/ci/smoke-test.sh`). It can also be started by hand: GitHub → **Actions** → **Live site check** → **Run workflow**.
+
+A failed run shows a red ✗ next to the commit on GitHub, and GitHub emails whoever pushed it. Click the ✗ to see which check failed.
+
+---
+
 ## Hackathon event configuration
 
 Go to `src/Components/events/hackthon/agenda/eventList.js` and edit the `events` object to update the agenda.
