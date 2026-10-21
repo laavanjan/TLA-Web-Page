@@ -127,6 +127,10 @@ export function bookSchema(book, image) {
   };
 }
 
+// One line on who TLA is - the same as in public/index.html.
+const ORG_DESCRIPTION =
+  "Student organisation of the University of Moratuwa, Sri Lanka, run by its Tamil students since 1968. It preserves and promotes Tamil arts, culture, literature and heritage, and runs the Thamilaruvi arts festival, the Sotkanai school debating competition, the Brammam online competitions and the Jeevanathi charity work.";
+
 // TLA itself, for the home page: adds the contact details from /admin/contact
 // and the university's address to the organisation in index.html (same @id,
 // so search engines merge the two).
@@ -150,6 +154,9 @@ export function organizationSchema(contact = {}) {
     ],
     url: `${SITE_URL}/`,
     logo: `${SITE_URL}/logo.png`,
+    foundingDate: "1968",
+    description: ORG_DESCRIPTION,
+    knowsAbout: ["Tamil literature", "Tamil language", "Tamil culture", "Debating", "Thamilaruvi", "Sotkanai"],
     ...(contact.email ? { email: contact.email } : {}),
     ...(phone ? { telephone: phone.startsWith("0") ? `+94${phone.slice(1)}` : phone } : {}),
     address: {
