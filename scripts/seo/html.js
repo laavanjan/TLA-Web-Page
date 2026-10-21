@@ -26,7 +26,7 @@ function clip(text, max = 160) {
 }
 
 function headTags(pagePath, meta) {
-  const title = meta.title ? `${meta.title} | ${SITE_NAME}` : `${SITE_NAME} | ${SITE_NAME_EN}`;
+  const title = meta.title ? `${meta.title} | ${SITE_NAME}` : `${SITE_NAME} | ${SITE_NAME_EN} (TLA UoM)`;
   const shareTitle = meta.title || title;
   const desc = clip(meta.description);
   const url = absolute(pagePath);

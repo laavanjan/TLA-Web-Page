@@ -138,7 +138,16 @@ export function organizationSchema(contact = {}) {
     "@type": "Organization",
     ...ORG,
     name: SITE_NAME_EN,
-    alternateName: ["தமிழ் இலக்கிய மன்றம்", "TLA UoM"],
+    // the same names as the organisation in index.html, so the two agree
+    alternateName: [
+      "TLA UoM",
+      "TLAUOM",
+      "Tamil Literary Association",
+      "Thamizh Literary Association",
+      "Thamizh Literary Association, University of Moratuwa",
+      "தமிழ் இலக்கிய மன்றம்",
+      "மொறட்டுவைப் பல்கலைக்கழக தமிழ் இலக்கிய மன்றம்",
+    ],
     url: `${SITE_URL}/`,
     logo: `${SITE_URL}/logo.png`,
     ...(contact.email ? { email: contact.email } : {}),

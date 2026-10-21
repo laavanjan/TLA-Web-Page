@@ -8,7 +8,7 @@ import { Helmet } from "react-helmet";
 import { SITE_NAME, SITE_NAME_EN, DEFAULT_IMAGE, absoluteUrl, clip } from "./site";
 
 export default function Seo({ title, description, path, image, type = "website", lang = "ta", noindex = false, jsonLd }) {
-  const fullTitle = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} | ${SITE_NAME_EN}`;
+  const fullTitle = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} | ${SITE_NAME_EN} (TLA UoM)`;
   const desc = clip(description);
   const url = absoluteUrl(path || (typeof window !== "undefined" ? window.location.pathname : "/"));
   const img = absoluteUrl(image || DEFAULT_IMAGE);
