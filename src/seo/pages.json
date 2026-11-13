@@ -203,6 +203,11 @@
       "description": "",
       "noindex": true
     },
+    "/intro": {
+      "title": "Intro · All our links",
+      "description": "One place for every Tamil Literary Association (University of Moratuwa) link — our official social pages, books, events and teams.",
+      "lang": "en"
+    },
     "/faq": {
       "title": "அடிக்கடி கேட்கப்படும் கேள்விகள் · FAQ",
       "description": "தமிழ் இலக்கிய மன்றம் பற்றிய கேள்விகளும் பதில்களும் — நிகழ்வுகள், போட்டிகள், அணிகளில் இணைதல், நூல்கள், தொடர்பு. Questions and answers about the Tamil Literary Association, University of Moratuwa."
