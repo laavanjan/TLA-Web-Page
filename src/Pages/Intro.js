@@ -1,64 +1,85 @@
-// /intro — a single-screen "all our links" page: who we are, our official
-// social pages and the main areas of the site. Standalone (no site nav/footer,
-// see App.js) so it works as the link in a social-media bio. The social links
-// are the ones edited at /admin/contact.
+// /intro — the association in one scroll, made for the link in a social-media
+// bio: a night-sky hero where the emblem sits in a gold kolam that draws
+// itself, then our social pages, the events and the main parts of the site.
+// Standalone (no site nav/footer, see App.js). The social links are the ones
+// edited at /admin/contact; event names, texts and pictures come from
+// src/seo/pages.json, so they stay in step with the rest of the site.
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { FaFacebookF, FaInstagram, FaLinkedinIn, FaYoutube, FaCalendarAlt, FaBookOpen, FaUsers, FaEnvelope } from "react-icons/fa";
+import { FaFacebookF, FaInstagram, FaLinkedinIn, FaYoutube } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
-import { FiArrowUpRight } from "react-icons/fi";
+import { FiArrowUpRight, FiArrowRight } from "react-icons/fi";
 
+import Kolam from "../Components/Home/Intro/Kolam";
+import Reveal from "../shared/Reveal/Reveal";
 import { fetchContactConfig, getCachedContactConfig } from "../shared/contactConfig";
+import seoPages from "../seo/pages.json";
+import emblem from "../images/LandingPage/V01-intro.webp";
 import "./Intro.css";
 
-// "https://www.instagram.com/tla_uom/" → "@tla_uom"; "" when there's no handle.
-const handleOf = (url) => {
+const { pages } = seoPages;
+
+// The account's name as it appears in its link: ".../tla_uom/" → "tla_uom".
+// "" when the link doesn't end in a name (a profile.php link, say).
+const nameIn = (url) => {
   try {
-    const seg = new URL(url).pathname.split("/").filter(Boolean)[0] || "";
-    return seg.startsWith("@") ? seg : "";
+    const parts = new URL(url).pathname.split("/").filter(Boolean);
+    const last = parts[parts.length - 1] || "";
+    return /^@?[\w-]{2,30}$/.test(last) ? last : "";
   } catch {
     return "";
   }
 };
+const handle = (url) => {
+  const n = nameIn(url);
+  return n && (n.startsWith("@") ? n : `@${n}`);
+};
 
-const SOCIALS = (c) => [
-  { key: "facebook", name: "TLA Facebook", note: "Official page", href: c.facebookUrl, Icon: FaFacebookF },
-  { key: "instagram", name: "TLA Instagram", note: "@tla_uom", href: c.instagramUrl, Icon: FaInstagram },
-  { key: "linkedin", name: "TLA LinkedIn", note: "Official page", href: c.linkedinUrl, Icon: FaLinkedinIn },
-  { key: "youtube", name: "TLA YouTube", note: handleOf(c.youtubeUrl) || "Official channel", href: c.youtubeUrl, Icon: FaYoutube },
-  { key: "x", name: "TLA on X", note: "@TLAuom", href: c.xUrl, Icon: FaXTwitter },
+const socialsOf = (c) =>
+  [
+    { key: "instagram", name: "Instagram", note: handle(c.instagramUrl), href: c.instagramUrl, Icon: FaInstagram },
+    { key: "youtube", name: "YouTube", note: handle(c.youtubeUrl), href: c.youtubeUrl, Icon: FaYoutube },
+    { key: "facebook", name: "Facebook", note: nameIn(c.facebookUrl), href: c.facebookUrl, Icon: FaFacebookF },
+    { key: "linkedin", name: "LinkedIn", note: nameIn(c.linkedinUrl), href: c.linkedinUrl, Icon: FaLinkedinIn },
+    { key: "x", name: "X", note: handle(c.xUrl), href: c.xUrl, Icon: FaXTwitter },
+  ].filter((s) => s.href);
+
+// The events shown as cards, in this order.
+const STAGE = ["thamilaruvi", "sotkanai", "brammam", "vani-villa", "thaipongal", "jeevanathi"]
+  .map((id) => {
+    const path = `/events/${id}`;
+    const meta = pages[path];
+    return meta && meta.title && meta.image ? { path, title: meta.title, text: meta.description, image: meta.image } : null;
+  })
+  .filter(Boolean);
+
+// Every event's name, for the ticker under the hero.
+const TICKER = Object.entries(pages)
+  .filter(([path, meta]) => /^\/(events\/[a-z-]+|ideathon)$/.test(path) && meta.title && !meta.noindex && path !== "/events/sotkanai-district")
+  .map(([, meta]) => meta.title);
+
+const EXPLORE = [
+  { ta: "வரலாறு", en: "History", note: "How the association began", to: "/history" },
+  { ta: "நூல்கள்", en: "Books", note: "Read what we publish", to: "/books" },
+  { ta: "அணிகள்", en: "Teams", note: "The people behind the work", to: "/teams" },
+  { ta: "உறுப்பினர்கள்", en: "Members", note: "Everyone, batch by batch", to: "/members" },
+  { ta: "தொடர்புகள்", en: "Contact", note: "Write to us", to: "/contact" },
 ];
 
-const PILLARS = [
-  { name: "Events", note: "Tamilaruvi, Sorkanai and more", href: "/#timeline", Icon: FaCalendarAlt },
-  { name: "Books", note: "Read our publications", to: "/books", Icon: FaBookOpen },
-  { name: "Teams", note: "Meet the teams, join in", to: "/teams", Icon: FaUsers },
-  { name: "Contact", note: "Say hello to us", to: "/contact", Icon: FaEnvelope },
-];
+const outside = { target: "_blank", rel: "noopener noreferrer" };
 
-const pad = (n) => String(n).padStart(2, "0");
-
-function Row({ icon: Icon, tone, name, note, ...link }) {
-  const inner = (
-    <>
-      <span className={`in-ico ${tone}`}>{Icon ? <Icon aria-hidden="true" /> : null}</span>
-      <span className="in-txt">
-        <strong>{name}</strong>
-        <small>{note}</small>
-      </span>
-      <span className="in-go" aria-hidden="true">
-        <FiArrowUpRight />
-      </span>
-    </>
-  );
-  return link.to ? (
-    <Link className="in-row" to={link.to}>
-      {inner}
-    </Link>
-  ) : (
-    <a className="in-row" href={link.href} {...(link.internal ? {} : { target: "_blank", rel: "noopener noreferrer" })}>
-      {inner}
-    </a>
+function SectionHead({ ta, title, note, children }) {
+  return (
+    <header className="in-head">
+      <div>
+        <p className="in-eyebrow" lang="ta">
+          {ta}
+        </p>
+        <h2>{title}</h2>
+        {note && <p className="in-head-note">{note}</p>}
+      </div>
+      {children}
+    </header>
   );
 }
 
@@ -75,67 +96,179 @@ export default function Intro() {
     };
   }, []);
 
-  const socials = SOCIALS(cfg).filter((s) => s.href);
+  const socials = socialsOf(cfg);
+  const [lead, ...rest] = socials;
 
   return (
     <main className="in-page">
+      {/* ---------- hero ---------- */}
       <section className="in-hero">
-        <div className="in-brand">
-          <span className="in-mark">T</span>
-          <span>
-            <small>University of Moratuwa</small>
-            <b>Tamil Literary Association</b>
-          </span>
-        </div>
-        <p className="in-eyebrow">Connect with TLA</p>
-        <h1>
-          One community.
-          <em>Every link.</em>
-        </h1>
-        <p className="in-lede">
-          Follow our stories, meet the teams, and stay close to everything happening across the TLA community.
-        </p>
-        <p className="in-est">
-          <span /> Est. at UoM
-        </p>
-        <span className="in-glyph" aria-hidden="true">
-          த
-        </span>
-      </section>
-
-      <section className="in-sec">
-        <header>
-          <div>
-            <p className="in-eyebrow">Stay in the loop</p>
-            <h2>Official pages</h2>
+        <div className="in-wrap">
+          <div className="in-bar">
+            <Link to="/" className="in-brand">
+              <img src="/favicon-192.png" alt="" width="40" height="40" />
+              <span>
+                <b>Tamil Literary Association</b>
+                <small>University of Moratuwa</small>
+              </span>
+            </Link>
+            <Link to="/" className="in-site">
+              tlauom.com <FiArrowUpRight aria-hidden="true" />
+            </Link>
           </div>
-          <span className="in-count">{pad(socials.length)}</span>
-        </header>
-        <div className="in-list">
-          {socials.map((s) => (
-            <Row key={s.key} icon={s.Icon} tone={`t-${s.key}`} name={s.name} note={s.note} href={s.href} />
-          ))}
-        </div>
-      </section>
 
-      <section className="in-sec">
-        <header>
-          <div>
-            <p className="in-eyebrow">Built by the community</p>
-            <h2>Main pillars</h2>
+          <div className="in-hero-grid">
+            <div className="in-copy">
+              <p className="in-kicker" lang="ta">
+                மொறட்டுவைப் பல்கலைக்கழக தமிழ் இலக்கிய மன்றம்
+              </p>
+              <h1>
+                One community. <em>Every link.</em>
+              </h1>
+              <p className="in-lede">
+                Follow our stories, see what’s on stage, and find your way into everything happening across the TLA community.
+              </p>
+              <div className="in-cta">
+                <Link to="/" className="in-btn is-gold">
+                  Visit the website <FiArrowRight aria-hidden="true" />
+                </Link>
+                <Link to="/teams/join" className="in-btn">
+                  Join a team
+                </Link>
+              </div>
+              <ul className="in-quick" aria-label="Our social pages">
+                {socials.map(({ key, name, href, Icon }) => (
+                  <li key={key}>
+                    <a href={href} {...outside} aria-label={name} title={name}>
+                      <Icon aria-hidden="true" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="in-emblem">
+              <div className="in-halo" aria-hidden="true">
+                <Kolam className="in-kolam" />
+              </div>
+              <img src={emblem} alt="தமிழ் இலக்கிய மன்றம்" width="760" height="594" />
+            </div>
           </div>
-          <span className="in-count">{pad(PILLARS.length)}</span>
-        </header>
-        <div className="in-list">
-          {PILLARS.map((p) => (
-            <Row key={p.name} tone="t-pillar" name={p.name} note={p.note} to={p.to} href={p.href} internal icon={p.Icon} />
-          ))}
         </div>
+
+        {TICKER.length > 0 && (
+          <div className="in-ticker" aria-hidden="true" lang="ta">
+            <div className="in-ticker-track">
+              {[0, 1].map((copy) => (
+                <span key={copy}>
+                  {TICKER.map((t) => (
+                    <i key={t}>{t}</i>
+                  ))}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
-      <p className="in-foot">
-        <Link to="/">tlauom.com</Link>
-      </p>
+      <div className="in-body">
+        {/* ---------- social pages ---------- */}
+        {lead && (
+          <Reveal as="section" className="in-sec in-wrap">
+            <SectionHead ta="சமூக ஊடகங்கள்" title="Follow along" />
+            <div className="in-social">
+              <a className="in-tile is-lead" href={lead.href} {...outside}>
+                <Kolam className="in-kolam-still" />
+                <span className="in-tile-top">
+                  <span className={`in-ico t-${lead.key}`}>
+                    <lead.Icon aria-hidden="true" />
+                  </span>
+                  <span className="in-go" aria-hidden="true">
+                    <FiArrowUpRight />
+                  </span>
+                </span>
+                <span className="in-tile-txt">
+                  <small>Start here</small>
+                  <strong>{lead.name}</strong>
+                  {lead.note && <span>{lead.note}</span>}
+                </span>
+              </a>
+              {rest.map(({ key, name, note, href, Icon }) => (
+                <a key={key} className="in-tile" href={href} {...outside}>
+                  <span className="in-tile-top">
+                    <span className={`in-ico t-${key}`}>
+                      <Icon aria-hidden="true" />
+                    </span>
+                    <span className="in-go" aria-hidden="true">
+                      <FiArrowUpRight />
+                    </span>
+                  </span>
+                  <span className="in-tile-txt">
+                    <strong>{name}</strong>
+                    {note && <span>{note}</span>}
+                  </span>
+                </a>
+              ))}
+            </div>
+          </Reveal>
+        )}
+
+        {/* ---------- events ---------- */}
+        <Reveal as="section" className="in-sec in-wrap">
+          <SectionHead ta="நிகழ்வுகள்" title="On our stage">
+            <Link to="/" className="in-more">
+              All events <FiArrowRight aria-hidden="true" />
+            </Link>
+          </SectionHead>
+          <div className="in-stage">
+            {STAGE.map((e) => (
+              <Link key={e.path} to={e.path} className="in-card" lang="ta">
+                <span className="in-card-art">
+                  <img src={e.image} alt="" loading="lazy" width="1200" height="630" />
+                </span>
+                <span className="in-card-txt">
+                  <strong>{e.title}</strong>
+                  <span>{e.text}</span>
+                </span>
+              </Link>
+            ))}
+          </div>
+        </Reveal>
+
+        {/* ---------- the rest of the site ---------- */}
+        <Reveal as="section" className="in-sec in-wrap is-split">
+          <SectionHead ta="மன்றம்" title="Find your way" note="Our story so far, the books we publish, the teams that run it all, and how to reach us." />
+          <nav className="in-index" aria-label="More of the website">
+            {EXPLORE.map((x) => (
+              <Link key={x.to} to={x.to}>
+                <b lang="ta">{x.ta}</b>
+                <span>
+                  <strong>{x.en}</strong>
+                  <small>{x.note}</small>
+                </span>
+                <FiArrowRight aria-hidden="true" />
+              </Link>
+            ))}
+          </nav>
+        </Reveal>
+      </div>
+
+      {/* ---------- sign-off ---------- */}
+      <footer className="in-foot">
+        <Kolam className="in-kolam-still" />
+        <div className="in-wrap">
+          <img src="/favicon-192.png" alt="" width="56" height="56" loading="lazy" />
+          <p className="in-foot-ta" lang="ta">
+            தமிழ் இலக்கிய மன்றம்
+          </p>
+          <p>Tamil Literary Association · University of Moratuwa</p>
+          <p className="in-foot-links">
+            <Link to="/">tlauom.com</Link>
+            <a href={`mailto:${cfg.email}`}>{cfg.email}</a>
+            <Link to="/privacy">Privacy</Link>
+          </p>
+        </div>
+      </footer>
     </main>
   );
 }
