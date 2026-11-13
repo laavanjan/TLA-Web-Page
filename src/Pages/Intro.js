@@ -6,9 +6,10 @@
 // src/seo/pages.json, so they stay in step with the rest of the site.
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet";
 import { FaFacebookF, FaInstagram, FaLinkedinIn, FaYoutube } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
-import { FiArrowUpRight, FiArrowRight } from "react-icons/fi";
+import { FiArrowUpRight, FiArrowRight, FiArrowUp } from "react-icons/fi";
 
 import Kolam from "../Components/Home/Intro/Kolam";
 import Reveal from "../shared/Reveal/Reveal";
@@ -18,6 +19,14 @@ import emblem from "../images/LandingPage/V01-intro.webp";
 import "./Intro.css";
 
 const { pages } = seoPages;
+
+// A stylesheet @import in the middle of the site's bundled CSS is ignored by
+// browsers, so the page's two fonts are linked in the head instead.
+const FONTS =
+  "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap";
+
+// The vowels of the Tamil alphabet, drawn big and faint behind the footer.
+const UYIR = ["அ", "ஆ", "இ", "ஈ", "உ", "ஊ", "எ", "ஏ", "ஐ", "ஒ", "ஓ", "ஔ"];
 
 // The account's name as it appears in its link: ".../tla_uom/" → "tla_uom".
 // "" when the link doesn't end in a name (a profile.php link, say).
@@ -101,6 +110,10 @@ export default function Intro() {
 
   return (
     <main className="in-page">
+      <Helmet>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="stylesheet" href={FONTS} />
+      </Helmet>
       {/* ---------- hero ---------- */}
       <section className="in-hero">
         <div className="in-wrap">
@@ -255,18 +268,53 @@ export default function Intro() {
 
       {/* ---------- sign-off ---------- */}
       <footer className="in-foot">
-        <Kolam className="in-kolam-still" />
-        <div className="in-wrap">
-          <img src="/favicon-192.png" alt="" width="56" height="56" loading="lazy" />
+        <div className="in-foot-halo" aria-hidden="true">
+          <Kolam className="in-kolam-still" />
+        </div>
+
+        <div className="in-letters" aria-hidden="true" lang="ta">
+          <div className="in-letters-track">
+            {[0, 1].map((copy) => (
+              <span key={copy}>
+                {UYIR.map((l) => (
+                  <i key={l}>{l}</i>
+                ))}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="in-wrap in-foot-main">
+          <span className="in-crest">
+            <img src="/favicon-192.png" alt="" width="64" height="64" loading="lazy" />
+          </span>
           <p className="in-foot-ta" lang="ta">
             தமிழ் இலக்கிய மன்றம்
           </p>
-          <p>Tamil Literary Association · University of Moratuwa</p>
+          <p className="in-foot-en">Tamil Literary Association · University of Moratuwa</p>
+
+          <ul className="in-quick" aria-label="Our social pages">
+            {socials.map(({ key, name, href, Icon }) => (
+              <li key={key}>
+                <a href={href} {...outside} aria-label={name} title={name}>
+                  <Icon aria-hidden="true" />
+                </a>
+              </li>
+            ))}
+          </ul>
+
           <p className="in-foot-links">
             <Link to="/">tlauom.com</Link>
             <a href={`mailto:${cfg.email}`}>{cfg.email}</a>
             <Link to="/privacy">Privacy</Link>
           </p>
+        </div>
+
+        <div className="in-wrap in-foot-base">
+          <span>© {new Date().getFullYear()} Tamil Literary Association</span>
+          <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+            Back to top <FiArrowUp aria-hidden="true" />
+          </button>
         </div>
       </footer>
     </main>

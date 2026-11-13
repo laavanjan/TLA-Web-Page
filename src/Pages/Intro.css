@@ -2,8 +2,6 @@
    gold kolam that draws itself round the emblem; below it, cream paper carries
    the links. Everything is scoped under .in-page so nothing leaks into the
    rest of the site. Phone first; the wide layout starts at 900px. */
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap");
-
 .in-page {
   --in-night: #04152b;
   --in-navy: #0a2a52;
@@ -32,10 +30,38 @@
   box-sizing: border-box;
 }
 
-/* :where() keeps this reset weaker than every rule below it */
-.in-page :where(p, h1, h2, ul) {
+/* Other pages' stylesheets have bare h1 / h2 / p rules (navy text, the
+   "Heading" and "Para" fonts forced with !important, centred or 22px text)
+   that reach every page once the site is bundled. Undo them here: the
+   :where() reset beats a bare element rule yet stays weaker than the classes
+   below it, and the fonts get !important to match theirs. */
+.in-page :where(h1, h2, p, ul) {
   margin: 0;
   padding: 0;
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  text-align: inherit;
+}
+
+.in-page p {
+  font-family: var(--in-sans) !important;
+}
+
+.in-page h1,
+.in-page h2 {
+  font-family: var(--in-serif) !important;
+}
+
+.in-page .in-kicker,
+.in-page .in-eyebrow,
+.in-page .in-head-note {
+  font-family: var(--in-tamil-text) !important;
+}
+
+.in-page .in-foot-ta {
+  font-family: var(--in-tamil) !important;
 }
 
 .in-page a {
@@ -233,6 +259,8 @@
 
 .in-hero h1 {
   margin-top: 10px;
+  color: #fff;
+  text-shadow: 0 2px 22px rgba(4, 21, 43, 0.85), 0 0 2px rgba(4, 21, 43, 0.6);
   font-family: var(--in-serif);
   font-weight: 400;
   font-size: clamp(46px, 13.5vw, 84px);
@@ -244,6 +272,7 @@
 .in-hero h1 em {
   display: block;
   color: var(--in-gold);
+  text-shadow: 0 2px 22px rgba(4, 21, 43, 0.85);
 }
 
 .in-lede {
@@ -403,6 +432,7 @@
 
 .in-head h2 {
   margin-top: 2px;
+  color: var(--in-ink);
   font-family: var(--in-serif);
   font-weight: 400;
   font-size: clamp(38px, 9vw, 54px);
@@ -733,61 +763,211 @@
 }
 
 /* ================= sign-off ================= */
+/* A rising-sun footer: a big kolam turning slowly under the horizon, a warm
+   glow behind it, the vowels of the Tamil alphabet drifting past, and the
+   crest in a gold ring. */
 .in-foot {
   position: relative;
+  isolation: isolate;
   overflow: hidden;
-  margin-top: 36px;
-  padding: 54px 20px 44px;
-  background: var(--in-night);
+  margin-top: 56px;
+  padding: 0 20px 22px;
+  background:
+    radial-gradient(70% 60% at 50% 108%, rgba(227, 170, 44, 0.42), rgba(227, 170, 44, 0) 70%),
+    linear-gradient(180deg, #04152b 0%, #082448 55%, #0b2f5c 100%);
   color: var(--in-mist);
-  font-size: 13.5px;
+  font-size: 14px;
   text-align: center;
 }
 
-.in-page .in-foot .in-kolam-still {
-  inset: auto;
-  top: 50%;
+/* pulli, fading towards the top */
+.in-foot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: radial-gradient(rgba(227, 170, 44, 0.32) 1px, transparent 1.6px);
+  background-size: 26px 26px;
+  -webkit-mask-image: linear-gradient(0deg, #000, transparent 75%);
+  mask-image: linear-gradient(0deg, #000, transparent 75%);
+}
+
+/* a gold line along the very top, brightest in the middle */
+.in-foot::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--in-gold), transparent);
+}
+
+.in-foot-halo {
+  position: absolute;
+  z-index: -1;
   left: 50%;
-  width: min(150vw, 760px);
-  height: auto;
+  bottom: 0;
+  width: min(190vw, 1200px);
   aspect-ratio: 1;
-  transform: translate(-50%, -50%);
-  color: rgba(227, 170, 44, 0.13);
+  transform: translate(-50%, 62%);
+  pointer-events: none;
 }
 
-.in-foot .in-wrap {
+.in-page .in-foot-halo .in-kolam-still {
+  color: rgba(244, 200, 90, 0.3);
+  animation: in-spin 240s linear infinite;
+}
+
+.in-page .in-foot-halo .in-kolam-still .k-dots circle {
+  fill: rgba(244, 200, 90, 0.55);
+}
+
+/* the vowels, outlined, sliding the other way from the hero's ticker */
+.in-letters {
+  margin: 0 -20px;
+  padding: 26px 0 8px;
+  overflow: hidden;
+  white-space: nowrap;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+}
+
+.in-letters-track {
+  display: inline-flex;
+  animation: in-marquee 90s linear infinite reverse;
+}
+
+.in-letters span {
+  display: inline-flex;
+}
+
+.in-letters i {
+  padding: 0 22px;
+  font-family: var(--in-tamil);
+  font-style: normal;
+  font-size: clamp(70px, 14vw, 120px);
+  line-height: 1.2;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(244, 200, 90, 0.4);
+}
+
+.in-foot-main {
   position: relative;
+  padding: 18px 0 34px;
 }
 
-.in-foot img {
-  width: 56px;
-  height: 56px;
+/* the crest, in a gold ring with a slowly turning dotted halo */
+.in-crest {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 104px;
+  height: 104px;
+  border: 1px solid rgba(227, 170, 44, 0.75);
+  border-radius: 50%;
+  background: radial-gradient(circle, #123a6e, #082448);
+  box-shadow: 0 0 0 7px rgba(227, 170, 44, 0.1), 0 0 56px rgba(227, 170, 44, 0.4);
+}
+
+.in-crest::before {
+  content: "";
+  position: absolute;
+  inset: -17px;
+  border: 1.5px dashed rgba(227, 170, 44, 0.55);
+  border-radius: 50%;
+  animation: in-spin 60s linear infinite;
+}
+
+.in-crest img {
+  width: 66px;
+  height: 66px;
 }
 
 .in-foot-ta {
-  margin-top: 10px;
-  font-family: var(--in-tamil);
-  font-size: 26px;
+  margin-top: 26px;
+  font-size: clamp(34px, 10vw, 60px);
+  line-height: 1.25;
+  /* gold leaf, brightest at the top */
+  background: linear-gradient(180deg, #fff3cf 10%, #f0c24f 60%, #cf8f12 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 2px 14px rgba(4, 21, 43, 0.7));
+}
+
+.in-foot-en {
+  margin-top: 4px;
+  font-size: 14.5px;
+  letter-spacing: 0.04em;
   color: var(--in-cream);
+}
+
+.in-foot .in-quick {
+  justify-content: center;
+  margin-top: 26px;
 }
 
 .in-foot-links {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 8px 22px;
-  margin-top: 20px;
+  gap: 10px;
+  margin-top: 22px;
 }
 
 .in-foot-links a {
+  padding: 9px 16px;
+  border: 1px solid rgba(244, 236, 218, 0.22);
+  border-radius: 999px;
+  font-size: 13.5px;
   color: var(--in-cream);
-  border-bottom: 1px solid rgba(244, 236, 218, 0.25);
-  transition: color 0.2s, border-color 0.2s;
+  background: rgba(4, 21, 43, 0.35);
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
 }
 
 .in-foot-links a:hover {
-  color: var(--in-gold);
   border-color: var(--in-gold);
+  background: var(--in-gold);
+  color: var(--in-night);
+}
+
+.in-foot-base {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(244, 236, 218, 0.16);
+  font-size: 12.5px;
+  color: var(--in-mist);
+  text-align: left;
+}
+
+.in-foot-base button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid rgba(244, 236, 218, 0.22);
+  border-radius: 999px;
+  background: transparent;
+  font: inherit;
+  color: var(--in-cream);
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.in-foot-base button:hover {
+  border-color: var(--in-gold);
+  color: var(--in-gold);
+  transform: translateY(-2px);
+}
+
+.in-foot-base button:focus-visible {
+  outline: 2px solid var(--in-gold);
+  outline-offset: 3px;
 }
 
 /* ================= wide screens ================= */
@@ -884,8 +1064,17 @@
   }
 
   .in-foot {
-    margin-top: 60px;
-    padding: 76px 40px 60px;
+    margin-top: 80px;
+    padding: 0 40px 26px;
+  }
+
+  .in-letters {
+    margin: 0 -40px;
+    padding-top: 40px;
+  }
+
+  .in-foot-main {
+    padding: 28px 0 56px;
   }
 }
 
@@ -927,7 +1116,10 @@
   .in-page .in-kolam .k-dots circle,
   .in-emblem img,
   .in-copy > *,
-  .in-ticker-track {
+  .in-ticker-track,
+  .in-letters-track,
+  .in-crest::before,
+  .in-page .in-foot-halo .in-kolam-still {
     animation: none;
   }
 
