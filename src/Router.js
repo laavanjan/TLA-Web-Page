@@ -25,6 +25,7 @@ import Seniors from "./Pages/Seniors";
 import MembersPage from "./Pages/Members";
 import Privacy from "./Pages/Privacy";
 import Faq from "./Pages/Faq";
+import Intro from "./Pages/Intro";
 
 // The admin panel, the photo-frame editor and the vote results screen are
 // downloaded only when opened, so visitors to the public pages don't load
@@ -148,6 +149,11 @@ function Router() {
       // Not linked from the menus: for search engines (see Pages/Faq.js).
       path: "faq",
       element: <Faq />,
+    },
+    {
+      // Standalone "all our links" page for social-media bios (see App.js).
+      path: "intro",
+      element: <Intro />,
     },
     {
       path: "vote",
